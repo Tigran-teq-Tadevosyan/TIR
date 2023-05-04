@@ -1,3 +1,31 @@
+# MPLAB X IDE specific
+/TIR-Link/firmware/TIRLink.X/~*.*
+/TIR-Link/firmware/TIRLink.X/build/
+/TIR-Link/firmware/TIRLink.X/debug/
+/TIR-Link/firmware/TIRLink.X/dist/
+/TIR-Link/firmware/TIRLink.X/disassembly/
+/TIR-Link/firmware/TIRLink.X/.generated_files/
+/TIR-Link/firmware/TIRLink.X/nbproject/private/
+/TIR-Link/firmware/TIRLink.X/nbproject/*.mk
+/TIR-Link/firmware/TIRLink.X/nbproject/*.bash
+/TIR-Link/firmware/TIRLink.X/nbproject/Makefile-genesis.properties
+
+# MCC specific
+*mc3.bak*
+
+# Mac OS stuff
+*.DS_Store
+
+# Emacs stuff
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
 # Prerequisites
 *.d
 
@@ -50,3 +78,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+
+*.zip
+*.pdf
