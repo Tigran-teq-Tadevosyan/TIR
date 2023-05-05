@@ -8,6 +8,11 @@
 
 #define NO_CONTEXT 0
 
+typedef enum {
+    Success = 0,
+    Failure = 1
+} TIR_Status;
+
 // Initializes the system timer
 void init_SysClock(void);
 

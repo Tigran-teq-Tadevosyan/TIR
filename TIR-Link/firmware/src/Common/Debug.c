@@ -15,24 +15,21 @@ void init_Debug(void) {
     UART4_ReadThresholdSet(0);
 }
 
-void printDebug (const char * format, ... )
-{
-    uint16_t sz = 0;
-    char pt[200];
+#define DEBUG_BUFFER_LENGTH (200)
+char DEBUG_BUFFER[DEBUG_BUFFER_LENGTH];
+void printDebug (const char * format, ... ) {
     va_list arg;
     va_start(arg, format);
-    sz = vsnprintf(pt, sizeof(pt), format, arg);
+    uint16_t sz = vsnprintf(DEBUG_BUFFER, DEBUG_BUFFER_LENGTH, format, arg);
     
-    UART4_Write((uint8_t *)(pt), sz);
+    UART4_Write((uint8_t *)(DEBUG_BUFFER), sz);
     va_end(arg);
 }
 
-static void UartRxEventHandler(UART_EVENT event, uintptr_t contextHandle)
-{
-   LED_GG_Toggle();
-   
-   if(event == UART_EVENT_READ_THRESHOLD_REACHED)
-   {
-       // No use currently
-   }
+static void UartRxEventHandler(UART_EVENT event, uintptr_t contextHandle) {  
+    (void)contextHandle;
+    if(event == UART_EVENT_READ_THRESHOLD_REACHED) {;
+    
+        // No use currently
+    }
 }

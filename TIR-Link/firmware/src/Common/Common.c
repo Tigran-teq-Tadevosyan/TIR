@@ -7,7 +7,7 @@
 #include "definitions.h"                // SYS function prototypes
 
 // TIRLink includes
-#include "Common.h"
+    #include "Common.h"
 
 static void sysTimerTick(uint32_t status, uintptr_t contextHandle);
 

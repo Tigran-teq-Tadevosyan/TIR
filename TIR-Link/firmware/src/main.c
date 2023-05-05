@@ -60,6 +60,10 @@ int main ( void )
     UART2_ReadThresholdSet(0);
            
     W5500_Init();
+    
+    
+    
+    
     uint16_t UAR4_readByteCount = 0;
     
     while ( true )
@@ -249,19 +253,19 @@ uint16_t parseUartMessage(uint8_t * rxbuff, uint16_t sz)
 
 static void SwitchEventHandler(GPIO_PIN pin, uintptr_t contextHandle)
 {
+    (void)contextHandle;
     if(pin == SW_1_PIN) {
         if(SW_1_Get() == 0) {
-            uint8_t destIP[4] = {192,168,1,3};
-            printDebug("Sending ARP Request for 192.168.1.3\r\n");
-//            sendArpRequestIprawSocket(destIP);
-        }
+        } else {}
     } else if(pin == SW_2_PIN) {
         if(SW_2_Get() == 0) {
-            readNetworkInfo = true;
         } else { }
     } else if(pin == SW_3_PIN) {
         if(SW_3_Get() == 0) {
             LED_GG_Toggle();
         } else { }    
-    }
+    } else if(pin == SW_4_PIN) {
+        if(SW_4_Get() == 0) {
+        } else { }    
+    } 
 }
