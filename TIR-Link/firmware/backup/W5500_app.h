@@ -57,8 +57,8 @@ typedef struct ethPacket_t
 {
    uint16_t mac_lenght;     ///< Ethernet Type 
    uint8_t dest_mac[6];     ///< Destination Mac Address
-   uint8_t source_mac[6];  ///< Source Mac Address
-   uint16_t ethertype;     ///< Ethernet Type 
+   uint8_t source_mac[6];   ///< Source Mac Address
+   uint16_t ethertype;      ///< Ethernet Type 
    uint8_t *payload;        ///< Payload of pacekt 46 - 1500
 }ethPacket;
 

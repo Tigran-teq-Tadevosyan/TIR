@@ -33,14 +33,13 @@
 #include "W5500_app.h"      
 #include "./driver/Ethernet/W5500/w5500.h"    
 #include "./driver/Ethernet/wizchip_conf.h"   
-#include "./driver/Ethernet/socket.h"  
-#include "utilities/utilities.h"  
+#include "./driver/Ethernet/socket.h"
 
 /* TODO:  Include other files here if needed. */
 
 
 #define MAX_MSG_SIZE    4000
-#define MACRAW_SOCKET    0
+#define MACRAW_SOCKET   0
 #define TCP_SOCKET      1
 
 const uint8_t startDel[4] = {'$','_','$','_'};
@@ -66,12 +65,12 @@ enum tcpSocketStateEnum tcpSocketState = TCP_Socket_Init;
 
 uint16_t tcpRxBytes, tcpTxBytes; 
 
-wiz_NetInfo myNetwork = { .mac = {0x98, 0x28, 0xA6, 0x1A, 0x6D, 0x49},//{0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef}, //{0x49, 0x6D, 0x1A, 0xA6, 0x28, 0x98},//
-                        .ip = {192,168,1,80},
-                        .sn = {255, 255, 255, 0},
-                        .gw = {192,168,1,1},
-                        .dns = {8, 8, 8, 8},		// Google public DNS (8.8.8.8 , 8.8.4.4), OpenDNS (208.67.222.222 , 208.67.220.220)
-                        .dhcp = NETINFO_STATIC };
+wiz_NetInfo myNetwork = {   .mac = {0x98, 0x28, 0xA6, 0x1A, 0x6D, 0x49},//{0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef}, //{0x49, 0x6D, 0x1A, 0xA6, 0x28, 0x98},//
+                            .ip = {192,168,1,80},
+                            .sn = {255, 255, 255, 0},
+                            .gw = {192,168,1,1},
+                            .dns = {8, 8, 8, 8},		// Google public DNS (8.8.8.8 , 8.8.4.4), OpenDNS (208.67.222.222 , 208.67.220.220)
+                            .dhcp = NETINFO_STATIC };
 
 
 raw_ArpRequest arpRequenst = {  .arp_header = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF},
@@ -245,8 +244,6 @@ void sendArpRequestIprawSocket(uint8_t *destIp)
 void processMACrawSocket(void)
 {
     
-
-    
     switch(macrawSocketState)
     {
         case MACRAW_Socket_Init:
@@ -300,11 +297,11 @@ void processMACrawSocket(void)
             {
                 ethPacket pct;
                 if(macrawRxBytes + macrawRxBytesLeft > MAX_MSG_SIZE) 
-                    macrawRxBytes = MAX_MSG_SIZE - macrawRxBytesLeft - 5;   
+                    macrawRxBytes = MAX_MSG_SIZE - macrawRxBytesLeft - 5;
                 
                 wiz_recv_data(MACRAW_SOCKET, &macrawRxBuff[macrawRxBytesLeft], macrawRxBytes);
                 
-                setSn_CR(MACRAW_SOCKET,Sn_CR_RECV);
+                setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
                 while(getSn_CR(MACRAW_SOCKET));
                 
                 macPacketeProc = 0;
@@ -326,6 +323,8 @@ void processMACrawSocket(void)
                 }
                 else
                 {
+                    printDebug(macrawRxBuff);
+                    
                     UART2_Write((uint8_t *)startDel, 4);
                     macPacketeLenght -= 2;
                     UART2_Write((uint8_t *)&(macPacketeLenght), 2);
@@ -529,7 +528,7 @@ void processTCPSocket(void)
 
             printDebug("IP:  %d.%d.%d.%d\r\n", rIP[0], rIP[1], rIP[2], rIP[3]);
 
-            sprintf(Message, "You Are Connected to  - %d.%d.%d.%d\r\n",    myNetwork.ip[0],
+            sprintf(Message, "You Are Connected to  - %d.%d.%d.%d\r\n",     myNetwork.ip[0],
                                                                             myNetwork.ip[1],
                                                                             myNetwork.ip[2],
                                                                             myNetwork.ip[3]);
@@ -678,7 +677,7 @@ void printNetworkInfo (void)
     
     chipVersion = getVERSIONR();
     wizchip_getnetinfo(&pnetinfo);
-    printDebug("CHIP VER. %02x\r\nGW %u.%u.%u.%u \r\n",chipVersion ,
+    printDebug("CHIP VER. %02x\r\nGW %u.%u.%u.%u \r\n", chipVersion ,
                                                         pnetinfo.gw[0],
                                                         pnetinfo.gw[1],
                                                         pnetinfo.gw[2],
@@ -691,10 +690,10 @@ void printNetworkInfo (void)
                                                         (int)pnetinfo.mac[4],
                                                         (int)pnetinfo.mac[5]);
     
-    printDebug("IP %u.%u.%u.%u\r\n", pnetinfo.ip[0],
-                                    pnetinfo.ip[1],
-                                    pnetinfo.ip[2],
-                                    pnetinfo.ip[3]);
+    printDebug("IP %u.%u.%u.%u\r\n",    pnetinfo.ip[0],
+                                        pnetinfo.ip[1],
+                                        pnetinfo.ip[2],
+                                        pnetinfo.ip[3]);
 
     
 }

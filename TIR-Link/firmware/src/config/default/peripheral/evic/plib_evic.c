@@ -58,8 +58,6 @@ void EVIC_Initialize( void )
     IPC1SET = 0x1c | 0x0;  /* TIMER_1:  Priority 7 / Subpriority 0 */
     IPC27SET = 0x1c0000 | 0x0;  /* SPI1_RX:  Priority 7 / Subpriority 0 */
     IPC27SET = 0x1c000000 | 0x0;  /* SPI1_TX:  Priority 7 / Subpriority 0 */
-    IPC28SET = 0x1c000000 | 0x0;  /* I2C1_BUS:  Priority 7 / Subpriority 0 */
-    IPC29SET = 0x1c00 | 0x0;  /* I2C1_MASTER:  Priority 7 / Subpriority 0 */
     IPC29SET = 0xc000000 | 0x0;  /* CHANGE_NOTICE_B:  Priority 3 / Subpriority 0 */
     IPC30SET = 0xc | 0x0;  /* CHANGE_NOTICE_C:  Priority 3 / Subpriority 0 */
     IPC31SET = 0xc | 0x0;  /* CHANGE_NOTICE_G:  Priority 3 / Subpriority 0 */

@@ -10,10 +10,6 @@
          <string>class com.microchip.mcc.harmony.HarmonyModule</string>
       </entry>
       <entry>
-         <string>i2c1</string>
-         <string>class com.microchip.mcc.harmony.HarmonyModule</string>
-      </entry>
-      <entry>
          <string>spi1</string>
          <string>class com.microchip.mcc.harmony.HarmonyModule</string>
       </entry>
@@ -38,16 +34,15 @@
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="!@#harmonyUserData"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;UserData&gt;
   &lt;UserData dnOrder=&quot;0&quot;&gt;
-    &lt;GraphSettings canvasHeight=&quot;494&quot; canvasWidth=&quot;432&quot; dnOrder=&quot;0&quot;/&gt;
+    &lt;GraphSettings canvasHeight=&quot;494&quot; canvasWidth=&quot;519&quot; dnOrder=&quot;0&quot;/&gt;
     &lt;ComponentGraph dnOrder=&quot;1&quot; id=&quot;__ROOTVIEW&quot;&gt;
       &lt;ElementPositions dnOrder=&quot;0&quot;&gt;
         &lt;ElementPosition dnOrder=&quot;0&quot; id=&quot;core&quot; x=&quot;27&quot; y=&quot;55&quot;/&gt;
         &lt;ElementPosition dnOrder=&quot;1&quot; id=&quot;dfp&quot; x=&quot;16&quot; y=&quot;21&quot;/&gt;
-        &lt;ElementPosition dnOrder=&quot;2&quot; id=&quot;i2c1&quot; x=&quot;76&quot; y=&quot;206&quot;/&gt;
-        &lt;ElementPosition dnOrder=&quot;3&quot; id=&quot;spi1&quot; x=&quot;75&quot; y=&quot;382&quot;/&gt;
-        &lt;ElementPosition dnOrder=&quot;4&quot; id=&quot;tmr1&quot; x=&quot;72&quot; y=&quot;121&quot;/&gt;
-        &lt;ElementPosition dnOrder=&quot;5&quot; id=&quot;uart2&quot; x=&quot;390&quot; y=&quot;273&quot;/&gt;
-        &lt;ElementPosition dnOrder=&quot;6&quot; id=&quot;uart4&quot; x=&quot;76&quot; y=&quot;288&quot;/&gt;
+        &lt;ElementPosition dnOrder=&quot;2&quot; id=&quot;spi1&quot; x=&quot;75&quot; y=&quot;382&quot;/&gt;
+        &lt;ElementPosition dnOrder=&quot;3&quot; id=&quot;tmr1&quot; x=&quot;72&quot; y=&quot;121&quot;/&gt;
+        &lt;ElementPosition dnOrder=&quot;4&quot; id=&quot;uart2&quot; x=&quot;83&quot; y=&quot;518&quot;/&gt;
+        &lt;ElementPosition dnOrder=&quot;5&quot; id=&quot;uart4&quot; x=&quot;76&quot; y=&quot;288&quot;/&gt;
       &lt;/ElementPositions&gt;
     &lt;/ComponentGraph&gt;
   &lt;/UserData&gt;
@@ -2400,7 +2395,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;EVIC_115_ENABLE&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;true&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;false&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -2411,7 +2406,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;EVIC_115_HANDLER_LOCK&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;true&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;false&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -2422,7 +2417,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;EVIC_115_INTERRUPT_HANDLER&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;I2C1_BUS_InterruptHandler&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;I2C1_BUS_Handler&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -2488,7 +2483,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;EVIC_117_ENABLE&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;true&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;false&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -2499,7 +2494,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;EVIC_117_HANDLER_LOCK&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;true&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;false&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -2510,7 +2505,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;EVIC_117_INTERRUPT_HANDLER&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;I2C1_MASTER_InterruptHandler&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;I2C1_MASTER_Handler&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -3235,9 +3230,7 @@
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="I2C1_BUS_INTERRUPT_ENABLE"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_BUS_INTERRUPT_ENABLE&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;true&quot;/&gt;
-    &lt;/Values&gt;
+    &lt;Values dnOrder=&quot;0&quot;/&gt;
   &lt;/core&gt;
 &lt;/core&gt;
 </value>
@@ -3247,7 +3240,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_BUS_INTERRUPT_ENABLE_UPDATE&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;false&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;true&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -3257,9 +3250,7 @@
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="I2C1_BUS_INTERRUPT_HANDLER"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_BUS_INTERRUPT_HANDLER&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;I2C1_BUS_InterruptHandler&quot;/&gt;
-    &lt;/Values&gt;
+    &lt;Values dnOrder=&quot;0&quot;/&gt;
   &lt;/core&gt;
 &lt;/core&gt;
 </value>
@@ -3268,9 +3259,7 @@
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="I2C1_BUS_INTERRUPT_HANDLER_LOCK"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_BUS_INTERRUPT_HANDLER_LOCK&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;true&quot;/&gt;
-    &lt;/Values&gt;
+    &lt;Values dnOrder=&quot;0&quot;/&gt;
   &lt;/core&gt;
 &lt;/core&gt;
 </value>
@@ -3279,9 +3268,7 @@
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="I2C1_CLOCK_ENABLE"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_CLOCK_ENABLE&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;true&quot;/&gt;
-    &lt;/Values&gt;
+    &lt;Values dnOrder=&quot;0&quot;/&gt;
   &lt;/core&gt;
 &lt;/core&gt;
 </value>
@@ -3291,7 +3278,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_CLOCK_FREQUENCY&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;100000000&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;0&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -3301,9 +3288,7 @@
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="I2C1_MASTER_INTERRUPT_ENABLE"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_MASTER_INTERRUPT_ENABLE&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;true&quot;/&gt;
-    &lt;/Values&gt;
+    &lt;Values dnOrder=&quot;0&quot;/&gt;
   &lt;/core&gt;
 &lt;/core&gt;
 </value>
@@ -3313,7 +3298,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_MASTER_INTERRUPT_ENABLE_UPDATE&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;false&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;true&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -3323,9 +3308,7 @@
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="I2C1_MASTER_INTERRUPT_HANDLER"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_MASTER_INTERRUPT_HANDLER&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;I2C1_MASTER_InterruptHandler&quot;/&gt;
-    &lt;/Values&gt;
+    &lt;Values dnOrder=&quot;0&quot;/&gt;
   &lt;/core&gt;
 &lt;/core&gt;
 </value>
@@ -3334,9 +3317,7 @@
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="I2C1_MASTER_INTERRUPT_HANDLER_LOCK"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_MASTER_INTERRUPT_HANDLER_LOCK&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;true&quot;/&gt;
-    &lt;/Values&gt;
+    &lt;Values dnOrder=&quot;0&quot;/&gt;
   &lt;/core&gt;
 &lt;/core&gt;
 </value>
@@ -3345,9 +3326,7 @@
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="I2C1_SLAVE_INTERRUPT_ENABLE"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_SLAVE_INTERRUPT_ENABLE&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;false&quot;/&gt;
-    &lt;/Values&gt;
+    &lt;Values dnOrder=&quot;0&quot;/&gt;
   &lt;/core&gt;
 &lt;/core&gt;
 </value>
@@ -3367,9 +3346,7 @@
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="I2C1_SLAVE_INTERRUPT_HANDLER"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_SLAVE_INTERRUPT_HANDLER&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;I2C1_SLAVE_Handler&quot;/&gt;
-    &lt;/Values&gt;
+    &lt;Values dnOrder=&quot;0&quot;/&gt;
   &lt;/core&gt;
 &lt;/core&gt;
 </value>
@@ -3378,9 +3355,7 @@
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="I2C1_SLAVE_INTERRUPT_HANDLER_LOCK"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;I2C1_SLAVE_INTERRUPT_HANDLER_LOCK&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;false&quot;/&gt;
-    &lt;/Values&gt;
+    &lt;Values dnOrder=&quot;0&quot;/&gt;
   &lt;/core&gt;
 &lt;/core&gt;
 </value>
@@ -3654,7 +3629,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;PMD5_REG_VALUE&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;807288373&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;807353909&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -5166,286 +5141,6 @@
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="dfp" name="#&amp;__MCC_Group_Parrent_id"/>
          <value>__ROOTVIEW</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="#&amp;__MCC_Group_Parrent_id"/>
-         <value>__ROOTVIEW</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="BRG_VALUE"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;BRG_VALUE&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;992&quot;/&gt;
-    &lt;/Values&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2CS_A10M_SUPPORT"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2CS_A10M_SUPPORT&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2CS_AHEN_DHEN_SUPPORT"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2CS_AHEN_DHEN_SUPPORT&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2CS_CORE_TIMER_FREQUENCY"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2CS_CORE_TIMER_FREQUENCY&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2CS_PCIE_SUPPORT"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2CS_PCIE_SUPPORT&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2CS_RISE_TIME_CORE_TIMER_CNTS"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2CS_RISE_TIME_CORE_TIMER_CNTS&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;30&quot;/&gt;
-    &lt;/Values&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2CS_SDAHT_SUPPORT"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2CS_SDAHT_SUPPORT&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2CS_SETUP_RISE_TIME"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2CS_SETUP_RISE_TIME&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2CS_SETUP_TIME_CORE_TIMER_CNTS"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2CS_SETUP_TIME_CORE_TIMER_CNTS&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;i2c1&quot; value=&quot;10&quot;/&gt;
-    &lt;/Values&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_BUS_COLLISION_INT_ENABLE_BIT_NAME"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_BUS_COLLISION_INT_ENABLE_BIT_NAME&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_BUS_COLLISION_INT_FLAG_BIT_NAME"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_BUS_COLLISION_INT_FLAG_BIT_NAME&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_BUS_IEC_REG"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_BUS_IEC_REG&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_BUS_IFS_REG"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_BUS_IFS_REG&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_CLOCK_FREQ"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_CLOCK_FREQ&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_CLOCK_SPEED"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_CLOCK_SPEED&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_CLOCK_SPEED_HZ"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_CLOCK_SPEED_HZ&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_DISSLW"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_DISSLW&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_INCLUDE_FORCED_WRITE_API"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_INCLUDE_FORCED_WRITE_API&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_INSTANCE_NAME"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_INSTANCE_NAME&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_INSTANCE_NUM"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_INSTANCE_NUM&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_MASTER_IEC_REG"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_MASTER_IEC_REG&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_MASTER_IFS_REG"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_MASTER_IFS_REG&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_MAX_BRG"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_MAX_BRG&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_OPERATING_MODE"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_OPERATING_MODE&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_PLIB_API_PREFIX"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_PLIB_API_PREFIX&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_SIDL"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_SIDL&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_SLAVE_ADDDRESS"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_SLAVE_ADDDRESS&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_SLAVE_IEC_REG"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_SLAVE_IEC_REG&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_SLAVE_IFS_REG"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_SLAVE_IFS_REG&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
-      </entry>
-      <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="i2c1" name="I2C_SMEN"/>
-         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;i2c1&gt;
-  &lt;i2c1 dnOrder=&quot;0&quot; id=&quot;I2C_SMEN&quot;&gt;
-    &lt;Values dnOrder=&quot;0&quot;/&gt;
-  &lt;/i2c1&gt;
-&lt;/i2c1&gt;
-</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="spi1" name="#&amp;__MCC_Group_Parrent_id"/>
@@ -7215,124 +6910,112 @@
    </tokenMap>
    <generatedFileHashHistoryMap class="java.util.HashMap">
       <entry>
-         <file>..\src\config\default\stdio\xc32_monitor.c</file>
-         <hash>858f8710d4287200a5ee7f3b3ad7c24f505aed9c05c16956ab0ff9f7bb162a6a</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\evic\plib_evic.h</file>
-         <hash>c92512e3068987f43ebd53be03c4e58115b45dbdcb9833216cb05c2d71199152</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\evic\plib_evic.c</file>
-         <hash>26700772d3a1faa2c70b6ba938ce786a71d0d818a575158789e40075d0d3dd22</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\uart\plib_uart2.c</file>
-         <hash>7d4d024e17636c66d15cda107653ca1a31b246a1caf3df2ed26f6c05073f917d</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\i2c\master\plib_i2c_master_common.h</file>
-         <hash>d575964edd097b1032012b5588ebc83cc5bb8a6cfd2d4a9a6449ba4508252dda</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\spi\spi_master\plib_spi1_master.h</file>
-         <hash>e022deaa6bc614442c072622acf6a7ebb292ba4db067510bd6e37af805bea226</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\toolchain_specifics.h</file>
-         <hash>84276afca06869943bba17727ff4f41fea61e4f81329ee20a333cafe39562a73</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\clk\plib_clk.c</file>
-         <hash>dfc156c430fd5ecd2834da27441d124645533309a8e8800ca64bc34fe065d427</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\clk\plib_clk.h</file>
-         <hash>aeb73e24e5a518024b1c3f7dce953a5cbacead08f55e80ae465fc8d2e522e477</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\p32MZ2064DAR176.ld</file>
-         <hash>53c6726055d4327dd5ab551bf71b7c17731c0863e8b938010c6f607088c9ab2b</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\i2c\master\plib_i2c1_master.h</file>
-         <hash>b55edc69b7977dd2f69688f9be699d73685731e753383fe3ddb9ca4390c9e87c</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\spi\spi_master\plib_spi_master_common.h</file>
-         <hash>844a71566e886cd1f28024000d440ac48841cdb4f4059f5feefac8e4334f12ef</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\initialization.c</file>
-         <hash>4a3762c58fdbd1696a075571173803eb4a30cc64af470aae9bf4840d27f6b91e</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\exceptions.c</file>
+         <file>../src/config/default/exceptions.c</file>
          <hash>f5ad435bbdb69c22d638ce10fd145b4cf0f12dc654d814a836293ca96fa992e5</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\spi\spi_master\plib_spi1_master.c</file>
-         <hash>00fa201c3a4a7d9d2adeec527e23ccc8c515cfa4929fa00aae2fcd61a0853ae0</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\uart\plib_uart_common.h</file>
-         <hash>90d1791d0855caa86d5d529a0ba209330f20cd0da2436950a7e71b38ef8da02b</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\uart\plib_uart4.h</file>
-         <hash>fe7966e08297ce303e9cf791174a8d0fc6413c127a27eebeba824892fadb558a</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\definitions.h</file>
-         <hash>15d26ce6d42d32bd04fa983f3444780b7489c2fbf1827b7acdcbdf8d4f450d52</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\gpio\plib_gpio.h</file>
-         <hash>48076e8518b782dfcf8e1b31941df4799ebd697ccfe6beed18e93d2213a329ae</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\tmr1\plib_tmr1.h</file>
-         <hash>b28749c5aeabe65f99fb625e1d171fcc0979f5b85f0ff072a6fb610d66236832</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\interrupts.h</file>
-         <hash>91abdb8d191ae865fc6082f30783c3d6cca8aa8d5aca823a7fb2cc65e3a57d24</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\uart\plib_uart2.h</file>
-         <hash>8b718719efb5a886d96e8be07b7f7266901bf30dcee9db4fd534bf0359c8c9ec</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\device.h</file>
-         <hash>10ec93c43a7b158a129ae05bd8f4a59ff5bcf3d0f3f062fdd64c374bc2d42099</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\uart\plib_uart4.c</file>
-         <hash>2b361fa89d4fb235aa895456ccf4689fc1cd70d047d600b20352ad341f9f918e</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\gpio\plib_gpio.c</file>
-         <hash>63d4b652d837a04059d3e4293b02b05cf02c651b9a99b75a40fc9f6a52c87f8b</hash>
-      </entry>
-      <entry>
-         <file>..\src\config\default\peripheral\tmr1\plib_tmr1.c</file>
+         <file>../src/config/default/peripheral/tmr1/plib_tmr1.c</file>
          <hash>fca73b40b49eb2eaf259f9f8b8158eeafe74270bfdf75a9cd4bb963dedebaaee</hash>
       </entry>
       <entry>
-         <file>..\src\main.c</file>
+         <file>../src/config/default/stdio/xc32_monitor.c</file>
+         <hash>858f8710d4287200a5ee7f3b3ad7c24f505aed9c05c16956ab0ff9f7bb162a6a</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/spi/spi_master/plib_spi1_master.c</file>
+         <hash>00fa201c3a4a7d9d2adeec527e23ccc8c515cfa4929fa00aae2fcd61a0853ae0</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/uart/plib_uart_common.h</file>
+         <hash>90d1791d0855caa86d5d529a0ba209330f20cd0da2436950a7e71b38ef8da02b</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/evic/plib_evic.c</file>
+         <hash>494b70c456e900b9c6105e69436a4e6e6e2635ae7b5e565ef2a3be0a37d70623</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/uart/plib_uart2.c</file>
+         <hash>7d4d024e17636c66d15cda107653ca1a31b246a1caf3df2ed26f6c05073f917d</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/tmr1/plib_tmr1.h</file>
+         <hash>b28749c5aeabe65f99fb625e1d171fcc0979f5b85f0ff072a6fb610d66236832</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/evic/plib_evic.h</file>
+         <hash>c92512e3068987f43ebd53be03c4e58115b45dbdcb9833216cb05c2d71199152</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/initialization.c</file>
+         <hash>cdc0120f19d61d2b65d67182fb5d5dd65cc36ea8d9521276679d877e79a0f335</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/interrupts.c</file>
+         <hash>b5462d36f6678b3823b181962008694803450c9f298751cb02bfcf4080ead7ff</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/toolchain_specifics.h</file>
+         <hash>84276afca06869943bba17727ff4f41fea61e4f81329ee20a333cafe39562a73</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/spi/spi_master/plib_spi1_master.h</file>
+         <hash>e022deaa6bc614442c072622acf6a7ebb292ba4db067510bd6e37af805bea226</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/interrupts.h</file>
+         <hash>91abdb8d191ae865fc6082f30783c3d6cca8aa8d5aca823a7fb2cc65e3a57d24</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/spi/spi_master/plib_spi_master_common.h</file>
+         <hash>844a71566e886cd1f28024000d440ac48841cdb4f4059f5feefac8e4334f12ef</hash>
+      </entry>
+      <entry>
+         <file>../src/main.c</file>
          <hash>d3c233d419e6304bfacbafc18cc68c0f5c26e365f23b20ea40ccfac458f664c5</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\tmr1\plib_tmr1_common.h</file>
+         <file>../src/config/default/peripheral/tmr1/plib_tmr1_common.h</file>
          <hash>b1c97e9466cc0bfc2e05ec0af7fb56a5946e8df5675a1f206cfc5dbb42d85f25</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\i2c\master\plib_i2c1_master.c</file>
-         <hash>367d4076d31294a52d767abe2fce6dad40b9a117784bba95c0ffe67a7fbdb9da</hash>
+         <file>../src/config/default/p32MZ2064DAR176.ld</file>
+         <hash>53c6726055d4327dd5ab551bf71b7c17731c0863e8b938010c6f607088c9ab2b</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\interrupts.c</file>
-         <hash>55f6dafd84ad339326343ea4ccfa79f3ea87ee82040317ba706fa411fd44d975</hash>
+         <file>../src/config/default/peripheral/gpio/plib_gpio.h</file>
+         <hash>48076e8518b782dfcf8e1b31941df4799ebd697ccfe6beed18e93d2213a329ae</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/clk/plib_clk.h</file>
+         <hash>aeb73e24e5a518024b1c3f7dce953a5cbacead08f55e80ae465fc8d2e522e477</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/definitions.h</file>
+         <hash>31cb3d5cfc05317a9ae603f1310476fc73e24c32c2bdd47a21c5a63ca7a5ca42</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/gpio/plib_gpio.c</file>
+         <hash>63d4b652d837a04059d3e4293b02b05cf02c651b9a99b75a40fc9f6a52c87f8b</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/device.h</file>
+         <hash>10ec93c43a7b158a129ae05bd8f4a59ff5bcf3d0f3f062fdd64c374bc2d42099</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/uart/plib_uart2.h</file>
+         <hash>8b718719efb5a886d96e8be07b7f7266901bf30dcee9db4fd534bf0359c8c9ec</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/uart/plib_uart4.c</file>
+         <hash>2b361fa89d4fb235aa895456ccf4689fc1cd70d047d600b20352ad341f9f918e</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/clk/plib_clk.c</file>
+         <hash>ab816685bd5ec882bc355f803c1ba1548fee356ace2afc23545c8067b4eed2cf</hash>
+      </entry>
+      <entry>
+         <file>../src/config/default/peripheral/uart/plib_uart4.h</file>
+         <hash>fe7966e08297ce303e9cf791174a8d0fc6413c127a27eebeba824892fadb558a</hash>
       </entry>
    </generatedFileHashHistoryMap>
 </config>

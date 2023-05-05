@@ -63,8 +63,6 @@
 void TIMER_1_InterruptHandler( void );
 void SPI1_RX_InterruptHandler( void );
 void SPI1_TX_InterruptHandler( void );
-void I2C1_BUS_InterruptHandler( void );
-void I2C1_MASTER_InterruptHandler( void );
 void CHANGE_NOTICE_B_InterruptHandler( void );
 void CHANGE_NOTICE_C_InterruptHandler( void );
 void CHANGE_NOTICE_G_InterruptHandler( void );
@@ -92,16 +90,6 @@ void __ISR(_SPI1_RX_VECTOR, ipl7SRS) SPI1_RX_Handler (void)
 void __ISR(_SPI1_TX_VECTOR, ipl7SRS) SPI1_TX_Handler (void)
 {
     SPI1_TX_InterruptHandler();
-}
-
-void __ISR(_I2C1_BUS_VECTOR, ipl7SRS) I2C1_BUS_Handler (void)
-{
-    I2C1_BUS_InterruptHandler();
-}
-
-void __ISR(_I2C1_MASTER_VECTOR, ipl7SRS) I2C1_MASTER_Handler (void)
-{
-    I2C1_MASTER_InterruptHandler();
 }
 
 void __ISR(_CHANGE_NOTICE_B_VECTOR, ipl3SRS) CHANGE_NOTICE_B_Handler (void)
