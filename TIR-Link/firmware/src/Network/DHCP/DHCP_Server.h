@@ -3,6 +3,9 @@
 
 #include "DHCP.h"
 
+#define DHCP_SERVER_DEBUG_LEVEL0 // Sending to debug uart basic debugging data like assining new ip address
+//#define DHCP_SERVER_DEBUG_LEVEL1 // Sending to debug uart all debugging data like what packages where recieved, sent or rejected (including dumping content)
+
 #define DHCP_SERVER_MAX_CLIENTS 16
 #define DHCP_SERVER_DEFAULT_LEASE_TIME 120000 // 2 minutes in milliseconds
 
@@ -19,7 +22,7 @@ typedef struct
 
 extern DhcpServerBinding clientBinding[DHCP_SERVER_MAX_CLIENTS];
 
-TIR_Status DHCP_server_start(const char* device_name);
+TIR_Status dhcpServerProcessPkt(const EthFrame *ethFrame, const uint16_t frame_len);
 
 void dhcpServerTick();
 void dhcpServerParseDiscover(const DhcpMessage *message, size_t length);
@@ -36,4 +39,4 @@ TIR_Status dhcpServerGetNextIpAddr(Ipv4Addr *ipAddr);
 
 TIR_Status dhcpServerSendReply(uint8_t type, Ipv4Addr yourIpAddr, const DhcpMessage *request, size_t requestLen);
 
-#endif
+#endif // _DHCP_SERVER_H

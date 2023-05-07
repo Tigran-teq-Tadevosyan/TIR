@@ -1,8 +1,7 @@
 #ifndef _DHCP_H
 #define _DHCP_H
 
-#include "../Ethernet.h"
-#include "../IP.h"
+#include "../Network.h"
 
 #define DHCP_SERVER_PORT (67)
 #define DHCP_CLIENT_PORT (68)

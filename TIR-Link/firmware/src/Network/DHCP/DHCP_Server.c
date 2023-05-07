@@ -1,130 +1,108 @@
 #include "DHCP_Server.h"
 
 #include <stdlib.h>
+#include <endian.h>
 
-#include "../Network.h"
+#include "../../Common/Debug.h"
 #include "DHCP_Debug.h"
+#include "../../W5500/MACRAW_FrameFIFO.h"
 
-const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MIN;
-const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MAX;
+const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MIN = IPV4_ADDR(100, 100, 0, 2);
+const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MAX = IPV4_ADDR(100, 100, 0, 250);
 
-const Ipv4Addr DHCP_SERVER_NEXT_IPv4_ADDRESS;
+Ipv4Addr DHCP_SERVER_NEXT_IPv4_ADDRESS = IPV4_ADDR(100, 100, 0, 2);
 
 DhcpServerBinding clientBinding[DHCP_SERVER_MAX_CLIENTS];
 
-void DHCP_server_packet_callback(u_char *args, const struct pcap_pkthdr *packet_hdr, const u_char *frame);
 
-TIR_Status DHCP_server_start(const char* device_name) {
-
-    ipv4StringToAddr("100.100.0.1", &DHCP_SERVER_IPv4_ADDRESS);
-    ipv4StringToAddr("255.255.255.0", &DHCP_SERVER_SUBNET_MUSK);
- 
-//    DHCP_SERVER_IPv4_ADDRESS_MIN = IPV4_UNSPECIFIED_ADDR;
-//    DHCP_SERVER_IPv4_ADDRESS_MAX = IPV4_UNSPECIFIED_ADDR;
-
-    ipv4StringToAddr("100.100.0.2", &DHCP_SERVER_IPv4_ADDRESS_MIN);
-    ipv4StringToAddr("100.100.0.250", &DHCP_SERVER_IPv4_ADDRESS_MAX);
-
-    ipv4StringToAddr("100.100.0.2", &DHCP_SERVER_NEXT_IPv4_ADDRESS);
-
-    char errbuf[PCAP_ERRBUF_SIZE];
-    handle = pcap_open_live(device_name, BUFSIZ, 1, 1000, errbuf);
-
-    if (handle == NULL) {
-        fprintf(stderr, "Faile to start DHCP server on device %s: %s\n", device_name, errbuf);
-        return Failure;
-    } else if(pcap_datalink(handle) != DLT_EN10MB) {
-        fprintf(stderr, "Faile to start DHCP server. Unsupported data link. Only Ethernet is supported.\n");
-        return Failure;
-    }
-
-    initClock();
-
-    printf("Starting the DHCP server!\n");
-    pcap_loop(handle, -1, DHCP_server_packet_callback, NULL);
-
-    pcap_close(handle);
-
-    return Success;
-}
-
-void DHCP_server_packet_callback(u_char *args, const struct pcap_pkthdr *packet_hdr, const u_char *frame) {
-    (void)args; // We do not pass context in the loop intialization so "args" is always NULL
-
-    if(packet_hdr->caplen != packet_hdr->len) {
-        printf("-> Packat read %u of %u bytes, ignoring!\n", packet_hdr->caplen, packet_hdr->len);
-        return;
-    }
-
-    if(packet_hdr->len < sizeof(EthFrame))
-    {
-        printf("-> Invalid ethernet header (too short), ignoring!\n");
-        return;
-    }
-
-    EthFrame *eth_header = (EthFrame *) frame; // frame is the raw ethernet frame in out case
-
-    if(ntohs(eth_header->type) != ETH_TYPE_IPV4) {
+TIR_Status dhcpServerProcessPkt(const EthFrame *ethFrame, const uint16_t frame_len) {
+    if(betoh16(ethFrame->type) != ETH_TYPE_IPV4) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> Non IPv4 internet layer package, ignoring!\n");
-        return;
+        #endif
+        return Failure;
     }
 
-    size_t ip_packet_length = packet_hdr->len - sizeof(EthFrame);
-    Ipv4Header *ip_header = (Ipv4Header *) eth_header->data;
+    size_t ip_packet_length = frame_len - sizeof(EthFrame);
+    Ipv4Header *ip_header = (Ipv4Header *) ethFrame->data;
 
     if(ip_header->version != IPV4_VERSION) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> Non IPv4 package, ignoring!\n");
-        return;
+        #endif
+        return Failure;
     } else if(ip_packet_length < sizeof(Ipv4Header)) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> Invalid IPv4 packet length, ignoring!\n");
-        return;
+        #endif
+        return Failure;
     } else if(ip_header->headerLength < 5) { // lentgh is in multyply of words (32 bit)
-       printf("-> Invalid IPv4 header length (too short), ignoring!\n");
-       return;
-    } else if(ntohs(ip_header->totalLength) < (ip_header->headerLength * 4)) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
+        printf("-> Invalid IPv4 header length (too short), ignoring!\n");
+        #endif
+        return Failure;
+    } else if(betoh16(ip_header->totalLength) < (ip_header->headerLength * 4)) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> IPv4 invalid total length, ignoring!\n");
-        return;
+        #endif
+        return Failure;
     } else if(isFragmentedPacket(ip_header)) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> Received fragmented IPv4 packet which is not supported, ignoring!\n");
-        return;
+        #endif
+        return Failure;
     } else if(ip_header->protocol != IPV4_PROTOCOL_UDP) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> Received non UPD IPv4 packet, which is not supported, ignoring!\n");
-        return;
+        #endif
+        return Failure;
     }
 
     // (ip_header->headerLength * 4) is the length of IPv4 packet
     // again we multipy it by 4 (32 bit), as the length is given in word length
     UdpHeader *upd_header = (UdpHeader *) ((uint8_t*)ip_header + (ip_header->headerLength * 4));
 
-    if(ntohs(upd_header->destPort) != DHCP_SERVER_PORT || ntohs(upd_header->srcPort) != DHCP_CLIENT_PORT) {
+    if(betoh16(upd_header->destPort) != DHCP_SERVER_PORT || betoh16(upd_header->srcPort) != DHCP_CLIENT_PORT) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> UDP dest. port %hu (expected %hu) and source port %hu (expected %hu), ignoring!\n",
-               ntohs(upd_header->destPort), (u_short)DHCP_SERVER_PORT,
-               ntohs(upd_header->srcPort), (u_short)DHCP_CLIENT_PORT);
-        return;
+               betoh16(upd_header->destPort), (u_short)DHCP_SERVER_PORT,
+               betoh16(upd_header->srcPort), (u_short)DHCP_CLIENT_PORT);
+        #endif
+        return Failure;
     }
 
     const DhcpMessage *dhcp_packet = (DhcpMessage *) ((uint8_t*)upd_header + UDP_HEADER_LENGTH);
-    size_t dhcp_pkt_len = ntohs(upd_header->length) - UDP_HEADER_LENGTH;
+    size_t dhcp_pkt_len = betoh16(upd_header->length) - UDP_HEADER_LENGTH;
 
     if(dhcp_packet->op != DHCP_OPCODE_BOOTREQUEST) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> DHCP rerquest received, ignoring!\n");
-        return;
+        #endif
+        return Failure;
     } else if(dhcp_packet->htype != DHCP_HARDWARE_TYPE_ETH) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> DHCP hardware type non ethernet, ignoring!\n");
-        return;
+        #endif
+        return Failure;
     } else if(dhcp_packet->hlen != sizeof(MacAddr)) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> DHCP incorrect header length, ignoring!\n");
-        return;
+        #endif
+        return Failure;
     } else if(dhcp_packet->magicCookie != HTONL(DHCP_MAGIC_COOKIE)) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> DHCP incorrect magic cookie, ignoring!\n");
-        return;
+        #endif
+        return Failure;
     }
 
     DhcpOption *dhcp_option = dhcpGetOption(dhcp_packet, dhcp_pkt_len, DHCP_OPT_DHCP_MESSAGE_TYPE);
 
     if(dhcp_option  == NULL || dhcp_option ->length != 1) {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> Failed to extract dhcp options, ignoring!\n");
-        return;
+        #endif
+        return Failure;
     }
 
     dhcpServerTick();
@@ -156,28 +134,32 @@ void DHCP_server_packet_callback(u_char *args, const struct pcap_pkthdr *packet_
        break;
     }
 
+    
+    #ifdef DHCP_SERVER_DEBUG_LEVEL1
     printf("------NEW PACKET------\n");
 
-    ethDumpHeader(eth_header);
+    ethDumpHeader(ethFrame);
     ipv4DumpHeader(ip_header);
     udpDumpHeader(upd_header);
     dhcpDumpMessage(dhcp_packet, dhcp_pkt_len);
 
     printf("------PACKET END------\n");
+    #endif
+
+    return Success;
 }
 
 void dhcpServerTick()
 {
-   uint_t i;
    systime_t time;
    systime_t leaseTime = DHCP_SERVER_DEFAULT_LEASE_TIME;
    DhcpServerBinding *binding;
 
    //Get current time
-   time = osGetSystemTime();
+   time = get_SysTime();
 
    //Loop through the list of bindings
-   for(i = 0; i < DHCP_SERVER_MAX_CLIENTS; i++)
+   for(uint16_t i = 0; i < DHCP_SERVER_MAX_CLIENTS; i++)
    {
       //Point to the current binding
       binding = &clientBinding[i];
@@ -202,13 +184,9 @@ void dhcpServerTick()
 void dhcpServerParseDiscover(const DhcpMessage *message, size_t length)
 {
     TIR_Status status;
-//    uint_t i;
     Ipv4Addr requestedIpAddr;
     DhcpOption *option;
     DhcpServerBinding *binding;
-
-    //Index of the IP address assigned to the DHCP server
-//    i = 0;
 
     //Retrieve Server Identifier option
     option = dhcpGetOption(message, length, DHCP_OPT_SERVER_ID);
@@ -218,7 +196,7 @@ void dhcpServerParseDiscover(const DhcpMessage *message, size_t length)
     if(option != NULL && option->length == 4)
     {
        //Unexpected server identifier?
-       if(!ipv4CompAddr(option->value, &DHCP_SERVER_IPv4_ADDRESS))
+       if(!ipv4CompAddr(option->value, &HOST_IPv4_ADDRESS))
           return;
     }
 
@@ -242,8 +220,8 @@ void dhcpServerParseDiscover(const DhcpMessage *message, size_t length)
        if(requestedIpAddr != binding->ipAddr)
        {
           //Ensure the IP address is in the server's pool of available addresses
-          if(ntohl(requestedIpAddr) >= ntohl(DHCP_SERVER_IPv4_ADDRESS_MIN) &&
-             ntohl(requestedIpAddr) <= ntohl(DHCP_SERVER_IPv4_ADDRESS_MAX))
+          if(betoh32(requestedIpAddr) >= betoh32(DHCP_SERVER_IPv4_ADDRESS_MIN) &&
+             betoh32(requestedIpAddr) <= betoh32(DHCP_SERVER_IPv4_ADDRESS_MAX))
           {
              //Make sure the IP address is not already allocated
              if(!dhcpServerFindBindingByIpAddr(requestedIpAddr))
@@ -251,7 +229,7 @@ void dhcpServerParseDiscover(const DhcpMessage *message, size_t length)
                 //Record IP address
                 binding->ipAddr = requestedIpAddr;
                 //Get current time
-                binding->timestamp = osGetSystemTime();
+                binding->timestamp = get_SysTime();
              }
           }
        }
@@ -268,8 +246,8 @@ void dhcpServerParseDiscover(const DhcpMessage *message, size_t length)
        if(binding != NULL)
        {
           //Ensure the IP address is in the server's pool of available addresses
-          if(ntohl(requestedIpAddr) >= ntohl(DHCP_SERVER_IPv4_ADDRESS_MIN) &&
-             ntohl(requestedIpAddr) <= ntohl(DHCP_SERVER_IPv4_ADDRESS_MAX))
+          if(betoh32(requestedIpAddr) >= betoh32(DHCP_SERVER_IPv4_ADDRESS_MIN) &&
+             betoh32(requestedIpAddr) <= betoh32(DHCP_SERVER_IPv4_ADDRESS_MAX))
           {
              //Make sure the IP address is not already allocated
              if(!dhcpServerFindBindingByIpAddr(requestedIpAddr))
@@ -297,7 +275,7 @@ void dhcpServerParseDiscover(const DhcpMessage *message, size_t length)
              //Record MAC address
              binding->macAddr = message->chaddr;
              //Get current time
-             binding->timestamp = osGetSystemTime();
+             binding->timestamp = get_SysTime();
           }
        }
        else
@@ -309,7 +287,11 @@ void dhcpServerParseDiscover(const DhcpMessage *message, size_t length)
 
     //Check status code
     if(!status)
-    {
+    {   
+        #ifdef DHCP_SERVER_DEBUG_LEVEL0
+        printDebug("Offered IP on Discover: %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
+        #endif
+        
        //The server responds with a DHCPOFFER message that includes an
        //available network address in the 'yiaddr' field (and other
        //configuration parameters in DHCP options)
@@ -330,7 +312,7 @@ void dhcpServerParseRequest(const DhcpMessage *message, size_t length)
    if(option != NULL && option->length == 4)
    {
       //Unexpected server identifier?
-      if(!ipv4CompAddr(option->value, &DHCP_SERVER_IPv4_ADDRESS))
+      if(!ipv4CompAddr(option->value, &HOST_IPv4_ADDRESS))
          return;
    }
 
@@ -367,8 +349,12 @@ void dhcpServerParseRequest(const DhcpMessage *message, size_t length)
             //Commit network address
             binding->validLease = 1;
             //Save lease start time
-            binding->timestamp = osGetSystemTime();
+            binding->timestamp = get_SysTime();
 
+            #ifdef DHCP_SERVER_DEBUG_LEVEL0
+            printDebug("Acknowledged requested IP: %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
+            #endif
+            
             //The server responds with a DHCPACK message containing the
             //configuration parameters for the requesting client
             dhcpServerSendReply(DHCP_MSG_TYPE_ACK, binding->ipAddr, message, length);
@@ -380,8 +366,8 @@ void dhcpServerParseRequest(const DhcpMessage *message, size_t length)
       else
       {
          //Ensure the IP address is in the server's pool of available addresses
-         if(ntohl(clientIpAddr) >= ntohl(DHCP_SERVER_IPv4_ADDRESS_MIN) &&
-            ntohl(clientIpAddr) <= ntohl(DHCP_SERVER_IPv4_ADDRESS_MAX))
+         if(betoh32(clientIpAddr) >= betoh32(DHCP_SERVER_IPv4_ADDRESS_MIN) &&
+            betoh32(clientIpAddr) <= betoh32(DHCP_SERVER_IPv4_ADDRESS_MAX))
          {
             //Make sure the IP address is not already allocated
             if(!dhcpServerFindBindingByIpAddr(clientIpAddr))
@@ -399,7 +385,11 @@ void dhcpServerParseRequest(const DhcpMessage *message, size_t length)
                   //Commit network address
                   binding->validLease = 1;
                   //Get current time
-                  binding->timestamp = osGetSystemTime();
+                  binding->timestamp = get_SysTime();
+                  
+                  #ifdef DHCP_SERVER_DEBUG_LEVEL0
+                  printDebug("Assigned new IP from request:  %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
+                  #endif
 
                   //The server responds with a DHCPACK message containing the
                   //configuration parameters for the requesting client
@@ -413,6 +403,9 @@ void dhcpServerParseRequest(const DhcpMessage *message, size_t length)
       }
    }
 
+    #ifdef DHCP_SERVER_DEBUG_LEVEL0
+    printDebug("Failed to satisfy request.");
+    #endif
    //If the server is unable to satisfy the DHCPREQUEST message, the
    //server should respond with a DHCPNAK message
    dhcpServerSendReply(DHCP_MSG_TYPE_NAK, IPV4_UNSPECIFIED_ADDR, message, length);
@@ -442,6 +435,10 @@ void dhcpServerParseDecline(const DhcpMessage *message, size_t length)
          //Check the IP address against the requested IP address
          if(binding->ipAddr == requestedIpAddr)
          {
+            #ifdef DHCP_SERVER_DEBUG_LEVEL0
+            printDebug("Removed binding from decline for IP:  %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
+            #endif
+             
             //Remote the binding from the list
             memset(binding, 0, sizeof(DhcpServerBinding));
          }
@@ -463,6 +460,10 @@ void dhcpServerParseRelease(const DhcpMessage *message, size_t length)
       //Check the IP address against the client IP address
       if(binding->ipAddr == message->ciaddr)
       {
+        #ifdef DHCP_SERVER_DEBUG_LEVEL0
+        printDebug("Released:  %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
+        #endif
+          
          //Release the network address and cancel remaining lease
          binding->validLease = 0;
       }
@@ -482,11 +483,10 @@ void dhcpServerParseInform(const DhcpMessage *message, size_t length)
 
 DhcpServerBinding *dhcpServerFindBindingByMacAddr(const MacAddr *macAddr)
 {
-   uint_t i;
    DhcpServerBinding *binding;
 
    //Loop through the list of bindings
-   for(i = 0; i < DHCP_SERVER_MAX_CLIENTS; i++)
+   for(uint16_t i = 0; i < DHCP_SERVER_MAX_CLIENTS; i++)
    {
       //Point to the current binding
       binding = &clientBinding[i];
@@ -509,11 +509,10 @@ DhcpServerBinding *dhcpServerFindBindingByMacAddr(const MacAddr *macAddr)
 
 DhcpServerBinding *dhcpServerFindBindingByIpAddr(Ipv4Addr ipAddr)
 {
-   uint_t i;
    DhcpServerBinding *binding;
 
    //Loop through the list of bindings
-   for(i = 0; i < DHCP_SERVER_MAX_CLIENTS; i++)
+   for(uint16_t i = 0; i < DHCP_SERVER_MAX_CLIENTS; i++)
    {
       //Point to the current binding
       binding = &clientBinding[i];
@@ -536,19 +535,18 @@ DhcpServerBinding *dhcpServerFindBindingByIpAddr(Ipv4Addr ipAddr)
 
 DhcpServerBinding *dhcpServerCreateBinding()
 {
-   uint_t i;
    systime_t time;
    DhcpServerBinding *binding;
    DhcpServerBinding *oldestBinding;
 
    //Get current time
-   time = osGetSystemTime();
+   time = get_SysTime();
 
    //Keep track of the oldest binding
    oldestBinding = NULL;
 
    //Loop through the list of bindings
-   for(i = 0; i < DHCP_SERVER_MAX_CLIENTS; i++)
+   for(uint16_t i = 0; i < DHCP_SERVER_MAX_CLIENTS; i++)
    {
       //Point to the current binding
       binding = &clientBinding[i];
@@ -592,11 +590,10 @@ DhcpServerBinding *dhcpServerCreateBinding()
 
 TIR_Status dhcpServerGetNextIpAddr(Ipv4Addr *ipAddr)
 {
-    uint_t i;
     DhcpServerBinding *binding;
 
     //Search the pool for any available IP address
-    for(i = 0; i < DHCP_SERVER_MAX_CLIENTS; i++)
+    for(uint16_t i = 0; i < DHCP_SERVER_MAX_CLIENTS; i++)
     {
        //Check whether the current IP address is already allocated
        binding = dhcpServerFindBindingByIpAddr(DHCP_SERVER_NEXT_IPv4_ADDRESS);
@@ -606,7 +603,7 @@ TIR_Status dhcpServerGetNextIpAddr(Ipv4Addr *ipAddr)
           *ipAddr = DHCP_SERVER_NEXT_IPv4_ADDRESS;
 
        //Compute the next IP address that will be assigned by the DHCP server
-       if(ntohl(DHCP_SERVER_NEXT_IPv4_ADDRESS) >= ntohl(DHCP_SERVER_IPv4_ADDRESS_MAX))
+       if(betoh32(DHCP_SERVER_NEXT_IPv4_ADDRESS) >= betoh32(DHCP_SERVER_IPv4_ADDRESS_MAX))
        {
           //Wrap around to the beginning of the pool
           DHCP_SERVER_NEXT_IPv4_ADDRESS = DHCP_SERVER_IPv4_ADDRESS_MIN;
@@ -614,7 +611,7 @@ TIR_Status dhcpServerGetNextIpAddr(Ipv4Addr *ipAddr)
        else
        {
           //Increment IP address
-          DHCP_SERVER_NEXT_IPv4_ADDRESS = htonl(ntohl(DHCP_SERVER_NEXT_IPv4_ADDRESS) + 1);
+          DHCP_SERVER_NEXT_IPv4_ADDRESS = htobe32(betoh32(DHCP_SERVER_NEXT_IPv4_ADDRESS) + 1);
        }
 
        //If the IP address is available, we are done
@@ -631,26 +628,15 @@ TIR_Status dhcpServerSendReply(uint8_t type, Ipv4Addr yourIpAddr, const DhcpMess
     (void)requestLen;
 
     TIR_Status status = Success;
-//    uint_t i;
-//    uint_t n;
-//    uint32_t value;
-//    size_t offset;
     size_t dhcp_packet_length;
-//    NetBuffer *buffer;
-//    NetInterface *interface;
-//    DhcpMessage *reply;
 
     Ipv4Addr srcIpAddr;
     Ipv4Addr destIpAddr;
     uint16_t destPort;
 
-    //Index of the IP address assigned to the DHCP server
-//    i = context->settings.ipAddrIndex;
-
-
     uint32_t    frame_length    = ETH_HEADER_SIZE + IPV4_MIN_HEADER_LENGTH + UDP_HEADER_LENGTH + DHCP_MAX_MSG_SIZE;
-    uint8_t     *frame          = malloc(frame_length);
-    EthFrame   *eth_header     = (EthFrame *) frame;
+    uint8_t     *frame          = (uint8_t*)reserveItem_TxFIFO(frame_length);
+    EthFrame    *eth_header     = (EthFrame *) frame;
     Ipv4Header  *ip_header      = (Ipv4Header *) ((uint8_t*)eth_header + ETH_HEADER_SIZE);
     UdpHeader   *upd_header     = (UdpHeader *) ((uint8_t*)ip_header + IPV4_MIN_HEADER_LENGTH);
     DhcpMessage *dhcp_packet    = (DhcpMessage *) ((uint8_t*)upd_header + UDP_HEADER_LENGTH);
@@ -683,13 +669,13 @@ TIR_Status dhcpServerSendReply(uint8_t type, Ipv4Addr yourIpAddr, const DhcpMess
     dhcpAddOption(dhcp_packet, &dhcp_packet_length, DHCP_OPT_DHCP_MESSAGE_TYPE, &type, sizeof(type));
 
     //Add Server Identifier option
-    dhcpAddOption(dhcp_packet, &dhcp_packet_length, DHCP_OPT_SERVER_ID, &DHCP_SERVER_IPv4_ADDRESS, sizeof(Ipv4Addr));
+    dhcpAddOption(dhcp_packet, &dhcp_packet_length, DHCP_OPT_SERVER_ID, &HOST_IPv4_ADDRESS, sizeof(Ipv4Addr));
 
     //DHCPOFFER or DHCPACK message?
     if(type == DHCP_MSG_TYPE_OFFER || type == DHCP_MSG_TYPE_ACK)
     {
        //Convert the lease time to network byte order
-       uint32_t value = htonl(DHCP_SERVER_DEFAULT_LEASE_TIME/1000);
+       uint32_t value = htobe32(DHCP_SERVER_DEFAULT_LEASE_TIME/1000);
 
        //When responding to a DHCPINFORM message, the server must not
        //send a lease expiration time to the client
@@ -700,9 +686,9 @@ TIR_Status dhcpServerSendReply(uint8_t type, Ipv4Addr yourIpAddr, const DhcpMess
        }
 
        //Add Subnet Mask option
-       if(DHCP_SERVER_SUBNET_MUSK != IPV4_UNSPECIFIED_ADDR)
+       if(HOST_IPv4_SUBNET_MUSK != IPV4_UNSPECIFIED_ADDR)
        {
-          dhcpAddOption(dhcp_packet, &dhcp_packet_length, DHCP_OPT_SUBNET_MASK, &DHCP_SERVER_SUBNET_MUSK, sizeof(Ipv4Addr));
+          dhcpAddOption(dhcp_packet, &dhcp_packet_length, DHCP_OPT_SUBNET_MASK, &HOST_IPv4_SUBNET_MUSK, sizeof(Ipv4Addr));
        }
 
         //Add Router option (currently unsupported)
@@ -728,7 +714,7 @@ TIR_Status dhcpServerSendReply(uint8_t type, Ipv4Addr yourIpAddr, const DhcpMess
         //}
     }
 
-    srcIpAddr = DHCP_SERVER_IPv4_ADDRESS;
+    srcIpAddr = HOST_IPv4_ADDRESS;
 
 
     //Check whether the 'giaddr' field is non-zero
@@ -762,7 +748,7 @@ TIR_Status dhcpServerSendReply(uint8_t type, Ipv4Addr yourIpAddr, const DhcpMess
             else
             {
             //Check whether the broadcast bit is set
-            if(ntohs(request->flags) & DHCP_FLAG_BROADCAST)
+            if(betoh16(request->flags) & DHCP_FLAG_BROADCAST)
             {
                //If 'giaddr' is zero and 'ciaddr' is zero, and the broadcast bit is
                //set, then the server broadcasts DHCPOFFER and DHCPACK messages
@@ -787,9 +773,9 @@ TIR_Status dhcpServerSendReply(uint8_t type, Ipv4Addr yourIpAddr, const DhcpMess
     }
 
     // Setting up the UDP header
-    upd_header->srcPort = htons(DHCP_SERVER_PORT);
-    upd_header->destPort = htons(destPort);
-    upd_header->length = htons(UDP_HEADER_LENGTH + DHCP_MAX_MSG_SIZE);
+    upd_header->srcPort = htobe16(DHCP_SERVER_PORT);
+    upd_header->destPort = htobe16(destPort);
+    upd_header->length = htobe16(UDP_HEADER_LENGTH + DHCP_MAX_MSG_SIZE);
     upd_header->checksum = 0; // For IPv4 checksum is not mandatory
 
     // Setting up the IP header
@@ -797,9 +783,9 @@ TIR_Status dhcpServerSendReply(uint8_t type, Ipv4Addr yourIpAddr, const DhcpMess
     ip_header->version = IPV4_VERSION;
     ip_header->headerLength = 5;
     ip_header->typeOfService = 0;
-    ip_header->totalLength = htons(IPV4_MIN_HEADER_LENGTH + UDP_HEADER_LENGTH + DHCP_MAX_MSG_SIZE);
-    ip_header->identification = htons(IPv4_IDENTIFICATION++);
-    ip_header->fragmentOffset = htons(0);
+    ip_header->totalLength = htobe16(IPV4_MIN_HEADER_LENGTH + UDP_HEADER_LENGTH + DHCP_MAX_MSG_SIZE);
+    ip_header->identification = htobe16(IPv4_IDENTIFICATION++);
+    ip_header->fragmentOffset = htobe16(0);
     ip_header->timeToLive = IPV4_DEFAULT_TTL;
     ip_header->protocol = IPV4_PROTOCOL_UDP;
     ip_header->headerChecksum = 0;
@@ -808,12 +794,11 @@ TIR_Status dhcpServerSendReply(uint8_t type, Ipv4Addr yourIpAddr, const DhcpMess
 
     ip_header->headerChecksum = ipCalcChecksum(ip_header, IPV4_MIN_HEADER_LENGTH);
 
-    eth_header->srcAddr = MAC_SOURCE_ADDR;
+    eth_header->srcAddr = HOST_MAC_ADDR;
     eth_header->destAddr = MAC_BROADCAST_ADDR;
-    eth_header->type = htons(ETH_TYPE_IPV4);
-
-    pcap_inject(handle, frame, frame_length);
-
+    eth_header->type = htobe16(ETH_TYPE_IPV4);
+    
+    #ifdef DHCP_SERVER_DEBUG_LEVEL1
     printf("------SENT PACKET------\n");
 
     ethDumpHeader(eth_header);
@@ -822,8 +807,9 @@ TIR_Status dhcpServerSendReply(uint8_t type, Ipv4Addr yourIpAddr, const DhcpMess
     dhcpDumpMessage(dhcp_packet, DHCP_MAX_MSG_SIZE);
 
     printf("------PACKET END------\n");
-
-    free(frame);
-
+    #endif
+    
+    incremetTailIndex_TxFIFO();
+    
     return status;
 }

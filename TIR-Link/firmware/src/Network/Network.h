@@ -5,11 +5,8 @@
 #include "IP.h"
 #include "UDP.h"
 
-
-//A5-E6-38-61-B8-71
-
-extern const MacAddr    HOST_MAC_ADDR;
-extern const Ipv4Addr   HOST_IPv4_ADDRESS;
-extern const Ipv4Addr   HOST_IPv4_SUBNET_MUSK;
+extern const MacAddr    HOST_MAC_ADDR; //A5-E6-38-61-B8-71
+extern const Ipv4Addr   HOST_IPv4_ADDRESS; // 100.100.0.1
+extern const Ipv4Addr   HOST_IPv4_SUBNET_MUSK; // 255.255.255.0
 
 #endif

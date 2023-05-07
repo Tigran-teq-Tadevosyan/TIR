@@ -16,19 +16,20 @@
 #include "Common/Debug.h"
 
 #include "Network/Network.h"
-#include "Network/DHCP/DHCP.h"
-#include "Network/DHCP/DHCP_Debug.h"
+#include "Network/DHCP/DHCP_Server.h"
+//#include "Network/DHCP/DHCP.h"
+//#include "Network/DHCP/DHCP_Debug.h"
 #include "MACRAW_FrameFIFO.h"
 
-#define MACRAW_SOCKET   0 // The socket number for MACRAW socket (only 0 can operate in MACRAW mode)
+#define MACRAW_SOCKET   0 // The socket number for MACRAW socket (only socket 0 can operate in MACRAW mode)
 
-const uint8_t SOCKET_MEM_LAYOUT[2][8] = { { 8, 2, 1, 1, 1, 1, 1, 1 }, { 8, 2, 1, 1, 1, 1, 1, 1 } };
-const wiz_NetInfo DEFAULT_NETWORK_CONFIG = {  .mac   = {0xA5, 0xE6, 0x38, 0x61, 0xB8, 0x71},
-                                                .ip     = {100, 100, 0, 1},
-                                                .sn     = {255, 255, 255, 0},
-                                                .gw     = {0, 0, 0, 0},
-                                                .dns    = {8, 8, 8, 8},		// Google public DNS (8.8.8.8 , 8.8.4.4), OpenDNS (208.67.222.222 , 208.67.220.220)
-                                                .dhcp   = NETINFO_STATIC };
+const uint8_t SOCKET_MEM_LAYOUT[2][8] = {{ 8, 2, 1, 1, 1, 1, 1, 1 }, { 8, 2, 1, 1, 1, 1, 1, 1 }};
+const wiz_NetInfo DEFAULT_NETWORK_CONFIG = { .mac   = {0xA5, 0xE6, 0x38, 0x61, 0xB8, 0x71},
+                                            .ip     = {100, 100, 0, 1},
+                                            .sn     = {255, 255, 255, 0},
+                                            .gw     = {0, 0, 0, 0},
+                                            .dns    = {8, 8, 8, 8},		// Google public DNS (8.8.8.8 , 8.8.4.4), OpenDNS (208.67.222.222 , 208.67.220.220)
+                                            .dhcp   = NETINFO_STATIC };
 
 bool W5500_CURRENTLY_SENDING = false;
 
@@ -142,23 +143,23 @@ void process_W5500 (void)
     if(!isEmpty_RxFIFO()) {
         uint16_t new_frame_len;
         EthFrame *new_frame = peekHead_RxFIFO(&new_frame_len);
-        ethDumpHeader(new_frame);
+        dhcpServerProcessPkt(new_frame, (uint32_t)new_frame_len);
         
-        if(betoh16(new_frame->type) == ETH_TYPE_IPV4) {
-            Ipv4Header *ip_header = (Ipv4Header*)((uint8_t*)new_frame + ETH_HEADER_SIZE); 
-            ipv4DumpHeader(ip_header);
-            
-            if(ip_header->protocol == IPV4_PROTOCOL_UDP) {
-                UdpHeader *upd_header = (UdpHeader *) ((uint8_t*)ip_header + (ip_header->headerLength * 4));
-                udpDumpHeader(upd_header);
-                
-                if(betoh16(upd_header->destPort) == DHCP_SERVER_PORT && betoh16(upd_header->srcPort) == DHCP_CLIENT_PORT) {
-                    size_t dhcp_pkt_len = betoh16(upd_header->length) - UDP_HEADER_LENGTH;
-                    DhcpMessage *dhcp_packet = (DhcpMessage *) ((uint8_t*)upd_header + UDP_HEADER_LENGTH);
-                    dhcpDumpMessage(dhcp_packet, dhcp_pkt_len);
-                }
-            }
-        }
+//        if(betoh16(new_frame->type) == ETH_TYPE_IPV4) {
+//            Ipv4Header *ip_header = (Ipv4Header*)((uint8_t*)new_frame + ETH_HEADER_SIZE); 
+//            ipv4DumpHeader(ip_header);
+//            
+//            if(ip_header->protocol == IPV4_PROTOCOL_UDP) {
+//                UdpHeader *upd_header = (UdpHeader *) ((uint8_t*)ip_header + (ip_header->headerLength * 4));
+//                udpDumpHeader(upd_header);
+//                
+//                if(betoh16(upd_header->destPort) == DHCP_SERVER_PORT && betoh16(upd_header->srcPort) == DHCP_CLIENT_PORT) {
+//                    size_t dhcp_pkt_len = betoh16(upd_header->length) - UDP_HEADER_LENGTH;
+//                    DhcpMessage *dhcp_packet = (DhcpMessage *) ((uint8_t*)upd_header + UDP_HEADER_LENGTH);
+//                    dhcpDumpMessage(dhcp_packet, dhcp_pkt_len);
+//                }
+//            }
+//        }
         
         removeHead_RxFIFO();
     }
