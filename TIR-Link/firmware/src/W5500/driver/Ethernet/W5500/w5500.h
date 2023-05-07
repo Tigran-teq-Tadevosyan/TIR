@@ -2143,6 +2143,7 @@ void wiz_send_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
  * @sa wiz_send_data()
  */
 void wiz_recv_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
+void wiz_recv_peek_data(uint8_t sn, uint8_t *wizdata, uint16_t len);
 
 /**
  * @ingroup Basic_IO_function

@@ -26,10 +26,26 @@ void printDebug (const char * format, ... ) {
     va_end(arg);
 }
 
+
+void printDebugArray(const char *prepend, const void *data, uint32_t length) {
+   uint16_t i;
+
+   for(i = 0; i < length; i++)
+   {
+      //Beginning of a new line?
+      if((i % 16) == 0)
+         printDebug("%s", prepend);
+      //Display current data byte
+      printDebug("%02" PRIX8 " ", *((uint8_t *) data + i));
+      //End of current line?
+      if((i % 16) == 15 || i == (length - 1))
+         printDebug("\r\n");
+   }
+}
+
 static void UartRxEventHandler(UART_EVENT event, uintptr_t contextHandle) {  
     (void)contextHandle;
     if(event == UART_EVENT_READ_THRESHOLD_REACHED) {;
-    
         // No use currently
     }
 }

@@ -255,6 +255,20 @@ void wiz_recv_data(uint8_t sn, uint8_t *wizdata, uint16_t len)
    setSn_RX_RD(sn,ptr);
 }
 
+void wiz_recv_peek_data(uint8_t sn, uint8_t *wizdata, uint16_t len)
+{
+   uint16_t ptr = 0;
+   uint32_t addrsel = 0;
+   
+   if(len == 0) return;
+   ptr = getSn_RX_RD(sn);
+   //M20140501 : implict type casting -> explict type casting
+   //addrsel = ((ptr << 8) + (WIZCHIP_RXBUF_BLOCK(sn) << 3);
+   addrsel = ((uint32_t)ptr << 8) + (WIZCHIP_RXBUF_BLOCK(sn) << 3);
+   //
+   WIZCHIP_READ_BUF(addrsel, wizdata, len);
+}
+
 
 void wiz_recv_ignore(uint8_t sn, uint16_t len)
 {

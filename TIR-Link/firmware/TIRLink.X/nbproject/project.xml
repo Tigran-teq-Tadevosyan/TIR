@@ -15,6 +15,7 @@
                 <sourceRootElem>source</sourceRootElem>
                 <sourceRootElem>../src/Common</sourceRootElem>
                 <sourceRootElem>../src/Networking</sourceRootElem>
+                <sourceRootElem>../src/Network</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

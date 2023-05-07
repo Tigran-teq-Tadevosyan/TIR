@@ -59,23 +59,21 @@ int main ( void )
     UART2_ReadNotificationEnable(true, true);
     UART2_ReadThresholdSet(0);
            
-    W5500_Init();
+    init_W5500();
     
-    
-    
-    
-    uint16_t UAR4_readByteCount = 0;
+//    uint16_t UAR4_readByteCount = 0;
     
     while ( true )
     {
         /* Maintain state machines of all polled MPLAB Harmony modules. */
-        SYS_Tasks ( );
+        SYS_Tasks();
+        process_W5500();
         
 //        processW5500();
         
 //        UAR4_readByteCount = UART4_ReadCountGet();
-        if(UAR4_readByteCount > 0)
-        {
+//        if(UAR4_readByteCount > 0)
+//        {
 //            uint8_t *read_data = malloc(UAR4_readByteCount);
 //            UAR4_readByteCount = UART4_Read(read_data, UAR4_readByteCount);
             
@@ -91,7 +89,7 @@ int main ( void )
 //            uartRxBufferIn += rxRdy;  
 //            uartRxBuffer[uartRxBufferIn] = 0x00;
 //            uartRxBufferIn = parseUartMessage(uartRxBuffer, uartRxBufferIn);
-        }
+//        }
         
         /*
         rxRdy = UART2_ReadCountGet();
@@ -161,11 +159,11 @@ int main ( void )
         }
         */
                 
-        if(readNetworkInfo)
-        {
-            readNetworkInfo = false;
-            printNetworkInfo();
-        }
+//        if(readNetworkInfo)
+//        {
+//            readNetworkInfo = false;
+//            printNetworkInfo();
+//        }
        
     }
 
@@ -256,9 +254,11 @@ static void SwitchEventHandler(GPIO_PIN pin, uintptr_t contextHandle)
     (void)contextHandle;
     if(pin == SW_1_PIN) {
         if(SW_1_Get() == 0) {
+            printDebug("Hello Sailor\r\n");
         } else {}
     } else if(pin == SW_2_PIN) {
         if(SW_2_Get() == 0) {
+            send_pkt();
         } else { }
     } else if(pin == SW_3_PIN) {
         if(SW_3_Get() == 0) {

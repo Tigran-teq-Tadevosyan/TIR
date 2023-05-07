@@ -11,24 +11,28 @@
 
 static void sysTimerTick(uint32_t status, uintptr_t contextHandle);
 
-uint64_t system_tick_us;
-uint32_t delay_tick_us;
+systime_t system_tick_us;
+systime_t delay_tick_us;
 
 void init_SysClock() {
     system_tick_us = 0;
     delay_tick_us = 0;
             
-    TMR1_CallbackRegister(sysTimerTick, 0);
+    TMR1_CallbackRegister(sysTimerTick, NO_CONTEXT);
     TMR1_Start();
 }
 
-void delay_us(uint32_t us_to_wait)
+systime_t get_SysTime(void) { 
+    return system_tick_us;
+}
+
+void delay_us(systime_t us_to_wait)
 {
     delay_tick_us = 0;
     while(delay_tick_us < us_to_wait);
 }
 
-void delay_ms(uint32_t ms)
+void delay_ms(systime_t ms)
 {
     while(ms > 0)
     {
