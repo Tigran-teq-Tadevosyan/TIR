@@ -144,23 +144,6 @@ void process_W5500 (void)
         uint16_t new_frame_len;
         EthFrame *new_frame = peekHead_RxFIFO(&new_frame_len);
         dhcpServerProcessPkt(new_frame, (uint32_t)new_frame_len);
-        
-//        if(betoh16(new_frame->type) == ETH_TYPE_IPV4) {
-//            Ipv4Header *ip_header = (Ipv4Header*)((uint8_t*)new_frame + ETH_HEADER_SIZE); 
-//            ipv4DumpHeader(ip_header);
-//            
-//            if(ip_header->protocol == IPV4_PROTOCOL_UDP) {
-//                UdpHeader *upd_header = (UdpHeader *) ((uint8_t*)ip_header + (ip_header->headerLength * 4));
-//                udpDumpHeader(upd_header);
-//                
-//                if(betoh16(upd_header->destPort) == DHCP_SERVER_PORT && betoh16(upd_header->srcPort) == DHCP_CLIENT_PORT) {
-//                    size_t dhcp_pkt_len = betoh16(upd_header->length) - UDP_HEADER_LENGTH;
-//                    DhcpMessage *dhcp_packet = (DhcpMessage *) ((uint8_t*)upd_header + UDP_HEADER_LENGTH);
-//                    dhcpDumpMessage(dhcp_packet, dhcp_pkt_len);
-//                }
-//            }
-//        }
-        
         removeHead_RxFIFO();
     }
 }
@@ -228,6 +211,7 @@ void process_W5500Int() {
         }
     }
 
+    if(socket_int & SIK_SENT) { W5500_CURRENTLY_SENDING = false; } 
     ctlsocket(MACRAW_SOCKET, CS_CLR_INTERRUPT, (void *)&MACRAW_SOCKET_INT_MASK);
     
     // Would only be called if we have chip interrupts not related to sockets, so we clear that interrupts.

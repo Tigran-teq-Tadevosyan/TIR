@@ -9,6 +9,7 @@
 #include "W5500/W5500.h"
 #include "Common/Common.h"
 #include "Common/Debug.h"
+#include "Network/DHCP/DHCP_Server.h"
 
 uint8_t uartTxBuffer[256] = {0};
 uint8_t uartRxBuffer[256] = {0};
@@ -68,103 +69,7 @@ int main ( void )
         /* Maintain state machines of all polled MPLAB Harmony modules. */
         SYS_Tasks();
         process_W5500();
-        
-//        processW5500();
-        
-//        UAR4_readByteCount = UART4_ReadCountGet();
-//        if(UAR4_readByteCount > 0)
-//        {
-//            uint8_t *read_data = malloc(UAR4_readByteCount);
-//            UAR4_readByteCount = UART4_Read(read_data, UAR4_readByteCount);
-            
-//            sendPackage(read_data, UAR4_readByteCount);
-//            UART4_Write(read_data, UAR4_readByteCount);
-            
-            
-            
-//            rxRdy = UART2_Write(uartRxBuffer, rxRdy);
-//        
-//            rxRdy = UART4_Read(uartRxBuffer + uartRxBufferIn, rxRdy);
-//            UART4_Write(uartRxBuffer + uartRxBufferIn, rxRdy);
-//            uartRxBufferIn += rxRdy;  
-//            uartRxBuffer[uartRxBufferIn] = 0x00;
-//            uartRxBufferIn = parseUartMessage(uartRxBuffer, uartRxBufferIn);
-//        }
-        
-        /*
-        rxRdy = UART2_ReadCountGet();
-        if(rxRdy > 0)
-        {
-            if(uart2RxBufferIn > 3000)
-            {
-                printDebug("UART to much data Size = %u\r\n", uart2RxBufferIn);
-                uart2RxBufferIn = 0;
-                
-                macPctStartFound = false;
-                uart2RxBufferOut = 0; 
-            }
-                
-            rxRdy = UART2_Read(uart2RxBuffer + uart2RxBufferIn, rxRdy);
-            uart2RxBufferIn += rxRdy;
-            
-            // Find The Start of IP Packet
-            if(macPctStartFound == false)
-            {
-                for(uint16_t i = 0; i < uart2RxBufferIn; i++)
-                {
-                    if(uart2RxBuffer[i] == startDel[0] && i < uart2RxBufferIn - 6)
-                    {
-                        if(uart2RxBuffer[i + 1] == startDel[1] && uart2RxBuffer[i + 2] == startDel[2] && uart2RxBuffer[i + 3] == startDel[3])
-                        {
-                            // This is the start
-                            macPctStartFound = true;
-                            macPctSize = (uart2RxBuffer[i + 5] << 8)  +  uart2RxBuffer[i + 4];
-                            printDebug("UART MACRAW Size = %u\r\n", macPctSize);
-                            macPctStart_p = uart2RxBuffer + i + 6;
-                            uart2RxBufferOut = i + 6;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                    //wait for start
-                    }
-
-                }
-            }
-            
-            if(macPctStartFound == true)
-            {
-                if(uart2RxBufferIn - uart2RxBufferOut >= macPctSize)
-                {
-                    printDebug("UART MACRAW Sent\r\n", macPctSize);
-
-                    sendDataMACrawSocketDirect(macPctStart_p, macPctSize);
-                    
-                    if(uart2RxBufferIn - uart2RxBufferOut - macPctSize > 0)
-                    {
-                        memmove(uart2RxBuffer, macPctStart_p + macPctSize, uart2RxBufferIn - uart2RxBufferOut - macPctSize);
-                    }
-                    uart2RxBufferIn = uart2RxBufferIn - uart2RxBufferOut - macPctSize;
-                    
-                    macPctStartFound = false;
-                    uart2RxBufferOut = 0; 
-                            
-                }
-            }
-            // Find Size of IP Packet
-            
-            
-            rxRdy = UART4_Write(uartRxBuffer, rxRdy);
-        }
-        */
-                
-//        if(readNetworkInfo)
-//        {
-//            readNetworkInfo = false;
-//            printNetworkInfo();
-//        }
-       
+        dhcpServerMaintanance();
     }
 
     /* Execution should not come here during normal operation */

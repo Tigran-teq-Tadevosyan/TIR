@@ -6,8 +6,10 @@
 #define DHCP_SERVER_DEBUG_LEVEL0 // Sending to debug uart basic debugging data like assining new ip address
 //#define DHCP_SERVER_DEBUG_LEVEL1 // Sending to debug uart all debugging data like what packages where recieved, sent or rejected (including dumping content)
 
-#define DHCP_SERVER_MAX_CLIENTS 16
-#define DHCP_SERVER_DEFAULT_LEASE_TIME 120000 // 2 minutes in milliseconds
+#define DHCP_SERVER_MAX_CLIENTS (16)
+#define DHCP_SERVER_DEFAULT_LEASE_TIME 15000//(120000) // 2 minutes in milliseconds
+
+#define DHCP_SERVER_MAINTENANCE_PERIOD (2000) // 2 seconds in milliseconds
 
 extern const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MIN;
 extern const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MAX;
@@ -24,7 +26,7 @@ extern DhcpServerBinding clientBinding[DHCP_SERVER_MAX_CLIENTS];
 
 TIR_Status dhcpServerProcessPkt(const EthFrame *ethFrame, const uint16_t frame_len);
 
-void dhcpServerTick();
+void dhcpServerMaintanance(void);
 void dhcpServerParseDiscover(const DhcpMessage *message, size_t length);
 void dhcpServerParseRequest(const DhcpMessage *message, size_t length);
 void dhcpServerParseDecline(const DhcpMessage *message, size_t length);

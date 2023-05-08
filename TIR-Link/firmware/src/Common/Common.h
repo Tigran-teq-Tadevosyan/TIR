@@ -55,12 +55,13 @@ typedef enum {
     Failure = 1
 } TIR_Status;
 
-typedef uint32_t systime_t;
+typedef uint64_t systime_t;
 typedef uint32_t size_t;
 
 // Initializes the system timer
 void init_SysClock(void);
-systime_t get_SysTime(void); // Returns system time in microseconds
+systime_t get_SysTime_us(void); // Returns system time in microseconds
+systime_t get_SysTime_ms(void); // Returns system time in milliseconds
 
 void delay_us(systime_t us_to_wait);
 void delay_ms(systime_t ms);

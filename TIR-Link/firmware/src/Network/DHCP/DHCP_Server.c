@@ -14,6 +14,8 @@ Ipv4Addr DHCP_SERVER_NEXT_IPv4_ADDRESS = IPV4_ADDR(100, 100, 0, 2);
 
 DhcpServerBinding clientBinding[DHCP_SERVER_MAX_CLIENTS];
 
+systime_t last_maintenance_timestamp = 0;
+
 
 TIR_Status dhcpServerProcessPkt(const EthFrame *ethFrame, const uint16_t frame_len) {
     if(betoh16(ethFrame->type) != ETH_TYPE_IPV4) {
@@ -105,8 +107,6 @@ TIR_Status dhcpServerProcessPkt(const EthFrame *ethFrame, const uint16_t frame_l
         return Failure;
     }
 
-    dhcpServerTick();
-
     switch(dhcp_option->value[0])
     {
     case DHCP_MSG_TYPE_DISCOVER:
@@ -149,36 +149,45 @@ TIR_Status dhcpServerProcessPkt(const EthFrame *ethFrame, const uint16_t frame_l
     return Success;
 }
 
-void dhcpServerTick()
-{
-   systime_t time;
-   systime_t leaseTime = DHCP_SERVER_DEFAULT_LEASE_TIME;
-   DhcpServerBinding *binding;
+void dhcpServerMaintanance(void)
+{   
+    //Get current time
+    systime_t time = get_SysTime_ms();
+    
+    // We check if its time to perform maintenance
+    if(timeCompare(time , last_maintenance_timestamp) < DHCP_SERVER_MAINTENANCE_PERIOD) return;
+    last_maintenance_timestamp = time;
+//    #ifdef DHCP_SERVER_DEBUG_LEVEL1
+    printDebug("Performing maintenance\r\n");
+//    #endif
 
-   //Get current time
-   time = get_SysTime();
+    systime_t leaseTime = DHCP_SERVER_DEFAULT_LEASE_TIME;
+    DhcpServerBinding *binding;
 
-   //Loop through the list of bindings
-   for(uint16_t i = 0; i < DHCP_SERVER_MAX_CLIENTS; i++)
-   {
-      //Point to the current binding
-      binding = &clientBinding[i];
+    //Loop through the list of bindings
+    for(uint16_t i = 0; i < DHCP_SERVER_MAX_CLIENTS; i++)
+    {
+        //Point to the current binding
+        binding = &clientBinding[i];
 
-      //Valid binding?
-      if(!macCompAddr(&binding->macAddr, &MAC_UNSPECIFIED_ADDR))
-      {
-         //Check whether the network address has been committed
-         if(binding->validLease)
-         {
-            //Check whether the lease has expired
-            if(timeCompare(time, binding->timestamp + leaseTime) >= 0)
+        //Valid binding?
+        if(!macCompAddr(&binding->macAddr, &MAC_UNSPECIFIED_ADDR))
+        {
+            //Check whether the network address has been committed
+            if(binding->validLease)
             {
-               //The address lease is not more valid
-               binding->validLease = 0;
+                //Check whether the lease has expired
+                if(timeCompare(time, binding->timestamp + leaseTime) >= 0)
+                {
+                    #ifdef DHCP_SERVER_DEBUG_LEVEL0
+                    printDebug("Removed IP on maintenance: %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
+                    #endif
+                    //The address lease is not more valid
+                    binding->validLease = 0;
+                }
             }
-         }
-      }
-   }
+        }
+    }
 }
 
 void dhcpServerParseDiscover(const DhcpMessage *message, size_t length)
@@ -229,7 +238,7 @@ void dhcpServerParseDiscover(const DhcpMessage *message, size_t length)
                 //Record IP address
                 binding->ipAddr = requestedIpAddr;
                 //Get current time
-                binding->timestamp = get_SysTime();
+                binding->timestamp = get_SysTime_ms();
              }
           }
        }
@@ -275,7 +284,7 @@ void dhcpServerParseDiscover(const DhcpMessage *message, size_t length)
              //Record MAC address
              binding->macAddr = message->chaddr;
              //Get current time
-             binding->timestamp = get_SysTime();
+             binding->timestamp = get_SysTime_ms();
           }
        }
        else
@@ -349,7 +358,7 @@ void dhcpServerParseRequest(const DhcpMessage *message, size_t length)
             //Commit network address
             binding->validLease = 1;
             //Save lease start time
-            binding->timestamp = get_SysTime();
+            binding->timestamp = get_SysTime_ms();
 
             #ifdef DHCP_SERVER_DEBUG_LEVEL0
             printDebug("Acknowledged requested IP: %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
@@ -385,7 +394,7 @@ void dhcpServerParseRequest(const DhcpMessage *message, size_t length)
                   //Commit network address
                   binding->validLease = 1;
                   //Get current time
-                  binding->timestamp = get_SysTime();
+                  binding->timestamp = get_SysTime_ms();
                   
                   #ifdef DHCP_SERVER_DEBUG_LEVEL0
                   printDebug("Assigned new IP from request:  %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
@@ -540,7 +549,7 @@ DhcpServerBinding *dhcpServerCreateBinding()
    DhcpServerBinding *oldestBinding;
 
    //Get current time
-   time = get_SysTime();
+   time = get_SysTime_ms();
 
    //Keep track of the oldest binding
    oldestBinding = NULL;

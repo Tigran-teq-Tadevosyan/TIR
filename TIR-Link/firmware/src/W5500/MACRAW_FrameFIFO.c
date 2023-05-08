@@ -65,7 +65,7 @@ EthFrame* reserveItem_TxFIFO(uint16_t frame_length) {
     if(txFIFO[txFIFOTailIndex] == NULL) {printDebug("Failed to allocate memory in 'reserveItem_TxFIFO'\r\n"); while(true);}
     
     txFIFOItemLengths[txFIFOTailIndex] = frame_length;
-    return txFIFO[txFIFOTailIndex];
+    return txFIFO[txFIFOTailIndex]; 
 }
 
 
@@ -89,6 +89,7 @@ void removeHead_TxFIFO(void) {
     txFIFO[txFIFOHeadIndex] = NULL;
     txFIFOItemLengths[txFIFOHeadIndex] = 0;
     txFIFOHeadIndex = (txFIFOHeadIndex + 1)%MAX_MACRAW_FRAMEFIFO_SIZE;
+    
 }
 
 bool isEmpty_TxFIFO(void) {

@@ -22,8 +22,12 @@ void init_SysClock() {
     TMR1_Start();
 }
 
-systime_t get_SysTime(void) { 
+systime_t get_SysTime_us(void) { 
     return system_tick_us;
+}
+
+systime_t get_SysTime_ms(void) {
+    return system_tick_us/1000;
 }
 
 void delay_us(systime_t us_to_wait)
