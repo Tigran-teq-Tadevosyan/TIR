@@ -56,7 +56,7 @@ typedef enum {
 } TIR_Status;
 
 typedef uint64_t systime_t;
-typedef uint32_t size_t;
+//typedef uint32_t size_t;
 
 // Initializes the system timer
 void init_SysClock(void);

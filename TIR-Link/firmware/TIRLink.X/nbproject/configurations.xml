@@ -45,6 +45,10 @@
         </logicalFolder>
       </logicalFolder>
     </logicalFolder>
+    <logicalFolder name="f4" displayName="InterLink" projectFiles="true">
+      <itemPath>../src/InterLink/Interlink.c</itemPath>
+      <itemPath>../src/InterLink/Interlink.h</itemPath>
+    </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
@@ -149,6 +153,7 @@
     <Elem>../src/Common</Elem>
     <Elem>../src/Networking</Elem>
     <Elem>../src/Network</Elem>
+    <Elem>../src/InterLink</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>

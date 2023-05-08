@@ -153,14 +153,6 @@
 #define SW_3_InterruptEnable()   (CNENHSET = (1U<<12))
 #define SW_3_InterruptDisable()  (CNENHCLR = (1U<<12))
 
-/*** Macros for System_I2C1_SDA pin ***/
-#define System_I2C1_SDA_Get()               ((PORTA >> 15) & 0x1U)
-#define System_I2C1_SDA_PIN                  GPIO_PIN_RA15
-
-/*** Macros for System_I2C1_SCL pin ***/
-#define System_I2C1_SCL_Get()               ((PORTA >> 14) & 0x1U)
-#define System_I2C1_SCL_PIN                  GPIO_PIN_RA14
-
 /*** Macros for W5500_CS pin ***/
 #define W5500_CS_Set()               (LATBSET = (1U<<0))
 #define W5500_CS_Clear()             (LATBCLR = (1U<<0))

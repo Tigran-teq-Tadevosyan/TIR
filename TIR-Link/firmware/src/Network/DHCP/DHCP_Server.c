@@ -16,7 +16,6 @@ DhcpServerBinding clientBinding[DHCP_SERVER_MAX_CLIENTS];
 
 systime_t last_maintenance_timestamp = 0;
 
-
 TIR_Status dhcpServerProcessPkt(const EthFrame *ethFrame, const uint16_t frame_len) {
     if(betoh16(ethFrame->type) != ETH_TYPE_IPV4) {
         #ifdef DHCP_SERVER_DEBUG_LEVEL1
@@ -61,7 +60,7 @@ TIR_Status dhcpServerProcessPkt(const EthFrame *ethFrame, const uint16_t frame_l
     }
 
     // (ip_header->headerLength * 4) is the length of IPv4 packet
-    // again we multipy it by 4 (32 bit), as the length is given in word length
+    // again we multiply it by 4 (32 bit), as the length is given in word length
     UdpHeader *upd_header = (UdpHeader *) ((uint8_t*)ip_header + (ip_header->headerLength * 4));
 
     if(betoh16(upd_header->destPort) != DHCP_SERVER_PORT || betoh16(upd_header->srcPort) != DHCP_CLIENT_PORT) {
@@ -157,9 +156,9 @@ void dhcpServerMaintanance(void)
     // We check if its time to perform maintenance
     if(timeCompare(time , last_maintenance_timestamp) < DHCP_SERVER_MAINTENANCE_PERIOD) return;
     last_maintenance_timestamp = time;
-//    #ifdef DHCP_SERVER_DEBUG_LEVEL1
+    #ifdef DHCP_SERVER_DEBUG_LEVEL1
     printDebug("Performing maintenance\r\n");
-//    #endif
+    #endif
 
     systime_t leaseTime = DHCP_SERVER_DEFAULT_LEASE_TIME;
     DhcpServerBinding *binding;

@@ -17,8 +17,6 @@
 
 #include "Network/Network.h"
 #include "Network/DHCP/DHCP_Server.h"
-//#include "Network/DHCP/DHCP.h"
-//#include "Network/DHCP/DHCP_Debug.h"
 #include "MACRAW_FrameFIFO.h"
 
 #define MACRAW_SOCKET   0 // The socket number for MACRAW socket (only socket 0 can operate in MACRAW mode)
@@ -39,7 +37,6 @@ const uint8_t MACRAW_SOCKET_INT_MASK =  SIK_RECEIVED |  // Socket data receive i
 
 TIR_Status init_MACRAWSocket(void);
 void process_W5500Int();
-
 
 // Callback handler functions for wizchip internal use
 void  wizchip_select(void);
@@ -79,7 +76,7 @@ void init_W5500(void)
 	}
 
     wizchip_setnetinfo((wiz_NetInfo*)&DEFAULT_NETWORK_CONFIG);
-    printDebug("\r\n\r\n\r\nWIZCHIP Initialized\r\n");
+    printDebug("WIZCHIP Initialized\r\n");
     printNetworkInfo();
     
     init_MACRAWSocket();
@@ -126,9 +123,7 @@ void process_W5500 (void)
     if(W5500_INT_Get() == 0) {
         LED_BB_Toggle();
         process_W5500Int();
-    }
-    
-    if(!W5500_CURRENTLY_SENDING && !isEmpty_TxFIFO()) {
+    } else if(!W5500_CURRENTLY_SENDING && !isEmpty_TxFIFO()) {
         W5500_CURRENTLY_SENDING = true;
         uint16_t frame_length;
         EthFrame* frame = peekHead_TxFIFO(&frame_length);
@@ -158,6 +153,8 @@ void process_W5500Int() {
 
     ctlwizchip(CW_GET_INTERRUPT, &W5500_int);
     ctlsocket(MACRAW_SOCKET, CS_GET_INTERRUPT, &socket_int);
+    
+    ctlsocket(MACRAW_SOCKET, CS_CLR_INTERRUPT, (void *)&MACRAW_SOCKET_INT_MASK);
     
     if(socket_int & SIK_CONNECTED) { } // Currently not used 
     if(socket_int & SIK_DISCONNECTED) { } // Currently not used 
@@ -198,38 +195,24 @@ void process_W5500Int() {
 
     if(socket_int & SIK_SENT) {
         W5500_CURRENTLY_SENDING = false;
-        if(!isEmpty_TxFIFO()) {
-            W5500_CURRENTLY_SENDING = true;
-            uint16_t frame_length;
-            EthFrame* frame = peekHead_TxFIFO(&frame_length);
-            
-            wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
-            setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
-            while(getSn_CR(MACRAW_SOCKET));
-            
-            removeHead_TxFIFO();
-        }
     }
+    
+    if(!isEmpty_TxFIFO() && !W5500_CURRENTLY_SENDING) {
+        W5500_CURRENTLY_SENDING = true;
+        uint16_t frame_length;
+        EthFrame* frame = peekHead_TxFIFO(&frame_length);
 
-    if(socket_int & SIK_SENT) { W5500_CURRENTLY_SENDING = false; } 
-    ctlsocket(MACRAW_SOCKET, CS_CLR_INTERRUPT, (void *)&MACRAW_SOCKET_INT_MASK);
+        wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
+        setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
+        while(getSn_CR(MACRAW_SOCKET));
+
+        removeHead_TxFIFO();
+    }
     
     // Would only be called if we have chip interrupts not related to sockets, so we clear that interrupts.
     if(W5500_INT_MASK & 0x00FF) {
         ctlwizchip(CW_CLR_INTERRUPT, (void*)&W5500_INT_MASK );
     }
-}
-
-void send_pkt(void) {
-    EthFrame* frame = reserveItem_TxFIFO(ETH_HEADER_SIZE + 2);
-    
-    memcpy(&frame->destAddr, &MAC_BROADCAST_ADDR, 6);
-    memcpy(&frame->srcAddr, &HOST_MAC_ADDR, 6);
-    frame->type = htobe16(0xF322);
-    frame->data[0] = 4;
-    frame->data[1] = 4;
-    
-    incremetTailIndex_TxFIFO();
 }
 
 // Callback handler functions for wizchip internal use
