@@ -10,6 +10,14 @@
 /TIR-Link/firmware/TIRLink.X/nbproject/*.bash
 /TIR-Link/firmware/TIRLink.X/nbproject/Makefile-genesis.properties
 
+/TIR-RF/.metadata
+/TIR-RF/.jxbrowser.userdata
+/TIR-RF/RemoteSystemsTempFiles
+/TIR-RF/TIR-RF/Debug
+/TIR-RF/dvt
+/TIR-RF/TIR-RF/.launches
+
+
 # MCC specific
 *mc3.bak*
 
