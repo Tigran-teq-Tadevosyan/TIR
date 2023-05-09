@@ -44,4 +44,4 @@ extern const MacAddr MAC_BROADCAST_ADDR;
 char *macAddrToString(const MacAddr *macAddr, char *str);
 void ethDumpHeader(const EthFrame *EthFrame);
 
-#endif
+#endif // _ETHERNET_H

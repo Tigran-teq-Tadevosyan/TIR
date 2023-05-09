@@ -45,7 +45,13 @@ void printDebugArray(const char *prepend, const void *data, uint32_t length) {
 
 static void UartRxEventHandler(UART_EVENT event, uintptr_t contextHandle) {  
     (void)contextHandle;
-    if(event == UART_EVENT_READ_THRESHOLD_REACHED) {;
+    if(event == UART_EVENT_READ_THRESHOLD_REACHED) {
         // No use currently
+        size_t len = UART4_ReadCountGet();
+        uint8_t *buff = malloc(len);
+        UART4_Read(buff, len);
+        UART2_Write(buff, len);
+        
+        free(buff);
     }
 }

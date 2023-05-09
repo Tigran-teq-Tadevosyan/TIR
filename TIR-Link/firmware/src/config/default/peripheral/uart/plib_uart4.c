@@ -49,15 +49,15 @@
 
 UART_RING_BUFFER_OBJECT uart4Obj;
 
-#define UART4_READ_BUFFER_SIZE      1024
-#define UART4_READ_BUFFER_SIZE_9BIT (1024 >> 1)
+#define UART4_READ_BUFFER_SIZE      256
+#define UART4_READ_BUFFER_SIZE_9BIT (256 >> 1)
 #define UART4_RX_INT_DISABLE()      IEC5CLR = _IEC5_U4RXIE_MASK;
 #define UART4_RX_INT_ENABLE()       IEC5SET = _IEC5_U4RXIE_MASK;
 
 static uint8_t UART4_ReadBuffer[UART4_READ_BUFFER_SIZE];
 
-#define UART4_WRITE_BUFFER_SIZE     1024
-#define UART4_WRITE_BUFFER_SIZE_9BIT       (1024 >> 1)
+#define UART4_WRITE_BUFFER_SIZE     256
+#define UART4_WRITE_BUFFER_SIZE_9BIT       (256 >> 1)
 #define UART4_TX_INT_DISABLE()      IEC5CLR = _IEC5_U4TXIE_MASK;
 #define UART4_TX_INT_ENABLE()       IEC5SET = _IEC5_U4TXIE_MASK;
 
@@ -104,7 +104,7 @@ void UART4_Initialize( void )
     /* Set up UxMODE bits */
     /* STSEL  = 0*/
     /* PDSEL = 0 */
-    /* BRGH = 1 */
+    /* BRGH = 0 */
     /* RXINV = 0 */
     /* ABAUD = 0 */
     /* LPBACK = 0 */
@@ -113,13 +113,13 @@ void UART4_Initialize( void )
     /* RUNOVF = 0 */
     /* CLKSEL = 0 */
     /* SLPEN = 0 */
-    U4MODE = 0x8;
+    U4MODE = 0x0;
 
     /* Enable UART4 Receiver, Transmitter and TX Interrupt selection */
     U4STASET = (_U4STA_UTXEN_MASK | _U4STA_URXEN_MASK | _U4STA_UTXISEL1_MASK );
 
     /* BAUD Rate register Setup */
-    U4BRG = 216;
+    U4BRG = 53;
 
     IEC5CLR = _IEC5_U4TXIE_MASK;
 
@@ -167,7 +167,7 @@ bool UART4_SerialSetup( UART_SERIAL_SETUP *setup, uint32_t srcClkFreq )
     bool status = false;
     uint32_t baud;
     uint32_t status_ctrl;
-    uint8_t brgh = 1;
+    uint8_t brgh = 0;
     int32_t uxbrg = 0;
 
     if (setup != NULL)

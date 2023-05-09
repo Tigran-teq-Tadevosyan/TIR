@@ -55,13 +55,13 @@ void EVIC_Initialize( void )
     INTCONSET = _INTCON_MVEC_MASK;
 
     /* Set up priority and subpriority of enabled interrupts */
-    IPC1SET = 0x1c | 0x0;  /* TIMER_1:  Priority 7 / Subpriority 0 */
-    IPC27SET = 0x1c0000 | 0x0;  /* SPI1_RX:  Priority 7 / Subpriority 0 */
-    IPC27SET = 0x1c000000 | 0x0;  /* SPI1_TX:  Priority 7 / Subpriority 0 */
-    IPC29SET = 0xc000000 | 0x0;  /* CHANGE_NOTICE_B:  Priority 3 / Subpriority 0 */
-    IPC30SET = 0xc | 0x0;  /* CHANGE_NOTICE_C:  Priority 3 / Subpriority 0 */
-    IPC31SET = 0xc | 0x0;  /* CHANGE_NOTICE_G:  Priority 3 / Subpriority 0 */
-    IPC31SET = 0xc00 | 0x0;  /* CHANGE_NOTICE_H:  Priority 3 / Subpriority 0 */
+    IPC1SET = 0x4 | 0x0;  /* TIMER_1:  Priority 1 / Subpriority 0 */
+    IPC27SET = 0x40000 | 0x0;  /* SPI1_RX:  Priority 1 / Subpriority 0 */
+    IPC27SET = 0x4000000 | 0x0;  /* SPI1_TX:  Priority 1 / Subpriority 0 */
+    IPC29SET = 0x4000000 | 0x0;  /* CHANGE_NOTICE_B:  Priority 1 / Subpriority 0 */
+    IPC30SET = 0x4 | 0x0;  /* CHANGE_NOTICE_C:  Priority 1 / Subpriority 0 */
+    IPC31SET = 0x4 | 0x0;  /* CHANGE_NOTICE_G:  Priority 1 / Subpriority 0 */
+    IPC31SET = 0x400 | 0x0;  /* CHANGE_NOTICE_H:  Priority 1 / Subpriority 0 */
     IPC36SET = 0x400 | 0x0;  /* UART2_FAULT:  Priority 1 / Subpriority 0 */
     IPC36SET = 0x40000 | 0x0;  /* UART2_RX:  Priority 1 / Subpriority 0 */
     IPC36SET = 0x4000000 | 0x0;  /* UART2_TX:  Priority 1 / Subpriority 0 */

@@ -16,6 +16,7 @@
                 <sourceRootElem>../src/Common</sourceRootElem>
                 <sourceRootElem>../src/Networking</sourceRootElem>
                 <sourceRootElem>../src/Network</sourceRootElem>
+                <sourceRootElem>../src/InterLink</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

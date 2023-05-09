@@ -77,37 +77,37 @@ void UART4_TX_InterruptHandler( void );
 
 
 /* All the handlers are defined here.  Each will call its PLIB-specific function. */
-void __ISR(_TIMER_1_VECTOR, ipl7SRS) TIMER_1_Handler (void)
+void __ISR(_TIMER_1_VECTOR, ipl1SRS) TIMER_1_Handler (void)
 {
     TIMER_1_InterruptHandler();
 }
 
-void __ISR(_SPI1_RX_VECTOR, ipl7SRS) SPI1_RX_Handler (void)
+void __ISR(_SPI1_RX_VECTOR, ipl1SRS) SPI1_RX_Handler (void)
 {
     SPI1_RX_InterruptHandler();
 }
 
-void __ISR(_SPI1_TX_VECTOR, ipl7SRS) SPI1_TX_Handler (void)
+void __ISR(_SPI1_TX_VECTOR, ipl1SRS) SPI1_TX_Handler (void)
 {
     SPI1_TX_InterruptHandler();
 }
 
-void __ISR(_CHANGE_NOTICE_B_VECTOR, ipl3SRS) CHANGE_NOTICE_B_Handler (void)
+void __ISR(_CHANGE_NOTICE_B_VECTOR, ipl1SRS) CHANGE_NOTICE_B_Handler (void)
 {
     CHANGE_NOTICE_B_InterruptHandler();
 }
 
-void __ISR(_CHANGE_NOTICE_C_VECTOR, ipl3SRS) CHANGE_NOTICE_C_Handler (void)
+void __ISR(_CHANGE_NOTICE_C_VECTOR, ipl1SRS) CHANGE_NOTICE_C_Handler (void)
 {
     CHANGE_NOTICE_C_InterruptHandler();
 }
 
-void __ISR(_CHANGE_NOTICE_G_VECTOR, ipl3SRS) CHANGE_NOTICE_G_Handler (void)
+void __ISR(_CHANGE_NOTICE_G_VECTOR, ipl1SRS) CHANGE_NOTICE_G_Handler (void)
 {
     CHANGE_NOTICE_G_InterruptHandler();
 }
 
-void __ISR(_CHANGE_NOTICE_H_VECTOR, ipl3SRS) CHANGE_NOTICE_H_Handler (void)
+void __ISR(_CHANGE_NOTICE_H_VECTOR, ipl1SRS) CHANGE_NOTICE_H_Handler (void)
 {
     CHANGE_NOTICE_H_InterruptHandler();
 }

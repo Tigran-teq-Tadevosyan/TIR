@@ -14,8 +14,6 @@ typedef enum
 void init_W5500(void);
 void process_W5500 (void);
 
-void send_pkt(void);
-
 // Definitions in W5500_Debug.c
 void printNetworkInfo (void);
 

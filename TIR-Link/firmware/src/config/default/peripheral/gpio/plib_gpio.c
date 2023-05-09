@@ -65,10 +65,10 @@ void GPIO_Initialize ( void )
 
     /* PORTA Initialization */
     /* PORTB Initialization */
-    LATB = 0x1U; /* Initial Latch Value */
+    LATB = 0x0U; /* Initial Latch Value */
     TRISBCLR = 0x3U; /* Direction Control */
     ANSELBCLR = 0x2d27U; /* Digital Mode Enable */
-    CNPUBSET = 0x2801U; /* Pull-Up Enable */
+    CNPUBSET = 0x2800U; /* Pull-Up Enable */
 
     /* Change Notice Enable */
     CNCONBSET = _CNCONB_ON_MASK;
@@ -116,13 +116,13 @@ void GPIO_Initialize ( void )
     CFGCONbits.IOLOCK = 0U;
 
     /* PPS Input Remapping */
-    U4RXR = 1;
     SDI1R = 8;
+    U4RXR = 1;
     U2RXR = 2;
 
     /* PPS Output Remapping */
-    RPF12R = 2;
     RPB10R = 5;
+    RPF12R = 2;
     RPB2R = 2;
 
         /* Lock back the system after PPS configuration */
