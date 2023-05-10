@@ -16,11 +16,17 @@
             <logicalFolder name="clk" displayName="clk" projectFiles="true">
               <itemPath>../src/config/default/peripheral/clk/plib_clk.h</itemPath>
             </logicalFolder>
+            <logicalFolder name="coretimer" displayName="coretimer" projectFiles="true">
+              <itemPath>../src/config/default/peripheral/coretimer/plib_coretimer.h</itemPath>
+            </logicalFolder>
             <logicalFolder name="evic" displayName="evic" projectFiles="true">
               <itemPath>../src/config/default/peripheral/evic/plib_evic.h</itemPath>
             </logicalFolder>
             <logicalFolder name="gpio" displayName="gpio" projectFiles="true">
               <itemPath>../src/config/default/peripheral/gpio/plib_gpio.h</itemPath>
+            </logicalFolder>
+            <logicalFolder name="rng" displayName="rng" projectFiles="true">
+              <itemPath>../src/config/default/peripheral/rng/plib_rng.h</itemPath>
             </logicalFolder>
             <logicalFolder name="spi" displayName="spi" projectFiles="true">
               <logicalFolder name="spi_master" displayName="spi_master" projectFiles="true">
@@ -48,6 +54,10 @@
     <logicalFolder name="f4" displayName="InterLink" projectFiles="true">
       <itemPath>../src/InterLink/Interlink.c</itemPath>
       <itemPath>../src/InterLink/Interlink.h</itemPath>
+      <itemPath>../src/InterLink/Interlink_Handshake.c</itemPath>
+      <itemPath>../src/InterLink/Interlink_Handshake.h</itemPath>
+      <itemPath>../src/InterLink/Interlink_Forwarding.c</itemPath>
+      <itemPath>../src/InterLink/Interlink_Forwarding.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -85,11 +95,17 @@
             <logicalFolder name="clk" displayName="clk" projectFiles="true">
               <itemPath>../src/config/default/peripheral/clk/plib_clk.c</itemPath>
             </logicalFolder>
+            <logicalFolder name="coretimer" displayName="coretimer" projectFiles="true">
+              <itemPath>../src/config/default/peripheral/coretimer/plib_coretimer.c</itemPath>
+            </logicalFolder>
             <logicalFolder name="evic" displayName="evic" projectFiles="true">
               <itemPath>../src/config/default/peripheral/evic/plib_evic.c</itemPath>
             </logicalFolder>
             <logicalFolder name="gpio" displayName="gpio" projectFiles="true">
               <itemPath>../src/config/default/peripheral/gpio/plib_gpio.c</itemPath>
+            </logicalFolder>
+            <logicalFolder name="rng" displayName="rng" projectFiles="true">
+              <itemPath>../src/config/default/peripheral/rng/plib_rng.c</itemPath>
             </logicalFolder>
             <logicalFolder name="spi" displayName="spi" projectFiles="true">
               <logicalFolder name="spi_master" displayName="spi_master" projectFiles="true">
@@ -201,6 +217,7 @@
       <C32>
         <property key="additional-warnings" value="true"/>
         <property key="addresss-attribute-use" value="false"/>
+        <property key="appendMe" value=""/>
         <property key="enable-app-io" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-symbols" value="true"/>
@@ -257,6 +274,7 @@
         <property key="additional-options-use-response-files" value="false"/>
         <property key="additional-options-write-sla" value="false"/>
         <property key="allocate-dinit" value="false"/>
+        <property key="appendMe" value=""/>
         <property key="code-dinit" value="false"/>
         <property key="ebase-addr" value=""/>
         <property key="enable-check-sections" value="false"/>
@@ -296,6 +314,7 @@
       <C32CPP>
         <property key="additional-warnings" value="false"/>
         <property key="addresss-attribute-use" value="false"/>
+        <property key="appendMe" value=""/>
         <property key="check-new" value="false"/>
         <property key="eh-specs" value="true"/>
         <property key="enable-app-io" value="false"/>
@@ -1494,6 +1513,8 @@
                   value="${memories.instruction.ram.ranges}"/>
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="1d000000-1d1fffff"/>
+        <property key="programmerToGoFilePath"
+                  value="E:/RedFeather/Projects/TTTHDRCD/PIC/Projects/Test/firmware/TestSoftware.X/debug/default/TestSoftware_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.pgmentry.voltage" value="low"/>

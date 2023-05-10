@@ -3,6 +3,7 @@
 #include <stdlib.h>                     // Defines EXIT_FAILURE
 #include <stdio.h>
 #include <stdarg.h>
+#include <time.h>
 
 #include "definitions.h"                // SYS function prototypes
 
@@ -15,6 +16,8 @@ systime_t system_tick_us;
 systime_t delay_tick_us;
 
 void init_SysClock() {
+    srand(time(NULL));
+    
     system_tick_us = 0;
     delay_tick_us = 0;
             
@@ -49,4 +52,8 @@ static void sysTimerTick(uint32_t status, uintptr_t contextHandle)
 {
     system_tick_us++;
     delay_tick_us++;
+}
+
+uint16_t getRandNumber(uint16_t min, uint16_t max) {
+    return rand() % (max - min) + min;
 }

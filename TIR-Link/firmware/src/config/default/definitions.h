@@ -48,8 +48,10 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include "peripheral/coretimer/plib_coretimer.h"
 #include "peripheral/uart/plib_uart4.h"
 #include "peripheral/uart/plib_uart2.h"
+#include "peripheral/rng/plib_rng.h"
 #include "peripheral/clk/plib_clk.h"
 #include "peripheral/gpio/plib_gpio.h"
 #include "peripheral/evic/plib_evic.h"

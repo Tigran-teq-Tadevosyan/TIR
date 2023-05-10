@@ -54,26 +54,26 @@ void  wizchip_critExit(void);
 void init_W5500(void)
 {   
     // Reseting the W5500
-	W5500_CS_Set();
+    W5500_CS_Set();
     W5500_RESET_Clear();
     delay_ms(W5500_ENTER_RESET_DELAY);
-	W5500_RESET_Set();
+    W5500_RESET_Set();
     delay_ms(W5500_EXIT_RESET_DELAY);
     
     // Setting the callback handler functions
     reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);
-	reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write);
+    reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write);
     reg_wizchip_spiburst_cbfunc(wizchip_readBurst, wizchip_writeBurst);
     reg_wizchip_cris_cbfunc(wizchip_critEnter, wizchip_critExit);
   
 //    GPIO_PinInterruptCallbackRegister(W5500_INT_PIN, W5500IntEventHandler, NO_CONTEXT);
 //    GPIO_PinIntEnable(W5500_INT_PIN, GPIO_INTERRUPT_ON_BOTH_EDGES);
     
-	/* Setting wizchip sockets memory layout */
-	if (ctlwizchip(CW_INIT_WIZCHIP, (void*) SOCKET_MEM_LAYOUT) == -1) {
-		printDebug("WIZCHIP Initialized fail.\r\n");
-    	while (1);
-	}
+    /* Setting wizchip sockets memory layout */
+    if (ctlwizchip(CW_INIT_WIZCHIP, (void*) SOCKET_MEM_LAYOUT) == -1) {
+        printDebug("WIZCHIP Initialized fail.\r\n");
+        while (1);
+    }
 
     wizchip_setnetinfo((wiz_NetInfo*)&DEFAULT_NETWORK_CONFIG);
     printDebug("WIZCHIP Initialized\r\n");
@@ -92,7 +92,7 @@ TIR_Status init_MACRAWSocket(void) {
                                             MACRAW_SOCKET,  // MACROW socket number
                                             Sn_MR_MACRAW,   // Socket protocol
                                             0x00,           // No need for port number in MACRAW mode
-                                            Sn_MR_MIP6B | Sn_MR_MULTI // Flags for blocking IPv6 and enabling MAC filtering
+                                            Sn_MR_MIP6B // | Sn_MR_MULTI // Flags for blocking IPv6 and enabling MAC filtering
                                         );
 
     if(status_socket_created != MACRAW_SOCKET) { // Checking if the sockets was successfully created
@@ -135,10 +135,12 @@ void process_W5500 (void)
         removeHead_TxFIFO();
     }
     
-    if(!isEmpty_RxFIFO()) {
+    while(!isEmpty_RxFIFO()) {
         uint16_t new_frame_len;
         EthFrame *new_frame = peekHead_RxFIFO(&new_frame_len);
-        dhcpServerProcessPkt(new_frame, (uint32_t)new_frame_len);
+        if(dhcpServerRunning()) {
+            dhcpServerProcessPkt(new_frame, (uint32_t)new_frame_len);
+        }
         removeHead_RxFIFO();
     }
 }

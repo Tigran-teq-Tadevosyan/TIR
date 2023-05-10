@@ -66,4 +66,6 @@ systime_t get_SysTime_ms(void); // Returns system time in milliseconds
 void delay_us(systime_t us_to_wait);
 void delay_ms(systime_t ms);
 
+uint16_t getRandNumber(uint16_t min, uint16_t max);
+
 #endif

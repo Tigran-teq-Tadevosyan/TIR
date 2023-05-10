@@ -3,20 +3,54 @@
 #include <stdlib.h>
 #include <endian.h>
 
-#include "../../Common/Debug.h"
 #include "DHCP_Debug.h"
-#include "../../W5500/MACRAW_FrameFIFO.h"
+#include "Common/Debug.h"
+#include "W5500/MACRAW_FrameFIFO.h"
+#include "InterLink/Interlink.h" 
+#include "InterLink/Interlink_Forwarding.h"
 
-const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MIN = IPV4_ADDR(100, 100, 0, 2);
-const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MAX = IPV4_ADDR(100, 100, 0, 250);
+Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MIN;
+Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MAX;
 
-Ipv4Addr DHCP_SERVER_NEXT_IPv4_ADDRESS = IPV4_ADDR(100, 100, 0, 2);
+Ipv4Addr DHCP_SERVER_NEXT_IPv4_ADDRESS;
 
 DhcpServerBinding clientBinding[DHCP_SERVER_MAX_CLIENTS];
+DhcpServerBinding pairServerClientBinding[DHCP_SERVER_MAX_CLIENTS];
 
 systime_t last_maintenance_timestamp = 0;
 
+static bool __dhcpServerRunning = false;
+
+static void dhcpServerParseDiscover(const DhcpMessage *message, size_t length);
+static void dhcpServerParseRequest(const DhcpMessage *message, size_t length);
+static void dhcpServerParseDecline(const DhcpMessage *message, size_t length);
+static void dhcpServerParseRelease(const DhcpMessage *message, size_t length);
+static void dhcpServerParseInform(const DhcpMessage *message, size_t length);
+
+TIR_Status dhcpServerStart(void) {
+    const InterlinkHostRole selfLinkRole = get_SelfLinkRole();
+    if(__dhcpServerRunning) return Failure;
+    
+    if(selfLinkRole == DHCP_SERVER1) {
+        DHCP_SERVER_IPv4_ADDRESS_MIN = DHCP_SERVER1_IPv4_ADDRESS_MIN;
+        DHCP_SERVER_IPv4_ADDRESS_MIN = DHCP_SERVER1_IPv4_ADDRESS_MAX;
+        DHCP_SERVER_NEXT_IPv4_ADDRESS = DHCP_SERVER1_IPv4_ADDRESS_MIN;
+    } else if(selfLinkRole == DHCP_SERVER2) {
+        DHCP_SERVER_IPv4_ADDRESS_MIN = DHCP_SERVER2_IPv4_ADDRESS_MIN;
+        DHCP_SERVER_IPv4_ADDRESS_MIN = DHCP_SERVER2_IPv4_ADDRESS_MAX;
+        DHCP_SERVER_NEXT_IPv4_ADDRESS = DHCP_SERVER2_IPv4_ADDRESS_MIN;
+    } else { return Failure; }
+    
+    __dhcpServerRunning = true;
+    return Success;
+}
+
+bool dhcpServerRunning(void) {
+    return __dhcpServerRunning;
+}
+
 TIR_Status dhcpServerProcessPkt(const EthFrame *ethFrame, const uint16_t frame_len) {
+    if(!dhcpServerRunning()) return Failure;
     if(betoh16(ethFrame->type) != ETH_TYPE_IPV4) {
         #ifdef DHCP_SERVER_DEBUG_LEVEL1
         printf("-> Non IPv4 internet layer package, ignoring!\n");
@@ -148,8 +182,9 @@ TIR_Status dhcpServerProcessPkt(const EthFrame *ethFrame, const uint16_t frame_l
     return Success;
 }
 
-void dhcpServerMaintanance(void)
-{   
+void dhcpServerMaintanance(void) {   
+    if(!dhcpServerRunning()) return;
+    
     //Get current time
     systime_t time = get_SysTime_ms();
     
@@ -181,6 +216,10 @@ void dhcpServerMaintanance(void)
                     #ifdef DHCP_SERVER_DEBUG_LEVEL0
                     printDebug("Removed IP on maintenance: %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
                     #endif
+
+                    // We also notify the pair server about removal
+                    send_RemoveForwardingEntry(binding);
+                    
                     //The address lease is not more valid
                     binding->validLease = 0;
                 }
@@ -358,10 +397,13 @@ void dhcpServerParseRequest(const DhcpMessage *message, size_t length)
             binding->validLease = 1;
             //Save lease start time
             binding->timestamp = get_SysTime_ms();
-
+            
             #ifdef DHCP_SERVER_DEBUG_LEVEL0
             printDebug("Acknowledged requested IP: %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
             #endif
+            
+            // As we send an acknowledgment we also notify the pair server about addition
+            send_AddForwardingEntry(binding);
             
             //The server responds with a DHCPACK message containing the
             //configuration parameters for the requesting client
@@ -399,6 +441,9 @@ void dhcpServerParseRequest(const DhcpMessage *message, size_t length)
                   printDebug("Assigned new IP from request:  %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
                   #endif
 
+                    // As we assign a new IP address we also notify the pair server about addition
+                    send_AddForwardingEntry(binding);
+                    
                   //The server responds with a DHCPACK message containing the
                   //configuration parameters for the requesting client
                   dhcpServerSendReply(DHCP_MSG_TYPE_ACK, binding->ipAddr, message, length);
@@ -412,7 +457,7 @@ void dhcpServerParseRequest(const DhcpMessage *message, size_t length)
    }
 
     #ifdef DHCP_SERVER_DEBUG_LEVEL0
-    printDebug("Failed to satisfy request.");
+    printDebug("Failed to satisfy request.\r\n");
     #endif
    //If the server is unable to satisfy the DHCPREQUEST message, the
    //server should respond with a DHCPNAK message
@@ -446,6 +491,9 @@ void dhcpServerParseDecline(const DhcpMessage *message, size_t length)
             #ifdef DHCP_SERVER_DEBUG_LEVEL0
             printDebug("Removed binding from decline for IP:  %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
             #endif
+
+            // We also notify the pair server about removal
+            send_RemoveForwardingEntry(binding);
              
             //Remote the binding from the list
             memset(binding, 0, sizeof(DhcpServerBinding));
@@ -472,6 +520,9 @@ void dhcpServerParseRelease(const DhcpMessage *message, size_t length)
         printDebug("Released:  %s\r\n", ipv4AddrToString(binding->ipAddr, NULL));
         #endif
           
+        // We also notify the pair server about removal
+        send_RemoveForwardingEntry(binding);
+                    
          //Release the network address and cancel remaining lease
          binding->validLease = 0;
       }
