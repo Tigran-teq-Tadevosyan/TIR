@@ -14,7 +14,8 @@ typedef enum {
     HANDSHAKE_OFFER		= 0x02,
     HANDSHAKE_ACK		= 0x03,
     FORWARDING_TABLE_ADDITION	= 0x04,
-    FORWARDING_TABLE_REMOVAL	= 0x05
+    FORWARDING_TABLE_REMOVAL	= 0x05,
+    FORWARDING_REQUEST		= 0x06
 } InterlinkMessageType;
 
 void init_Interlink(void);

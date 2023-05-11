@@ -16,13 +16,33 @@ uint16_t    rxFIFOHeadIndex = 0,
             txFIFOHeadIndex = 0, 
             txFIFOTailIndex = 0;
 
+// For debuging purposes
+static void printBothQueueSpaces(void) {
+    size_t  rxSpace = 0,
+            txSpace = 0;
+    
+    for(int i = 0; i < MAX_MACRAW_FRAMEFIFO_SIZE; ++i) {
+        rxSpace += rxFIFOItemLengths[i];
+        txSpace += txFIFOItemLengths[i];
+    }
+    
+    printDebug("Rx space used: %u\r\n", rxSpace);
+    printDebug("tx space used: %u\r\n", txSpace);
+}
+
+
+
 // RX SECTION
 EthFrame* reserveItem_RxFIFO(uint16_t frame_length) {
     if(rxFIFO[rxFIFOTailIndex] != NULL) 
         free(rxFIFO[rxFIFOTailIndex]);
     
     rxFIFO[rxFIFOTailIndex] = malloc(frame_length); 
-    if(rxFIFO[rxFIFOTailIndex] == NULL) {printDebug("Failed to allocate memory in 'reserveItem_RxFIFO'\r\n"); while(true);}
+    if(rxFIFO[rxFIFOTailIndex] == NULL) {
+        printBothQueueSpaces();
+        printDebug("Failed to allocate memory in 'reserveItem_RxFIFO'\r\n"); 
+        while(true);
+    }
     
     rxFIFOItemLengths[rxFIFOTailIndex] = frame_length;
     return rxFIFO[rxFIFOTailIndex];
@@ -61,7 +81,11 @@ EthFrame* reserveItem_TxFIFO(uint16_t frame_length) {
         free(txFIFO[txFIFOTailIndex]);
     
     txFIFO[txFIFOTailIndex] = malloc(frame_length); 
-    if(txFIFO[txFIFOTailIndex] == NULL) {printDebug("Failed to allocate memory in 'reserveItem_TxFIFO'\r\n"); while(true);}
+    if(txFIFO[txFIFOTailIndex] == NULL) {
+        printBothQueueSpaces();
+        printDebug("Failed to allocate memory in 'reserveItem_TxFIFO'\r\n");
+        while(true);
+    }
         
     txFIFOItemLengths[txFIFOTailIndex] = frame_length;
     return txFIFO[txFIFOTailIndex]; 

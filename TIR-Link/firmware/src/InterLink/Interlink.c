@@ -85,8 +85,12 @@ void send_InterLink(InterlinkMessageType messageType, uint8_t *payload, uint16_t
     UART2_Write((uint8_t*)START_DELIMITER, START_DELIMITER_LENGTH);
     UART2_Write((uint8_t*)&payload_len, PAYLOAD_LEN_ENTRY_SIZE);
     UART2_Write(&_messageType, MESSAGE_TYPE_LENGTH);
-    if(payload_len > 0)
-        UART2_Write((uint8_t*)payload, payload_len);
+    if(payload_len > 0) {
+        size_t written_size = UART2_Write((uint8_t*)payload, payload_len);
+        if(written_size != payload_len) {
+            printDebug("UART2 buffer overflow, written %u of %u \r\n", written_size, payload_len);
+        }
+    }
 }
 
 void process_Interlink(void) {
@@ -135,15 +139,37 @@ void process_Interlink(void) {
   
     uint8_t messageType;
     memmove(&messageType, rxBuffer + rxBufferReadIndex + START_DELIMITER_LENGTH + PAYLOAD_LEN_ENTRY_SIZE, MESSAGE_TYPE_LENGTH);
+        
+    if(payload_len > 2500) {
+        printDebug("Droped payload with length: %u \r\n", payload_len);
+        rxBufferReadIndex = 0; rxBufferWriteIndex = 0;
+        rxDelimiterFound = false;
+//        rxBufferReadIndex = (rxBufferReadIndex + INTERLINK_HEADER_LENGTH + payload_len)%INTERLINK_READ_BUFFER_LENGTH;
+//        rxDelimiterFound = false;
+        return;
+    }
     
     if(payload_len > (rxDataLen - INTERLINK_HEADER_LENGTH)) return; // The payload is yet not fully available
 
     uint8_t *payload = NULL;
     
+    
+    if(payload_len > 1000) {
+        printDebug("Droped payload with length: %u \r\n", payload_len);
+        rxBufferReadIndex = (rxBufferReadIndex + INTERLINK_HEADER_LENGTH + payload_len)%INTERLINK_READ_BUFFER_LENGTH;
+        rxDelimiterFound = false;
+        return;
+    }
+    
 //    printDebug("Payload Length: %u\r\n", payload_len);
 //    printDebug("Message Type: %x\r\n", (uint8_t)messageType);
     if(payload_len > 0) {
         payload = malloc(payload_len);
+        if(payload == NULL) {
+            printDebug("Failed to allocate memory in 'process_Interlink'\r\n"); 
+            while(true);
+        }
+        
         rxExtractPayload(payload, payload_len);
         
 //        printDebug("Payload: ");
@@ -162,9 +188,12 @@ void process_Interlink(void) {
         process_AddForwardingEntry((ForwardingBinding*)payload);
     } else if(messageType == (uint8_t)FORWARDING_TABLE_REMOVAL) {
         process_RemoveForwardingEntry((ForwardingBinding*)payload);
+    } else if(messageType == (uint8_t)FORWARDING_REQUEST) {
+        process_ForwardingRequest((EthFrame*)payload, payload_len);
     }
     
     rxBufferReadIndex = (rxBufferReadIndex + INTERLINK_HEADER_LENGTH + payload_len)%INTERLINK_READ_BUFFER_LENGTH;
     rxDelimiterFound = false;
-    free(payload);
+    
+    if(payload != NULL) free(payload);
 }

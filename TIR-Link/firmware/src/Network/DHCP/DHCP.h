@@ -177,6 +177,8 @@ typedef enum
    DHCP_OPT_END                          = 255
 } DhcpOptionCode;
 
+bool valid_dhcpPkt(EthFrame *frame, uint16_t frame_length);
+
 DhcpOption *dhcpGetOption(const DhcpMessage *message, size_t length, uint8_t optionCode);
 TIR_Status dhcpAddOption(DhcpMessage *message, size_t *messageLen, uint8_t optionCode, const void *optionValue, size_t optionLen);
 

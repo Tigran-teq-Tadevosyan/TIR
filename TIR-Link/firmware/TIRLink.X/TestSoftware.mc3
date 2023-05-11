@@ -3085,7 +3085,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;XC32_HEAP_SIZE&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;User dnOrder=&quot;0&quot; value=&quot;12000&quot;/&gt;
+      &lt;User dnOrder=&quot;0&quot; value=&quot;20000&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -3902,7 +3902,7 @@
       &lt;/Boolean&gt;
     &lt;/Attributes&gt;
     &lt;Values dnOrder=&quot;1&quot;&gt;
-      &lt;User dnOrder=&quot;0&quot; value=&quot;2000&quot;/&gt;
+      &lt;User dnOrder=&quot;0&quot; value=&quot;4000&quot;/&gt;
     &lt;/Values&gt;
   &lt;/uart2&gt;
 &lt;/uart2&gt;
@@ -3931,7 +3931,7 @@
       &lt;/Boolean&gt;
     &lt;/Attributes&gt;
     &lt;Values dnOrder=&quot;1&quot;&gt;
-      &lt;User dnOrder=&quot;0&quot; value=&quot;2000&quot;/&gt;
+      &lt;User dnOrder=&quot;0&quot; value=&quot;4000&quot;/&gt;
     &lt;/Values&gt;
   &lt;/uart2&gt;
 &lt;/uart2&gt;
@@ -4027,7 +4027,7 @@
       &lt;/Boolean&gt;
     &lt;/Attributes&gt;
     &lt;Values dnOrder=&quot;1&quot;&gt;
-      &lt;User dnOrder=&quot;0&quot; value=&quot;256&quot;/&gt;
+      &lt;User dnOrder=&quot;0&quot; value=&quot;2000&quot;/&gt;
     &lt;/Values&gt;
   &lt;/uart4&gt;
 &lt;/uart4&gt;
@@ -4056,7 +4056,7 @@
       &lt;/Boolean&gt;
     &lt;/Attributes&gt;
     &lt;Values dnOrder=&quot;1&quot;&gt;
-      &lt;User dnOrder=&quot;0&quot; value=&quot;256&quot;/&gt;
+      &lt;User dnOrder=&quot;0&quot; value=&quot;2000&quot;/&gt;
     &lt;/Values&gt;
   &lt;/uart4&gt;
 &lt;/uart4&gt;
@@ -4105,7 +4105,7 @@
       </entry>
       <entry>
          <file>../src/config/default/peripheral/uart/plib_uart2.c</file>
-         <hash>98a78573185445cbb96827fc9f86fc1bca25a5ee04fed1c2dc6cad561f26748a</hash>
+         <hash>560e1afa6854fa4abff74d259fd03d78177326a0caa3587b3b6617cf73a862a9</hash>
       </entry>
       <entry>
          <file>../src/config/default/peripheral/tmr1/plib_tmr1.h</file>
@@ -4185,7 +4185,7 @@
       </entry>
       <entry>
          <file>../src/config/default/peripheral/uart/plib_uart4.c</file>
-         <hash>2cc8ef4f6035dffb802b11006dd037c0186bca3c623a684ebe452d41fb5e8ffb</hash>
+         <hash>756d483c3bee20999d1532d520a1246589720ab909e0c0109fae6c09e81f421d</hash>
       </entry>
       <entry>
          <file>../src/config/default/peripheral/clk/plib_clk.c</file>

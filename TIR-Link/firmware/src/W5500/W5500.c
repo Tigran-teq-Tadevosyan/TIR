@@ -16,6 +16,7 @@
 #include "Common/Debug.h"
 
 #include "Network/Network.h"
+#include "InterLink/Interlink_Forwarding.h"
 #include "Network/DHCP/DHCP_Server.h"
 #include "MACRAW_FrameFIFO.h"
 
@@ -118,8 +119,7 @@ TIR_Status init_MACRAWSocket(void) {
     return Success;
 }
 
-void process_W5500 (void)
-{
+void process_W5500 (void) {
     if(W5500_INT_Get() == 0) {
         LED_BB_Toggle();
         process_W5500Int();
@@ -138,9 +138,15 @@ void process_W5500 (void)
     while(!isEmpty_RxFIFO()) {
         uint16_t new_frame_len;
         EthFrame *new_frame = peekHead_RxFIFO(&new_frame_len);
+        
         if(dhcpServerRunning()) {
-            dhcpServerProcessPkt(new_frame, (uint32_t)new_frame_len);
+            if(valid_dhcpPkt(new_frame, new_frame_len)) {
+                dhcpServerProcessPkt(new_frame, (uint32_t)new_frame_len);
+            } else { // We only try to forward if it is not a dhcp pkt
+                interlink_ForwardIfAppropriate(new_frame, new_frame_len);
+            }
         }
+        
         removeHead_RxFIFO();
     }
 }

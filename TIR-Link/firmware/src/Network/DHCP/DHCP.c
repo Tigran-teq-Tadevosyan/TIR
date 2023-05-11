@@ -1,5 +1,37 @@
 #include "DHCP.h"
 
+bool valid_dhcpPkt(EthFrame *frame, uint16_t frame_length) {
+    if(betoh16(frame->type) != ETH_TYPE_IPV4) {
+        return false;
+    }
+
+    size_t ip_packet_length = frame_length - sizeof(EthFrame);
+    Ipv4Header *ip_header = (Ipv4Header *) frame->data;
+
+    if(ip_header->version != IPV4_VERSION) {
+        return false;
+    } else if(ip_packet_length < sizeof(Ipv4Header)) {
+        return false;
+    } else if(ip_header->headerLength < 5) {
+        return false;
+    } else if(betoh16(ip_header->totalLength) < (ip_header->headerLength * 4)) {
+        return false;
+    } else if(isFragmentedPacket(ip_header)) {
+        return false;
+    } else if(ip_header->protocol != IPV4_PROTOCOL_UDP) {
+        return false;
+    }
+
+    // (ip_header->headerLength * 4) is the length of IPv4 packet
+    // again we multiply it by 4 (32 bit), as the length is given in word length
+    UdpHeader *upd_header = (UdpHeader *) ((uint8_t*)ip_header + (ip_header->headerLength * 4));
+
+    if(betoh16(upd_header->destPort) != DHCP_SERVER_PORT || betoh16(upd_header->srcPort) != DHCP_CLIENT_PORT) {
+        return false;
+    }
+    
+    return true;
+}
 DhcpOption *dhcpGetOption(const DhcpMessage *message, size_t length, uint8_t optionCode)
 {
    size_t i;

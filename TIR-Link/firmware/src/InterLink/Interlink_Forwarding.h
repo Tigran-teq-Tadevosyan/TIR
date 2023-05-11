@@ -11,7 +11,10 @@ typedef struct {
 void send_AddForwardingEntry(DhcpServerBinding *binding);
 void send_RemoveForwardingEntry(DhcpServerBinding *binding);
 
+void interlink_ForwardIfAppropriate(EthFrame *frame, uint16_t frame_length);
+
 void process_AddForwardingEntry(ForwardingBinding *fBinding);
 void process_RemoveForwardingEntry(ForwardingBinding *fBinding);
+void process_ForwardingRequest(EthFrame* frame, uint16_t frame_length);
 
 #endif // _INTERLINK_DHCP_H
