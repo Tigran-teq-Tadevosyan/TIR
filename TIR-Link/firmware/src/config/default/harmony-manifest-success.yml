@@ -4,8 +4,8 @@
 
 
 project: TIR-Link
-creation_date: 2023-05-11T17:01:48.150+04:00[Asia/Yerevan]    # ISO 8601 format: https://www.w3.org/TR/NOTE-datetime
-operating_system: Linux
+creation_date: 2023-05-11T22:19:20.589+04:00[Asia/Yerevan]    # ISO 8601 format: https://www.w3.org/TR/NOTE-datetime
+operating_system: Windows 10
 mcc_mode: IDE            # [IDE|Standalone|Headless]
 mcc_version: v5.3.0
 mcc_core_version: v5.5.0

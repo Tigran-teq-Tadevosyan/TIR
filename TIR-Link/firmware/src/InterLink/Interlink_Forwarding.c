@@ -17,7 +17,7 @@ ForwardingListEntry *FORWARDING_LIST_HEAD = NULL;
 size_t              FORWARDING_LIST_LENGTH = 0;
 
 static ForwardingListEntry* findEntry(ForwardingBinding *fBinding);
-static bool ipAddrPresent(Ipv4Addr *ipAddr);
+static bool ipAddrPresent(Ipv4Addr ipAddr);
 static bool macAddrPresent(MacAddr *macAddr);
 
 void send_AddForwardingEntry(DhcpServerBinding *binding) {
@@ -96,7 +96,7 @@ void process_RemoveForwardingEntry(ForwardingBinding *fBinding) {
 }
 
 void process_ForwardingRequest(EthFrame* frame, uint16_t frame_length) {
-    printDebug("Forwarding processing to -> Mac %s;\r\n", macAddrToString(&frame->destAddr, NULL));
+//    printDebug("Forwarding processing to -> Mac %s;\r\n", macAddrToString(&frame->destAddr, NULL));
   
 //    if(betoh16(frame->type) != ETH_TYPE_IPV4) return;
     
@@ -116,8 +116,8 @@ void interlink_ForwardIfAppropriate(EthFrame *frame, uint16_t frame_length) {
     
     // First we check based on destination MAC address, if it is broadcast or in forwarding table we forward it
     if(macCompAddr(&frame->destAddr, &MAC_BROADCAST_ADDR) || macAddrPresent(&frame->destAddr)) {
-        printDebug("Forwarding req to -> Mac %s;\r\n",
-                macAddrToString(&frame->destAddr, NULL));    
+//        printDebug("Forwarding req to -> Mac %s;\r\n",
+//                macAddrToString(&frame->destAddr, NULL));    
         send_InterLink(FORWARDING_REQUEST, (uint8_t*)frame, frame_length);
         return;
     }
@@ -126,7 +126,7 @@ void interlink_ForwardIfAppropriate(EthFrame *frame, uint16_t frame_length) {
     if(betoh16(frame->type) == ETH_TYPE_IPV4) {
         Ipv4Header *ip_header = (Ipv4Header *) frame->data;
         
-        if(ip_header->destAddr == IPV4_BROADCAST_ADDR || ipAddrPresent(&ip_header->destAddr)) {  
+        if(ip_header->destAddr == IPV4_BROADCAST_ADDR || ipAddrPresent(ip_header->destAddr)) {  
             printDebug("Forwarding req to -> Mac %s; IP: %s\r\n",
                     macAddrToString(&frame->destAddr, NULL),  
                     ipv4AddrToString(ip_header->destAddr, NULL));
@@ -149,11 +149,11 @@ static ForwardingListEntry* findEntry(ForwardingBinding *fBinding) {
     return NULL;
 }
 
-static bool ipAddrPresent(Ipv4Addr *ipAddr) {
+static bool ipAddrPresent(Ipv4Addr ipAddr) {
     ForwardingListEntry* current = FORWARDING_LIST_HEAD;
     
     while(current != NULL) {
-        if(current->binding.ipAddr == *ipAddr) return true;
+        if(current->binding.ipAddr == ipAddr) return true;
         
         current = current->next;
     }

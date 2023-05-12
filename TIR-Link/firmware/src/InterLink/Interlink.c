@@ -12,7 +12,7 @@
 
 // Link communication related definition section
 
-#define INTERLINK_READ_BUFFER_LENGTH (3200) // in bytes 
+#define INTERLINK_READ_BUFFER_LENGTH (10000) // in bytes 
 
 #define START_DELIMITER_LENGTH  (4)
 #define PAYLOAD_LEN_ENTRY_SIZE  (2)
@@ -45,7 +45,7 @@ static void UART2RxEventHandler(UART_EVENT event, uintptr_t contextHandle) {
     if(event == UART_EVENT_READ_THRESHOLD_REACHED) {
         size_t read_len = UART2_ReadCountGet();
         if(read_len > 0) {
-            if(read_len < (INTERLINK_READ_BUFFER_LENGTH - 1 - rxBufferWriteIndex)) {
+            if(read_len < (INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex)) {
                 UART2_Read( rxBuffer + rxBufferWriteIndex,
                             read_len);
             } else {
@@ -62,9 +62,8 @@ static void UART2RxEventHandler(UART_EVENT event, uintptr_t contextHandle) {
 }
 
 static size_t rxDataLength(void) {
-    return  (rxBufferWriteIndex >= rxBufferReadIndex) ?
-            (rxBufferWriteIndex - rxBufferReadIndex) :
-            (((INTERLINK_READ_BUFFER_LENGTH - 1) - rxBufferReadIndex) + rxBufferWriteIndex);
+
+    return (INTERLINK_READ_BUFFER_LENGTH + rxBufferWriteIndex - rxBufferReadIndex) % INTERLINK_READ_BUFFER_LENGTH;
 }
 
 static void rxExtractPayload(uint8_t *buffer, uint16_t length) {
@@ -139,28 +138,11 @@ void process_Interlink(void) {
   
     uint8_t messageType;
     memmove(&messageType, rxBuffer + rxBufferReadIndex + START_DELIMITER_LENGTH + PAYLOAD_LEN_ENTRY_SIZE, MESSAGE_TYPE_LENGTH);
-        
-    if(payload_len > 2500) {
-        printDebug("Droped payload with length: %u \r\n", payload_len);
-        rxBufferReadIndex = 0; rxBufferWriteIndex = 0;
-        rxDelimiterFound = false;
-//        rxBufferReadIndex = (rxBufferReadIndex + INTERLINK_HEADER_LENGTH + payload_len)%INTERLINK_READ_BUFFER_LENGTH;
-//        rxDelimiterFound = false;
-        return;
-    }
     
     if(payload_len > (rxDataLen - INTERLINK_HEADER_LENGTH)) return; // The payload is yet not fully available
 
     uint8_t *payload = NULL;
-    
-    
-    if(payload_len > 1000) {
-        printDebug("Droped payload with length: %u \r\n", payload_len);
-        rxBufferReadIndex = (rxBufferReadIndex + INTERLINK_HEADER_LENGTH + payload_len)%INTERLINK_READ_BUFFER_LENGTH;
-        rxDelimiterFound = false;
-        return;
-    }
-    
+
 //    printDebug("Payload Length: %u\r\n", payload_len);
 //    printDebug("Message Type: %x\r\n", (uint8_t)messageType);
     if(payload_len > 0) {

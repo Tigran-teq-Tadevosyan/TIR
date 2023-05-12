@@ -40,8 +40,12 @@ EthFrame* reserveItem_RxFIFO(uint16_t frame_length) {
     rxFIFO[rxFIFOTailIndex] = malloc(frame_length); 
     if(rxFIFO[rxFIFOTailIndex] == NULL) {
         printBothQueueSpaces();
-        printDebug("Failed to allocate memory in 'reserveItem_RxFIFO'\r\n"); 
+        printDebug("Failed to allocate memory in 'reserveItem_RxFIFO' %u\r\n", frame_length); 
         while(true);
+    }
+    else
+    {
+//        printDebug("Reserved Memory in 'reserveItem_RxFIFO' %u\r\n", frame_length); 
     }
     
     rxFIFOItemLengths[rxFIFOTailIndex] = frame_length;
@@ -78,7 +82,11 @@ bool isEmpty_RxFIFO(void) {
 
 EthFrame* reserveItem_TxFIFO(uint16_t frame_length) {
     if(txFIFO[txFIFOTailIndex] != NULL) 
+    {
+        printDebug("TXFIFO Overflow\r\n");
         free(txFIFO[txFIFOTailIndex]);
+    }
+    
     
     txFIFO[txFIFOTailIndex] = malloc(frame_length); 
     if(txFIFO[txFIFOTailIndex] == NULL) {
