@@ -101,7 +101,7 @@ void process_Interlink(void) {
         read_UART2();
     }
 
-    if(!rxNewDataAvailable || rxDataLength() < (INTERLINK_HEADER_LENGTH)) return;
+    if((!rxNewDataAvailable && rxDelimiterFound == true) || rxDataLength() < (INTERLINK_HEADER_LENGTH)) return;
     rxNewDataAvailable = false;
 
     if(!rxDelimiterFound) {
@@ -116,6 +116,7 @@ void process_Interlink(void) {
         }
 
         if(delimBDC == START_DELIMITER_LENGTH) rxDelimiterFound = true;
+        else return;
     }
 
     size_t rxDataLen = rxDataLength();
@@ -123,13 +124,19 @@ void process_Interlink(void) {
 
     uint16_t payload_len;
     memmove(&payload_len, rxBuffer + rxBufferReadIndex + START_DELIMITER_LENGTH, PAYLOAD_LEN_ENTRY_SIZE);
-
+    
+    if(payload_len > 1514)
+        rxBufferReadIndex = (rxBufferReadIndex + START_DELIMITER_LENGTH )%INTERLINK_READ_BUFFER_LENGTH;
+    
     uint8_t messageType;
     memmove(&messageType, rxBuffer + rxBufferReadIndex + START_DELIMITER_LENGTH + PAYLOAD_LEN_ENTRY_SIZE, MESSAGE_TYPE_LENGTH);
+    
+
+    
     if(payload_len > (rxDataLen - INTERLINK_HEADER_LENGTH)) return; // The payload is yet not fully available
 
     uint8_t *payload = NULL;
-//    printDebug("Payload Length: %u\r\n", payload_len);
+    
 //    printDebug("Message Type: %x\r\n", (uint8_t)messageType);
     if(payload_len > 0) {
         payload = malloc(payload_len);
@@ -144,7 +151,7 @@ void process_Interlink(void) {
 //        UART4_Write(payload, payload_len);
 //        printDebug("\r\n");
     }
-    
+
     rxBufferReadIndex = (rxBufferReadIndex + INTERLINK_HEADER_LENGTH + payload_len)%INTERLINK_READ_BUFFER_LENGTH;
     rxDelimiterFound = false;
 
