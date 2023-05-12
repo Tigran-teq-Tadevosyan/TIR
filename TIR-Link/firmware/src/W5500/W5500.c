@@ -1,15 +1,15 @@
 #include "W5500.h"
 
-#include <stddef.h>                     
-#include <stdbool.h>                    
-#include <stdlib.h>                     
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include <stdio.h>
-#include "definitions.h"                
+#include "definitions.h"
 #include <string.h>
 #include <endian.h>
 
 #include "./driver/Ethernet/W5500/w5500.h"
-#include "./driver/Ethernet/wizchip_conf.h"   
+#include "./driver/Ethernet/wizchip_conf.h"
 #include "./driver/Ethernet/socket.h"
 
 #include "Common/Common.h"
@@ -53,23 +53,23 @@ void  wizchip_critExit(void);
 #define W5500_EXIT_RESET_DELAY  (200)   // in miliseconds
 
 void init_W5500(void)
-{   
+{
     // Reseting the W5500
     W5500_CS_Set();
     W5500_RESET_Clear();
     delay_ms(W5500_ENTER_RESET_DELAY);
     W5500_RESET_Set();
     delay_ms(W5500_EXIT_RESET_DELAY);
-    
+
     // Setting the callback handler functions
     reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);
     reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write);
     reg_wizchip_spiburst_cbfunc(wizchip_readBurst, wizchip_writeBurst);
     reg_wizchip_cris_cbfunc(wizchip_critEnter, wizchip_critExit);
-  
+
 //    GPIO_PinInterruptCallbackRegister(W5500_INT_PIN, W5500IntEventHandler, NO_CONTEXT);
 //    GPIO_PinIntEnable(W5500_INT_PIN, GPIO_INTERRUPT_ON_BOTH_EDGES);
-    
+
     /* Setting wizchip sockets memory layout */
     if (ctlwizchip(CW_INIT_WIZCHIP, (void*) SOCKET_MEM_LAYOUT) == -1) {
         printDebug("WIZCHIP Initialized fail.\r\n");
@@ -79,7 +79,7 @@ void init_W5500(void)
     wizchip_setnetinfo((wiz_NetInfo*)&DEFAULT_NETWORK_CONFIG);
     printDebug("WIZCHIP Initialized\r\n");
     printNetworkInfo();
-    
+
     init_MACRAWSocket();
 }
 
@@ -110,12 +110,12 @@ TIR_Status init_MACRAWSocket(void) {
                 return Failure;
             }
         }
-        printDebug("MACRAW Socket created, connecting...\r\n");    
+        printDebug("MACRAW Socket created, connecting...\r\n");
     }
-                           
+
     ctlwizchip(CW_SET_INTRMASK, (void *)&W5500_INT_MASK);
     ctlsocket(MACRAW_SOCKET, CS_SET_INTMASK, (void *)&MACRAW_SOCKET_INT_MASK);
-    
+
     return Success;
 }
 
@@ -131,14 +131,14 @@ void process_W5500 (void) {
         wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
         setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
         while(getSn_CR(MACRAW_SOCKET));
-        
+
         removeHead_TxFIFO();
     }
-    
+
     while(!isEmpty_RxFIFO()) {
         uint16_t new_frame_len;
         EthFrame *new_frame = peekHead_RxFIFO(&new_frame_len);
-        
+
         if(dhcpServerRunning()) {
             if(valid_dhcpPkt(new_frame, new_frame_len)) {
                 dhcpServerProcessPkt(new_frame, (uint32_t)new_frame_len);
@@ -146,7 +146,7 @@ void process_W5500 (void) {
                 interlink_ForwardIfAppropriate(new_frame, new_frame_len);
             }
         }
-        
+
         removeHead_RxFIFO();
     }
 }
@@ -154,61 +154,57 @@ void process_W5500 (void) {
 
 #define W5500_LENGTH_SECTION_LENGTH (2)
 
-void process_W5500Int() {    
+void process_W5500Int() {
     if(W5500_INT_Get() == 1) return; // Check for falling edge (as we use active low)
-    
+
     uint16_t W5500_int;
     uint8_t socket_int;
 
     ctlwizchip(CW_GET_INTERRUPT, &W5500_int);
     ctlsocket(MACRAW_SOCKET, CS_GET_INTERRUPT, &socket_int);
-    
+
     ctlsocket(MACRAW_SOCKET, CS_CLR_INTERRUPT, (void *)&MACRAW_SOCKET_INT_MASK);
-    
-    if(socket_int & SIK_CONNECTED) { } // Currently not used 
-    if(socket_int & SIK_DISCONNECTED) { } // Currently not used 
+
+    if(socket_int & SIK_CONNECTED) { } // Currently not used
+    if(socket_int & SIK_DISCONNECTED) { } // Currently not used
 
     if(socket_int & SIK_RECEIVED) {
         uint16_t rx_buffer_length = getSn_RX_RSR(MACRAW_SOCKET);
-        
         while(rx_buffer_length >= W5500_LENGTH_SECTION_LENGTH) {
-            uint16_t rx_buffer_pkt_length;    
-            
+            uint16_t rx_buffer_pkt_length;
+
             // Reading the length of current packet we want to read
             wiz_recv_peek_data(MACRAW_SOCKET, (uint8_t*)&rx_buffer_pkt_length, W5500_LENGTH_SECTION_LENGTH);
             rx_buffer_pkt_length = be16toh(rx_buffer_pkt_length) - W5500_LENGTH_SECTION_LENGTH;
-            
-            printDebug("Read %u\r\n",rx_buffer_pkt_length);
-                
-            if(rx_buffer_pkt_length > 2000)
-            {
-                wiz_recv_ignore(MACRAW_SOCKET, rx_buffer_length); 
+
+            printDebug("Read pkt %u \r\n", rx_buffer_pkt_length);
+
+            if(rx_buffer_pkt_length > 2000){
+                printDebug("Killing buffer \r\n");
+
+                wiz_recv_ignore(MACRAW_SOCKET, rx_buffer_length);
+
                 setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
-                while(getSn_SR(MACRAW_SOCKET) != SOCK_MACRAW);        
+                while(getSn_SR(MACRAW_SOCKET) != SOCK_MACRAW);
 
-                break;
+  +             break;
             }
-            else
-            {
-                // We read only in case the whole packet is currently available
-                if(rx_buffer_pkt_length <= (rx_buffer_length - W5500_LENGTH_SECTION_LENGTH)) {
 
+            // We read only in case the whole packet is currently available
+            if(rx_buffer_pkt_length <= (rx_buffer_length - W5500_LENGTH_SECTION_LENGTH)) {
+                // We ignore this 2 bytes for the read pointer to go over packet size, so we can read the frame itself
+                wiz_recv_ignore(MACRAW_SOCKET, W5500_LENGTH_SECTION_LENGTH);
+                setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
+                while(getSn_SR(MACRAW_SOCKET) != SOCK_MACRAW);
 
-                    // We ignore this 2 bytes for the read pointer to go over packet size, so we can read the frame itself 
-                    wiz_recv_ignore(MACRAW_SOCKET, W5500_LENGTH_SECTION_LENGTH); 
-                    setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
-                    while(getSn_SR(MACRAW_SOCKET) != SOCK_MACRAW);        
+                EthFrame* read_buffer = reserveItem_RxFIFO(rx_buffer_pkt_length);
+                wiz_recv_data(MACRAW_SOCKET, (uint8_t*)read_buffer, rx_buffer_pkt_length);
+                incremetTailIndex_RxFIFO();
 
-                    EthFrame* read_buffer = reserveItem_RxFIFO(rx_buffer_pkt_length);
-                    wiz_recv_data(MACRAW_SOCKET, (uint8_t*)read_buffer, rx_buffer_pkt_length);
-                    incremetTailIndex_RxFIFO();
+                setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
+                while(getSn_SR(MACRAW_SOCKET) != SOCK_MACRAW);
 
-                    setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
-                    while(getSn_SR(MACRAW_SOCKET) != SOCK_MACRAW);
-
-
-                    rx_buffer_length = getSn_RX_RSR(MACRAW_SOCKET);
-                }
+                rx_buffer_length = getSn_RX_RSR(MACRAW_SOCKET);
             }
         }
     }
@@ -216,7 +212,7 @@ void process_W5500Int() {
     if(socket_int & SIK_SENT) {
         W5500_CURRENTLY_SENDING = false;
     }
-    
+
     if(!isEmpty_TxFIFO() && !W5500_CURRENTLY_SENDING) {
         W5500_CURRENTLY_SENDING = true;
         uint16_t frame_length;
@@ -228,12 +224,12 @@ void process_W5500Int() {
 
         removeHead_TxFIFO();
     }
-    
+
     // Would only be called if we have chip interrupts not related to sockets, so we clear that interrupts.
     if(W5500_INT_MASK & 0x00FF) {
         ctlwizchip(CW_CLR_INTERRUPT, (void*)&W5500_INT_MASK );
     }
-}
+}/
 
 // Callback handler functions for wizchip internal use
 void  wizchip_select(void) { W5500_CS_Clear(); }
