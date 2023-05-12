@@ -10,8 +10,7 @@
 #include "Interlink_Forwarding.h"
 #include "Network/DHCP/DHCP_Server.h"
 
-// Link communication related definition section
-
+#define UART2_TIMEOUT_US (10000)
 #define INTERLINK_READ_BUFFER_LENGTH (10000) // in bytes
 
 #define START_DELIMITER_LENGTH  (4)
@@ -35,29 +34,34 @@ void init_Interlink(void) {
     // Setting up UART2: Connected to pair board
     UART2_ReadCallbackRegister(UART2RxEventHandler, NO_CONTEXT);
     UART2_ReadNotificationEnable(true, true);
-    UART2_ReadThresholdSet(0);
+    UART2_ReadThresholdSet(20);
 
     init_InterlinkHandshake();
+}
+
+static void read_UART2() {
+    size_t read_len = UART2_ReadCountGet();
+    if(read_len > 0) {
+        if(read_len < (INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex)) {
+            UART2_Read( rxBuffer + rxBufferWriteIndex,
+                        read_len);
+        } else {
+            UART2_Read( rxBuffer + rxBufferWriteIndex,
+                        INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex);
+            UART2_Read( rxBuffer,
+                        read_len - (INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex));
+        }
+
+        rxBufferWriteIndex = (rxBufferWriteIndex + read_len)%INTERLINK_READ_BUFFER_LENGTH;
+        rxNewDataAvailable = true;
+    }
 }
 
 static void UART2RxEventHandler(UART_EVENT event, uintptr_t contextHandle) {
     (void)contextHandle;
     if(event == UART_EVENT_READ_THRESHOLD_REACHED) {
-        size_t read_len = UART2_ReadCountGet();
-        if(read_len > 0) {
-            if(read_len < (INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex)) {
-                UART2_Read( rxBuffer + rxBufferWriteIndex,
-                            read_len);
-            } else {
-                UART2_Read( rxBuffer + rxBufferWriteIndex,
-                            INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex);
-                UART2_Read( rxBuffer,
-                            read_len - (INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex));
-            }
-
-            rxBufferWriteIndex = (rxBufferWriteIndex + read_len)%INTERLINK_READ_BUFFER_LENGTH;
-            rxNewDataAvailable = true;
-        }
+        UART2_timeout_us = 0;
+        read_UART2();
     }
 }
 
@@ -69,7 +73,7 @@ static void rxExtractPayload(uint8_t *buffer, uint16_t length) {
     size_t  payload_start_index = (rxBufferReadIndex + INTERLINK_HEADER_LENGTH)%INTERLINK_READ_BUFFER_LENGTH,
             payload_end_index = (payload_start_index + length)%INTERLINK_READ_BUFFER_LENGTH;
 
-    if(payload_end_index > payload_start_index) {
+    if(payload_end_index >= payload_start_index) {
         memmove(buffer, rxBuffer + payload_start_index, length);
     } else {
         memmove(buffer, rxBuffer + payload_start_index, INTERLINK_READ_BUFFER_LENGTH - payload_start_index);
@@ -93,43 +97,28 @@ void send_InterLink(InterlinkMessageType messageType, uint8_t *payload, uint16_t
 
 void process_Interlink(void) {
     process_InterlinkHandshake();
-
-    if(!rxNewDataAvailable || rxDataLength() < (INTERLINK_HEADER_LENGTH)) return;
-
-    rxNewDataAvailable = false;
-    size_t rxDataLen;
-
-    if(!rxDelimiterFound) {
-        size_t      rxDataLen = rxDataLength();
-        uint16_t    dataByteNum = 1,
-                    delimiterBytesFoundCount = 0;
-        size_t      currentByteIndex = rxBufferReadIndex;
-        while(dataByteNum <= rxDataLen) {
-            if(rxBuffer[currentByteIndex] == START_DELIMITER[delimiterBytesFoundCount]) {
-                if(++delimiterBytesFoundCount == START_DELIMITER_LENGTH) break;
-            }
-
-            ++dataByteNum;
-            currentByteIndex = (currentByteIndex + 1)%INTERLINK_READ_BUFFER_LENGTH;
-        }
-
-        // No delimiter yet so we skip everything before it
-        if(delimiterBytesFoundCount == 0) {
-            rxBufferReadIndex = currentByteIndex;
-            return;
-        }
-        if(delimiterBytesFoundCount < START_DELIMITER_LENGTH) return; // We have not found the delimiter
-
-        // If we have found the delimiter, we move 'rxBufferReadIndex' to the start of the delimiter as anything before it is useless
-        rxBufferReadIndex = currentByteIndex - (START_DELIMITER_LENGTH - 1);
-
-        // We need a fix for the case when the start of the start delimiter is at the and of the rx buffer
-        if(rxBufferReadIndex < 0) rxBufferReadIndex = INTERLINK_READ_BUFFER_LENGTH - rxBufferReadIndex;
-
-        rxDelimiterFound = true;
+    if(UART2_timeout_us > UART2_TIMEOUT_US) {
+        read_UART2();
     }
 
-    rxDataLen = rxDataLength();
+    if(!rxNewDataAvailable || rxDataLength() < (INTERLINK_HEADER_LENGTH)) return;
+    rxNewDataAvailable = false;
+
+    if(!rxDelimiterFound) {
+        uint16_t delimBDC = 0; // delimiterBytesFoundCount
+        while(rxDataLength() >= (INTERLINK_HEADER_LENGTH)) {
+            if(rxBuffer[rxBufferReadIndex + delimBDC] == START_DELIMITER[delimBDC]) {
+                if(++delimBDC == START_DELIMITER_LENGTH) break;
+            } else {
+                delimBDC = 0;
+                rxBufferReadIndex = (rxBufferReadIndex + 1)%INTERLINK_READ_BUFFER_LENGTH;
+            }
+        }
+
+        if(delimBDC == START_DELIMITER_LENGTH) rxDelimiterFound = true;
+    }
+
+    size_t rxDataLen = rxDataLength();
     if(rxDataLen < INTERLINK_HEADER_LENGTH) return; // The header is yet not available
 
     uint16_t payload_len;
@@ -155,6 +144,9 @@ void process_Interlink(void) {
 //        UART4_Write(payload, payload_len);
 //        printDebug("\r\n");
     }
+    
+    rxBufferReadIndex = (rxBufferReadIndex + INTERLINK_HEADER_LENGTH + payload_len)%INTERLINK_READ_BUFFER_LENGTH;
+    rxDelimiterFound = false;
 
     // switch/case apparently did not work, no idea  why?
     if(messageType == (uint8_t)HANDSHAKE_REQUEST) {
@@ -170,9 +162,6 @@ void process_Interlink(void) {
     } else if(messageType == (uint8_t)FORWARDING_REQUEST) {
         process_ForwardingRequest((EthFrame*)payload, payload_len);
     }
-
-    rxBufferReadIndex = (rxBufferReadIndex + INTERLINK_HEADER_LENGTH + payload_len)%INTERLINK_READ_BUFFER_LENGTH;
-    rxDelimiterFound = false;
 
     if(payload != NULL) free(payload);
 }

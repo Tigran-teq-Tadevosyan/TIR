@@ -4121,127 +4121,127 @@
    </tokenMap>
    <generatedFileHashHistoryMap class="java.util.TreeMap">
       <entry>
-         <file>..\src\config\default\definitions.h</file>
+         <file>../src/config/default/definitions.h</file>
          <hash>d11e9912cf2e7172ece93d2d6a07b7c6350ca07e60c37db133ccbe81676a1101</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\device.h</file>
+         <file>../src/config/default/device.h</file>
          <hash>10ec93c43a7b158a129ae05bd8f4a59ff5bcf3d0f3f062fdd64c374bc2d42099</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\exceptions.c</file>
+         <file>../src/config/default/exceptions.c</file>
          <hash>f5ad435bbdb69c22d638ce10fd145b4cf0f12dc654d814a836293ca96fa992e5</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\initialization.c</file>
+         <file>../src/config/default/initialization.c</file>
          <hash>9138924814a084286daf84de866541a2c38e30aeb5ae313b4f2dd18cdeb44386</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\interrupts.c</file>
+         <file>../src/config/default/interrupts.c</file>
          <hash>61986da01a3b2b19e6aeab08606c6eef3d4cd9dde32662f8747d4fbc74ea583d</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\interrupts.h</file>
+         <file>../src/config/default/interrupts.h</file>
          <hash>91abdb8d191ae865fc6082f30783c3d6cca8aa8d5aca823a7fb2cc65e3a57d24</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\p32MZ2064DAR176.ld</file>
+         <file>../src/config/default/p32MZ2064DAR176.ld</file>
          <hash>53c6726055d4327dd5ab551bf71b7c17731c0863e8b938010c6f607088c9ab2b</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\clk\plib_clk.c</file>
+         <file>../src/config/default/peripheral/clk/plib_clk.c</file>
          <hash>4fabf68ddda6c658df28aece902b9da3f9878baa96e4cb6a26ae0c7e87335070</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\clk\plib_clk.h</file>
+         <file>../src/config/default/peripheral/clk/plib_clk.h</file>
          <hash>aeb73e24e5a518024b1c3f7dce953a5cbacead08f55e80ae465fc8d2e522e477</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\coretimer\plib_coretimer.c</file>
+         <file>../src/config/default/peripheral/coretimer/plib_coretimer.c</file>
          <hash>a251b491fd77af23390ad159696ca3feedb4f76c79a8e11104003614e1db7adf</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\coretimer\plib_coretimer.h</file>
+         <file>../src/config/default/peripheral/coretimer/plib_coretimer.h</file>
          <hash>ccdc3bd8498dbb4f9ebdb2f131eff204c489e8ec8ef018b708f10e0671dcc559</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\evic\plib_evic.c</file>
+         <file>../src/config/default/peripheral/evic/plib_evic.c</file>
          <hash>53feb97bd2914667c2c885edae36c0bad7ee5a97216a8d5ac41ec66866563f9e</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\evic\plib_evic.h</file>
+         <file>../src/config/default/peripheral/evic/plib_evic.h</file>
          <hash>c92512e3068987f43ebd53be03c4e58115b45dbdcb9833216cb05c2d71199152</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\gpio\plib_gpio.c</file>
+         <file>../src/config/default/peripheral/gpio/plib_gpio.c</file>
          <hash>c5723ae8cf83224fc61b9a456be2f794c13de51defedfc83e3061efe3908cc81</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\gpio\plib_gpio.h</file>
+         <file>../src/config/default/peripheral/gpio/plib_gpio.h</file>
          <hash>09d21f376a33ea9668ccfeae1f60cd63d9a47ae2c8adf0c53b1af8bb48890104</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\rng\plib_rng.c</file>
+         <file>../src/config/default/peripheral/rng/plib_rng.c</file>
          <hash>6b0613a665d8c86fe0b2ea0d8745089623616d8c66259dbdb61fc768578c08f0</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\rng\plib_rng.h</file>
+         <file>../src/config/default/peripheral/rng/plib_rng.h</file>
          <hash>acbfc366e25935de5016b332a972dd439f2eee03c7cf8ddb0b0fbb5ee45cccb2</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\spi\spi_master\plib_spi1_master.c</file>
+         <file>../src/config/default/peripheral/spi/spi_master/plib_spi1_master.c</file>
          <hash>00fa201c3a4a7d9d2adeec527e23ccc8c515cfa4929fa00aae2fcd61a0853ae0</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\spi\spi_master\plib_spi1_master.h</file>
+         <file>../src/config/default/peripheral/spi/spi_master/plib_spi1_master.h</file>
          <hash>e022deaa6bc614442c072622acf6a7ebb292ba4db067510bd6e37af805bea226</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\spi\spi_master\plib_spi_master_common.h</file>
+         <file>../src/config/default/peripheral/spi/spi_master/plib_spi_master_common.h</file>
          <hash>844a71566e886cd1f28024000d440ac48841cdb4f4059f5feefac8e4334f12ef</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\tmr1\plib_tmr1.c</file>
+         <file>../src/config/default/peripheral/tmr1/plib_tmr1.c</file>
          <hash>fca73b40b49eb2eaf259f9f8b8158eeafe74270bfdf75a9cd4bb963dedebaaee</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\tmr1\plib_tmr1.h</file>
+         <file>../src/config/default/peripheral/tmr1/plib_tmr1.h</file>
          <hash>b28749c5aeabe65f99fb625e1d171fcc0979f5b85f0ff072a6fb610d66236832</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\tmr1\plib_tmr1_common.h</file>
+         <file>../src/config/default/peripheral/tmr1/plib_tmr1_common.h</file>
          <hash>b1c97e9466cc0bfc2e05ec0af7fb56a5946e8df5675a1f206cfc5dbb42d85f25</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\uart\plib_uart2.c</file>
-         <hash>2837e682128034888aea349834e2d24214c5875e707994654137a46f232a4e26</hash>
+         <file>../src/config/default/peripheral/uart/plib_uart2.c</file>
+         <hash>5d458e61094ac8714ee39e67a75e9802f4d34289ae5b4441765fd86d8fcebbeb</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\uart\plib_uart2.h</file>
+         <file>../src/config/default/peripheral/uart/plib_uart2.h</file>
          <hash>8b718719efb5a886d96e8be07b7f7266901bf30dcee9db4fd534bf0359c8c9ec</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\uart\plib_uart4.c</file>
+         <file>../src/config/default/peripheral/uart/plib_uart4.c</file>
          <hash>756d483c3bee20999d1532d520a1246589720ab909e0c0109fae6c09e81f421d</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\uart\plib_uart4.h</file>
+         <file>../src/config/default/peripheral/uart/plib_uart4.h</file>
          <hash>fe7966e08297ce303e9cf791174a8d0fc6413c127a27eebeba824892fadb558a</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\peripheral\uart\plib_uart_common.h</file>
+         <file>../src/config/default/peripheral/uart/plib_uart_common.h</file>
          <hash>90d1791d0855caa86d5d529a0ba209330f20cd0da2436950a7e71b38ef8da02b</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\stdio\xc32_monitor.c</file>
+         <file>../src/config/default/stdio/xc32_monitor.c</file>
          <hash>858f8710d4287200a5ee7f3b3ad7c24f505aed9c05c16956ab0ff9f7bb162a6a</hash>
       </entry>
       <entry>
-         <file>..\src\config\default\toolchain_specifics.h</file>
+         <file>../src/config/default/toolchain_specifics.h</file>
          <hash>84276afca06869943bba17727ff4f41fea61e4f81329ee20a333cafe39562a73</hash>
       </entry>
       <entry>
-         <file>..\src\main.c</file>
+         <file>../src/main.c</file>
          <hash>d3c233d419e6304bfacbafc18cc68c0f5c26e365f23b20ea40ccfac458f664c5</hash>
       </entry>
    </generatedFileHashHistoryMap>

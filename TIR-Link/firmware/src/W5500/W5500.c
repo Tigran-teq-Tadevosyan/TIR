@@ -121,22 +121,21 @@ TIR_Status init_MACRAWSocket(void) {
 
 void process_W5500 (void) {
     process_W5500Int();
-    /*
-    if(W5500_INT_Get() == 0) {
-        LED_BB_Toggle();
-        
-    } else 
-    if(!W5500_CURRENTLY_SENDING && !isEmpty_TxFIFO()) {
-        W5500_CURRENTLY_SENDING = true;
-        uint16_t frame_length;
-        EthFrame* frame = peekHead_TxFIFO(&frame_length);
+//    if(W5500_INT_Get() == 0) {
+//        LED_BB_Toggle();
+//    } else
 
-        wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
-        setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
-        while(getSn_CR(MACRAW_SOCKET));
-
-        removeHead_TxFIFO();
-    }*/
+//    if(!W5500_CURRENTLY_SENDING && !isEmpty_TxFIFO()) {
+//        W5500_CURRENTLY_SENDING = true;
+//        uint16_t frame_length;
+//        EthFrame* frame = peekHead_TxFIFO(&frame_length);
+//
+//        wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
+//        setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
+//        while(getSn_CR(MACRAW_SOCKET));
+//
+//        removeHead_TxFIFO();
+//    }
 
     if(!isEmpty_RxFIFO()) {
         uint16_t new_frame_len;
@@ -174,20 +173,23 @@ void process_W5500Int() {
     if(socket_int & SIK_SENT) {
         W5500_CURRENTLY_SENDING = false;
     }
-    
+
+
     if(socket_int & SIK_RECEIVED) {
-        
+
         uint16_t rx_buffer_length = getSn_RX_RSR(MACRAW_SOCKET);
         printDebug("Data to Read %u \r\n", rx_buffer_length);
         while(rx_buffer_length >= W5500_LENGTH_SECTION_LENGTH) {
-            
+
             ctlsocket(MACRAW_SOCKET, CS_GET_INTERRUPT, &socket_int);
+
             ctlsocket(MACRAW_SOCKET, CS_CLR_INTERRUPT, (void *)&MACRAW_SOCKET_INT_MASK);
+
             if(socket_int & SIK_SENT) {
                 W5500_CURRENTLY_SENDING = false;
             }
-            
-                        
+
+
             uint16_t rx_buffer_pkt_length;
 
             // Reading the length of current packet we want to read
@@ -223,7 +225,7 @@ void process_W5500Int() {
 
                 rx_buffer_length = getSn_RX_RSR(MACRAW_SOCKET);
             }
-            
+
             if(!isEmpty_TxFIFO() && !W5500_CURRENTLY_SENDING) {
                 W5500_CURRENTLY_SENDING = true;
                 uint16_t frame_length;
@@ -235,12 +237,8 @@ void process_W5500Int() {
 
                 removeHead_TxFIFO();
             }
-
-            
-            
         }
     }
-
 
     if(!isEmpty_TxFIFO() && !W5500_CURRENTLY_SENDING) {
         W5500_CURRENTLY_SENDING = true;
