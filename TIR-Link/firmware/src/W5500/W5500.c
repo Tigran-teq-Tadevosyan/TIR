@@ -120,7 +120,11 @@ TIR_Status init_MACRAWSocket(void) {
 }
 
 void process_W5500 (void) {
+    
+    LED_BB_Clear();
+    
     process_W5500Int();
+    LED_BB_Set();
 //    if(W5500_INT_Get() == 0) {
 //        LED_BB_Toggle();
 //    } else
@@ -137,6 +141,7 @@ void process_W5500 (void) {
 //        removeHead_TxFIFO();
 //    }
 
+    LED_GG_Clear();
     if(!isEmpty_RxFIFO()) {
         uint16_t new_frame_len;
         EthFrame *new_frame = peekHead_RxFIFO(&new_frame_len);
@@ -151,6 +156,8 @@ void process_W5500 (void) {
 
         removeHead_RxFIFO();
     }
+    
+    LED_GG_Set();
 }
 
 
@@ -158,7 +165,6 @@ void process_W5500 (void) {
 
 void process_W5500Int() {
     //if(W5500_INT_Get() == 1) return; // Check for falling edge (as we use active low)
-
     uint16_t W5500_int;
     uint8_t socket_int;
 
@@ -173,23 +179,12 @@ void process_W5500Int() {
     if(socket_int & SIK_SENT) {
         W5500_CURRENTLY_SENDING = false;
     }
-
-
+    
     if(socket_int & SIK_RECEIVED) {
 
         uint16_t rx_buffer_length = getSn_RX_RSR(MACRAW_SOCKET);
         printDebug("Data to Read %u \r\n", rx_buffer_length);
-        while(rx_buffer_length >= W5500_LENGTH_SECTION_LENGTH) {
-
-            ctlsocket(MACRAW_SOCKET, CS_GET_INTERRUPT, &socket_int);
-
-            ctlsocket(MACRAW_SOCKET, CS_CLR_INTERRUPT, (void *)&MACRAW_SOCKET_INT_MASK);
-
-            if(socket_int & SIK_SENT) {
-                W5500_CURRENTLY_SENDING = false;
-            }
-
-
+        if(rx_buffer_length >= W5500_LENGTH_SECTION_LENGTH) {
             uint16_t rx_buffer_pkt_length;
 
             // Reading the length of current packet we want to read
@@ -205,9 +200,7 @@ void process_W5500Int() {
 
                 setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
                 while(getSn_CR(MACRAW_SOCKET));
-
-                break;
-            }
+            } else 
 
             // We read only in case the whole packet is currently available
             if(rx_buffer_pkt_length <= (rx_buffer_length - W5500_LENGTH_SECTION_LENGTH)) {
@@ -225,18 +218,6 @@ void process_W5500Int() {
 
                 rx_buffer_length = getSn_RX_RSR(MACRAW_SOCKET);
             }
-
-            if(!isEmpty_TxFIFO() && !W5500_CURRENTLY_SENDING) {
-                W5500_CURRENTLY_SENDING = true;
-                uint16_t frame_length;
-                EthFrame* frame = peekHead_TxFIFO(&frame_length);
-
-                wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
-                setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
-                while(getSn_CR(MACRAW_SOCKET));
-
-                removeHead_TxFIFO();
-            }
         }
     }
 
@@ -248,6 +229,8 @@ void process_W5500Int() {
         wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
         setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
         while(getSn_CR(MACRAW_SOCKET));
+        
+        printDebug("Written Data %u \r\n", frame_length);
 
         removeHead_TxFIFO();
     }
@@ -263,9 +246,9 @@ void  wizchip_select(void) { W5500_CS_Clear(); }
 void  wizchip_deselect(void) { W5500_CS_Set(); }
 
 uint8_t wizchip_read() {
-	uint8_t rb;
+    uint8_t rb;
     SPI1_Read(&rb, 1);
-	while(SPI1_IsBusy());
+    while(SPI1_IsBusy());
     return rb;
 }
 
@@ -276,7 +259,7 @@ void  wizchip_write(uint8_t wb) {
 
 void wizchip_readBurst(uint8_t* pBuf, uint16_t len) {
     SPI1_Read(pBuf, len);
-	while(SPI1_IsBusy());
+    while(SPI1_IsBusy());
 }
 
 void  wizchip_writeBurst(uint8_t* pBuf, uint16_t len) {

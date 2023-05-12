@@ -49,7 +49,10 @@ int main(void) {
         /* Maintain state machines of all polled MPLAB Harmony modules. */
         SYS_Tasks();
         process_W5500();
+        
+        LED_RR_Clear();
         process_Interlink();
+        LED_RR_Set();
                 
         if(dhcpServerRunning()) {
             dhcpServerMaintanance();

@@ -10,7 +10,7 @@
 #include "Interlink_Forwarding.h"
 #include "Network/DHCP/DHCP_Server.h"
 
-#define UART2_TIMEOUT_US (10000)
+#define UART2_TIMEOUT_US (1000)
 #define INTERLINK_READ_BUFFER_LENGTH (10000) // in bytes
 
 #define START_DELIMITER_LENGTH  (4)
@@ -34,7 +34,7 @@ void init_Interlink(void) {
     // Setting up UART2: Connected to pair board
     UART2_ReadCallbackRegister(UART2RxEventHandler, NO_CONTEXT);
     UART2_ReadNotificationEnable(true, true);
-    UART2_ReadThresholdSet(20);
+    UART2_ReadThresholdSet(0);
 
     init_InterlinkHandshake();
 }
@@ -60,8 +60,8 @@ static void read_UART2() {
 static void UART2RxEventHandler(UART_EVENT event, uintptr_t contextHandle) {
     (void)contextHandle;
     if(event == UART_EVENT_READ_THRESHOLD_REACHED) {
-        UART2_timeout_us = 0;
         read_UART2();
+        UART2_timeout_us = 0;
     }
 }
 

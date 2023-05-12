@@ -1,5 +1,7 @@
 #include "Interlink_Handshake.h"
 
+#include "definitions.h"
+
 #include "Common/Common.h"
 #include "Common/Debug.h"
 #include "Network/DHCP/DHCP_Server.h"
@@ -91,6 +93,7 @@ void process_handshakeOffer(HANDSHAKE_ROLE_PAIR* roles) {
     send_InterLink(HANDSHAKE_ACK, (uint8_t*)roles, sizeof(HANDSHAKE_ROLE_PAIR));
     HANDSHAKE_STATE = HANDSHAKE_FINISHED;
     dhcpServerStart();
+    UART2_ReadThresholdSet(50);
     printDebug("dhcpServerRunning(): %d\r\n", dhcpServerRunning());
 }
 
@@ -104,5 +107,6 @@ void process_handshakeACK(HANDSHAKE_ROLE_PAIR* roles) {
     printDebug("Self Role: %d\r\n", SELF_LINK_ROLE);
     printDebug("Pair Role: %d\r\n", PAIR_LINK_ROLE);
     dhcpServerStart();
+    UART2_ReadThresholdSet(50);
     printDebug("dhcpServerRunning(): %d\r\n", dhcpServerRunning());
 }

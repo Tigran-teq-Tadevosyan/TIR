@@ -122,7 +122,7 @@ void interlink_ForwardIfAppropriate(EthFrame *frame, uint16_t frame_length) {
         return;
     }
 
-    // Then we check if it is an ip packet and check based on ip address if so
+    // Then we check if it is an ip packet and check based on ip address 
     if(betoh16(frame->type) == ETH_TYPE_IPV4) {
         Ipv4Header *ip_header = (Ipv4Header *) frame->data;
 

@@ -54,6 +54,8 @@ static void sysTimerTick(uint32_t status, uintptr_t contextHandle)
 {
     system_tick_us++;
     delay_tick_us++;
+    UART2_timeout_us++;
+    
 }
 
 uint16_t getRandNumber(uint16_t min, uint16_t max) {

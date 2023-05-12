@@ -18,7 +18,7 @@
 #define DHCP_SERVER_MAINTENANCE_PERIOD (1000) // 2 seconds in milliseconds
 
 //extern const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MIN;
-//extern const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MAX;
+//extern const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MAX;	
 
 typedef struct
 {
