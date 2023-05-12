@@ -15,6 +15,8 @@ static void sysTimerTick(uint32_t status, uintptr_t contextHandle);
 systime_t system_tick_us;
 systime_t delay_tick_us;
 
+systime_t UART2_timeout_us;
+
 void init_SysClock() {
     srand(time(NULL));
     
