@@ -17,7 +17,7 @@ uint16_t    rxFIFOHeadIndex = 0,
             txFIFOTailIndex = 0;
 
 // For debuging purposes
-static void printBothQueueSpaces(void) {
+void printBothQueueSpaces(void) {
     size_t  rxSpace = 0,
             txSpace = 0;
     
@@ -26,11 +26,15 @@ static void printBothQueueSpaces(void) {
         txSpace += txFIFOItemLengths[i];
     }
     
+    printDebug("rxFIFOHeadIndex: %u\r\n", rxFIFOHeadIndex);
+    printDebug("rxFIFOTailIndex: %u\r\n", rxFIFOTailIndex);
+    
+    printDebug("txFIFOHeadIndex: %u\r\n", txFIFOHeadIndex);
+    printDebug("txFIFOTailIndex: %u\r\n", txFIFOTailIndex);
+    
     printDebug("Rx space used: %u\r\n", rxSpace);
-    printDebug("tx space used: %u\r\n", txSpace);
+    printDebug("Tx space used: %u\r\n", txSpace);
 }
-
-
 
 // RX SECTION
 EthFrame* reserveItem_RxFIFO(uint16_t frame_length) {
@@ -77,8 +81,10 @@ bool isEmpty_RxFIFO(void) {
 // TX SECTION
 
 EthFrame* reserveItem_TxFIFO(uint16_t frame_length) {
-    if(txFIFO[txFIFOTailIndex] != NULL) 
+    if(txFIFO[txFIFOTailIndex] != NULL) {
+        printDebug("TxFIFO overflow\r\n");
         free(txFIFO[txFIFOTailIndex]);
+    }
     
     txFIFO[txFIFOTailIndex] = malloc(frame_length); 
     if(txFIFO[txFIFOTailIndex] == NULL) {
@@ -90,7 +96,6 @@ EthFrame* reserveItem_TxFIFO(uint16_t frame_length) {
     txFIFOItemLengths[txFIFOTailIndex] = frame_length;
     return txFIFO[txFIFOTailIndex]; 
 }
-
 
 void incremetTailIndex_TxFIFO(void) {
     txFIFOTailIndex = (txFIFOTailIndex + 1)%MAX_MACRAW_FRAMEFIFO_SIZE;

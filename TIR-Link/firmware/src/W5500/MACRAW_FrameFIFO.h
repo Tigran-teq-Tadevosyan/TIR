@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include "Network/Ethernet.h"
 
+void printBothQueueSpaces(void);
+
 EthFrame* reserveItem_RxFIFO(uint16_t frame_length);
 void incremetTailIndex_RxFIFO(void);
 EthFrame* peekHead_RxFIFO(uint16_t* frame_length);

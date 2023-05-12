@@ -13,8 +13,11 @@
 #include "Common/Debug.h"
 #include "Network/DHCP/DHCP_Server.h"
 #include "InterLink/Interlink.h"
+#include "W5500/MACRAW_FrameFIFO.h"
 
 static void SwitchEventHandler(GPIO_PIN pin, uintptr_t contextHandle);
+
+bool printFlag = false;
 
 int main(void) {   
     /* Initialize all modules */
@@ -51,6 +54,12 @@ int main(void) {
         if(dhcpServerRunning()) {
             dhcpServerMaintanance();
         }
+        
+        if(printFlag) {
+            printBothQueueSpaces();
+            printDebug("Interlink rx buffer length: %u\r\n", rxDataLength());
+            printFlag = false;
+        }
     }
     
     /* Execution should not come here during normal operation */
@@ -66,31 +75,11 @@ static void SwitchEventHandler(GPIO_PIN pin, uintptr_t contextHandle) {
             printDebug("Hello Sailor!!\r\n");
         } else { }
     } else if(pin == SW_2_PIN) {
-        if(SW_2_Get() == 0) {   
-            char str[] = "c string";
-            send_InterLink(HANDSHAKE_ACK, (uint8_t*)str, strlen(str));
+        if(SW_2_Get() == 0) {
+            printFlag = true;
         } else { }
     } else if(pin == SW_3_PIN) {
         if(SW_3_Get() == 0) {
-            LED_GG_Toggle();
-            
-            RNG_WaitForTrngCnt();
-            rand_num[0] = RNG_Seed1Get();
-            rand_num[1] = RNG_Seed2Get();
-            printDebug("\r\n\r\nSeed available in TRNG 0x%x%x", rand_num[1], rand_num[0]);
-
-            /* Prepare PRNG to get seed from TRNG */
-            RNG_LoadSet();
-            RNG_Poly1Set(0x00C00003);
-            RNG_PrngEnable();
-            /* Wait for at least 64 clock cycles */
-            CORETIMER_DelayUs(1);
-            rand_num[0] = RNG_NumGen1Get();
-            rand_num[1] = RNG_NumGen2Get();
-            RNG_PrngDisable();
-            printDebug("\r\nGenerated 64-bit Pseudo-Random Number 0x%x%x\r\n", rand_num[1], rand_num[0]);
-            /* Wait till SW1 is released */
-            
         } else { }    
     } else if(pin == SW_4_PIN) {
         if(SW_4_Get() == 0) {

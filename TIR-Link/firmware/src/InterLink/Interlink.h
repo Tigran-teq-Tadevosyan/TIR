@@ -2,6 +2,7 @@
 #define _INTERLINK_H
 
 #include <inttypes.h>
+#include <stddef.h>
 
 typedef enum {
     UNDEFINED_ROLE   = 0x00,
@@ -21,6 +22,8 @@ typedef enum {
 void init_Interlink(void);
 void process_Interlink(void);
 void send_InterLink(InterlinkMessageType messageType, uint8_t *payload, uint16_t payload_len);
+
+size_t   rxDataLength(void);
 
 // Definitions in Interlink_Handshake.c
 InterlinkHostRole get_SelfLinkRole(void);

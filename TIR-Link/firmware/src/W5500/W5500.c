@@ -169,34 +169,41 @@ void process_W5500Int() {
 
     if(socket_int & SIK_RECEIVED) {
         uint16_t rx_buffer_length = getSn_RX_RSR(MACRAW_SOCKET);
-        if(rx_buffer_length > 0) {
+        while(rx_buffer_length >= W5500_LENGTH_SECTION_LENGTH) {
             uint16_t rx_buffer_pkt_length;    
             
             // Reading the length of current packet we want to read
             wiz_recv_peek_data(MACRAW_SOCKET, (uint8_t*)&rx_buffer_pkt_length, W5500_LENGTH_SECTION_LENGTH);
             rx_buffer_pkt_length = be16toh(rx_buffer_pkt_length) - W5500_LENGTH_SECTION_LENGTH;
             
+            printDebug("Read pkt %u \r\n", rx_buffer_pkt_length);
+            
+            if(rx_buffer_pkt_length > 2000){
+                printDebug("Killing buffer \r\n");
+                
+                wiz_recv_ignore(MACRAW_SOCKET, rx_buffer_length); 
+                
+                setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
+                while(getSn_SR(MACRAW_SOCKET) != SOCK_MACRAW);
+                
+  +             break;
+            }
+            
             // We read only in case the whole packet is currently available
-            while(rx_buffer_pkt_length <= (rx_buffer_length - W5500_LENGTH_SECTION_LENGTH)) {
+            if(rx_buffer_pkt_length <= (rx_buffer_length - W5500_LENGTH_SECTION_LENGTH)) {
                 // We ignore this 2 bytes for the read pointer to go over packet size, so we can read the frame itself 
                 wiz_recv_ignore(MACRAW_SOCKET, W5500_LENGTH_SECTION_LENGTH); 
                 setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
-                while(getSn_CR(MACRAW_SOCKET));        
-                
+                while(getSn_SR(MACRAW_SOCKET) != SOCK_MACRAW);
+
                 EthFrame* read_buffer = reserveItem_RxFIFO(rx_buffer_pkt_length);
                 wiz_recv_data(MACRAW_SOCKET, (uint8_t*)read_buffer, rx_buffer_pkt_length);
                 incremetTailIndex_RxFIFO();
-                
+
                 setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
-                while(getSn_CR(MACRAW_SOCKET));
-                
-                // If we only had exactly one package in the rx buffer of the chip we just break as the is nothing else to check
-                if(rx_buffer_pkt_length == (rx_buffer_length - W5500_LENGTH_SECTION_LENGTH)) break;
-                
-                // If there is something else in the rx buffer we update the values to check (in while statement) if we have another complete packet in th buffer
-                rx_buffer_pkt_length -= (rx_buffer_length - W5500_LENGTH_SECTION_LENGTH);
-                wiz_recv_peek_data(MACRAW_SOCKET, (uint8_t*)&rx_buffer_pkt_length, W5500_LENGTH_SECTION_LENGTH);
-                rx_buffer_pkt_length = be16toh(rx_buffer_pkt_length) - W5500_LENGTH_SECTION_LENGTH;
+                while(getSn_SR(MACRAW_SOCKET) != SOCK_MACRAW);
+
+                rx_buffer_length = getSn_RX_RSR(MACRAW_SOCKET);
             }
         }
     }
@@ -221,7 +228,7 @@ void process_W5500Int() {
     if(W5500_INT_MASK & 0x00FF) {
         ctlwizchip(CW_CLR_INTERRUPT, (void*)&W5500_INT_MASK );
     }
-}
+}/
 
 // Callback handler functions for wizchip internal use
 void  wizchip_select(void) { W5500_CS_Clear(); }

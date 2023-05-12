@@ -49,15 +49,15 @@
 
 UART_RING_BUFFER_OBJECT uart2Obj;
 
-#define UART2_READ_BUFFER_SIZE      4000
-#define UART2_READ_BUFFER_SIZE_9BIT (4000 >> 1)
+#define UART2_READ_BUFFER_SIZE      10000
+#define UART2_READ_BUFFER_SIZE_9BIT (10000 >> 1)
 #define UART2_RX_INT_DISABLE()      IEC4CLR = _IEC4_U2RXIE_MASK;
 #define UART2_RX_INT_ENABLE()       IEC4SET = _IEC4_U2RXIE_MASK;
 
 static uint8_t UART2_ReadBuffer[UART2_READ_BUFFER_SIZE];
 
-#define UART2_WRITE_BUFFER_SIZE     4000
-#define UART2_WRITE_BUFFER_SIZE_9BIT       (4000 >> 1)
+#define UART2_WRITE_BUFFER_SIZE     10000
+#define UART2_WRITE_BUFFER_SIZE_9BIT       (10000 >> 1)
 #define UART2_TX_INT_DISABLE()      IEC4CLR = _IEC4_U2TXIE_MASK;
 #define UART2_TX_INT_ENABLE()       IEC4SET = _IEC4_U2TXIE_MASK;
 
@@ -104,7 +104,7 @@ void UART2_Initialize( void )
     /* Set up UxMODE bits */
     /* STSEL  = 0*/
     /* PDSEL = 0 */
-    /* BRGH = 1 */
+    /* BRGH = 0 */
     /* RXINV = 0 */
     /* ABAUD = 0 */
     /* LPBACK = 0 */
@@ -119,7 +119,7 @@ void UART2_Initialize( void )
     U2STASET = (_U2STA_UTXEN_MASK | _U2STA_URXEN_MASK | _U2STA_UTXISEL1_MASK );
 
     /* BAUD Rate register Setup */
-    U2BRG = 216;
+    U2BRG = 2;
 
     IEC4CLR = _IEC4_U2TXIE_MASK;
 
@@ -167,7 +167,7 @@ bool UART2_SerialSetup( UART_SERIAL_SETUP *setup, uint32_t srcClkFreq )
     bool status = false;
     uint32_t baud;
     uint32_t status_ctrl;
-    uint8_t brgh = 1;
+    uint8_t brgh = 0;
     int32_t uxbrg = 0;
 
     if (setup != NULL)
