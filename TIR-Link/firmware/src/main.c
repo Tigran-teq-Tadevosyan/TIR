@@ -44,14 +44,18 @@ int main(void) {
     init_Debug();
     init_Interlink();
     init_W5500();
+    
+    
 
     while(true) {
         /* Maintain state machines of all polled MPLAB Harmony modules. */
         SYS_Tasks();
+        
         process_W5500();
-             
+        
         process_Interlink();
-                
+//        while(process_Interlink()); 
+        
         if(dhcpServerRunning()) {
             dhcpServerMaintanance();
         }
@@ -81,6 +85,7 @@ static void SwitchEventHandler(GPIO_PIN pin, uintptr_t contextHandle) {
         } else { }
     } else if(pin == SW_3_PIN) {
         if(SW_3_Get() == 0) {
+            print_recordingSections();
         } else { }    
     } else if(pin == SW_4_PIN) {
         if(SW_4_Get() == 0) {

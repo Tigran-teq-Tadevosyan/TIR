@@ -10,7 +10,7 @@
 #include "Interlink_Forwarding.h"
 #include "Network/DHCP/DHCP_Server.h"
 
-#define UART2_TIMEOUT_US (1000)
+#define UART2_TIMEOUT_US (1000) // in microseconds
 #define INTERLINK_READ_BUFFER_LENGTH (10000) // in bytes
 
 #define START_DELIMITER_LENGTH  (4)
@@ -81,7 +81,14 @@ static void rxExtractPayload(uint8_t *buffer, uint16_t length) {
     }
 }
 
+
+static uint32_t droped_pkt_num = 0;
 void send_InterLink(InterlinkMessageType messageType, uint8_t *payload, uint16_t payload_len) {
+    if(UART2_WriteFreeBufferCountGet() < (INTERLINK_HEADER_LENGTH + payload_len) ) {
+        printDebug("UART2 dropped packet count %u \r\n", ++droped_pkt_num);
+        return;
+    }
+    
     uint8_t _messageType = (uint8_t)messageType;
 
     UART2_Write((uint8_t*)START_DELIMITER, START_DELIMITER_LENGTH);
@@ -91,17 +98,21 @@ void send_InterLink(InterlinkMessageType messageType, uint8_t *payload, uint16_t
         size_t written_size = UART2_Write((uint8_t*)payload, payload_len);
         if(written_size != payload_len) {
             printDebug("UART2 buffer overflow, written %u of %u \r\n", written_size, payload_len);
+            while(true);
+        } else {
+            printDebug("UART2 buffer  written %u \r\n", payload_len);
         }
     }
 }
 
-void process_Interlink(void) {
+bool process_Interlink(void) {
     process_InterlinkHandshake();
     if(UART2_timeout_us > UART2_TIMEOUT_US) {
         read_UART2();
+//        UART2_timeout_us = 0;
     }
 
-    if((!rxNewDataAvailable && rxDelimiterFound == true) || rxDataLength() < (INTERLINK_HEADER_LENGTH)) return;
+    if((!rxNewDataAvailable && rxDelimiterFound == true) || rxDataLength() < (INTERLINK_HEADER_LENGTH)) return false;
     rxNewDataAvailable = false;
 
     if(!rxDelimiterFound) {
@@ -116,11 +127,11 @@ void process_Interlink(void) {
         }
 
         if(delimBDC == START_DELIMITER_LENGTH) rxDelimiterFound = true;
-        else return;
+        else return false;
     }
 
     size_t rxDataLen = rxDataLength();
-    if(rxDataLen < INTERLINK_HEADER_LENGTH) return; // The header is yet not available
+    if(rxDataLen < INTERLINK_HEADER_LENGTH) return false; // The header is yet not available
 
     uint16_t payload_len;
     memmove(&payload_len, rxBuffer + rxBufferReadIndex + START_DELIMITER_LENGTH, PAYLOAD_LEN_ENTRY_SIZE);
@@ -133,7 +144,7 @@ void process_Interlink(void) {
     
 
     
-    if(payload_len > (rxDataLen - INTERLINK_HEADER_LENGTH)) return; // The payload is yet not fully available
+    if(payload_len > (rxDataLen - INTERLINK_HEADER_LENGTH)) return false; // The payload is yet not fully available
 
     uint8_t *payload = NULL;
     
@@ -171,4 +182,5 @@ void process_Interlink(void) {
     }
 
     if(payload != NULL) free(payload);
+    return true;
 }

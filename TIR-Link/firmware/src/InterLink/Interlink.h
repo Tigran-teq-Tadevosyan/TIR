@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 typedef enum {
     UNDEFINED_ROLE   = 0x00,
@@ -20,7 +21,7 @@ typedef enum {
 } InterlinkMessageType;
 
 void init_Interlink(void);
-void process_Interlink(void);
+bool process_Interlink(void);
 void send_InterLink(InterlinkMessageType messageType, uint8_t *payload, uint16_t payload_len);
 
 size_t   rxDataLength(void);

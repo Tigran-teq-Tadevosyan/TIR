@@ -13,9 +13,9 @@
 #define DHCP_SERVER2_IPv4_ADDRESS_MAX IPV4_ADDR(100, 100, 0, 200);
 
 #define DHCP_SERVER_MAX_CLIENTS (16)
-#define DHCP_SERVER_DEFAULT_LEASE_TIME (10000) // (120000) // 2 minutes in milliseconds
+#define DHCP_SERVER_DEFAULT_LEASE_TIME (120000) // 2 minutes in milliseconds
 
-#define DHCP_SERVER_MAINTENANCE_PERIOD (1000) // 2 seconds in milliseconds
+#define DHCP_SERVER_MAINTENANCE_PERIOD (5000) // 2 seconds in milliseconds
 
 //extern const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MIN;
 //extern const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MAX;	

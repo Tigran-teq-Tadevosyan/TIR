@@ -56,3 +56,42 @@ static void UartRxEventHandler(UART_EVENT event, uintptr_t contextHandle) {
 //        free(buff);
     }
 }
+
+#define MAX_RECORDING_SECTIONS (8)
+
+static systime_t recordingStartTimeStamp;
+static systime_t recordingSectionsStartTimeStamps[MAX_RECORDING_SECTIONS];
+
+static systime_t recordingSectionsSum[MAX_RECORDING_SECTIONS];
+
+static char* recordingSectionNames[MAX_RECORDING_SECTIONS] = {
+                                                                "Sending 1",
+                                                                "RECEIVED",
+                                                                "SENDING 2",
+                                                                "macrawRx_processReservedChunk",
+                                                                "!macraw_isRxEmpty()",
+                                                                "!process_Interlink()",
+                                                                "dhcpServerRunning()",
+                                                                "WTF"
+                                                            };
+
+void restart_recordingSections() {
+    recordingStartTimeStamp = get_SysTime_ms();
+    for(int i = 0; i < MAX_RECORDING_SECTIONS; i++) {
+        recordingSectionsSum[i] = 0;
+    }
+}
+void print_recordingSections() {
+    systime_t overall_time = get_SysTime_ms() - recordingStartTimeStamp;
+    for(int i = 0; i < MAX_RECORDING_SECTIONS; i++) {
+        printDebug("%s: %u\r\n", recordingSectionNames[i], (100*recordingSectionsSum[i])/overall_time);
+    }
+    restart_recordingSections();
+}
+void start_recordSection(uint8_t section_num) {
+    recordingSectionsStartTimeStamps[section_num] = get_SysTime_ms();
+}
+
+void end_recordSection(uint8_t section_num) {
+    recordingSectionsSum[section_num] += get_SysTime_ms() - recordingSectionsStartTimeStamps[section_num] ;
+}

@@ -51,60 +51,60 @@ bool dhcpServerRunning(void) {
 
 TIR_Status dhcpServerProcessPkt(const EthFrame *ethFrame, const uint16_t frame_len) {
     if(!dhcpServerRunning()) return Failure;
-    if(betoh16(ethFrame->type) != ETH_TYPE_IPV4) {
-        #ifdef DHCP_SERVER_DEBUG_LEVEL1
-        printf("-> Non IPv4 internet layer package, ignoring!\n");
-        #endif
-        return Failure;
-    }
+//    if(betoh16(ethFrame->type) != ETH_TYPE_IPV4) {
+//        #ifdef DHCP_SERVER_DEBUG_LEVEL1
+//        printf("-> Non IPv4 internet layer package, ignoring!\n");
+//        #endif
+//        return Failure;
+//    }
 
-    size_t ip_packet_length = frame_len - sizeof(EthFrame);
+//    size_t ip_packet_length = frame_len - sizeof(EthFrame);
     Ipv4Header *ip_header = (Ipv4Header *) ethFrame->data;
 
-    if(ip_header->version != IPV4_VERSION) {
-        #ifdef DHCP_SERVER_DEBUG_LEVEL1
-        printf("-> Non IPv4 package, ignoring!\n");
-        #endif
-        return Failure;
-    } else if(ip_packet_length < sizeof(Ipv4Header)) {
-        #ifdef DHCP_SERVER_DEBUG_LEVEL1
-        printf("-> Invalid IPv4 packet length, ignoring!\n");
-        #endif
-        return Failure;
-    } else if(ip_header->headerLength < 5) { // lentgh is in multyply of words (32 bit)
-        #ifdef DHCP_SERVER_DEBUG_LEVEL1
-        printf("-> Invalid IPv4 header length (too short), ignoring!\n");
-        #endif
-        return Failure;
-    } else if(betoh16(ip_header->totalLength) < (ip_header->headerLength * 4)) {
-        #ifdef DHCP_SERVER_DEBUG_LEVEL1
-        printf("-> IPv4 invalid total length, ignoring!\n");
-        #endif
-        return Failure;
-    } else if(isFragmentedPacket(ip_header)) {
-        #ifdef DHCP_SERVER_DEBUG_LEVEL1
-        printf("-> Received fragmented IPv4 packet which is not supported, ignoring!\n");
-        #endif
-        return Failure;
-    } else if(ip_header->protocol != IPV4_PROTOCOL_UDP) {
-        #ifdef DHCP_SERVER_DEBUG_LEVEL1
-        printf("-> Received non UPD IPv4 packet, which is not supported, ignoring!\n");
-        #endif
-        return Failure;
-    }
+//    if(ip_header->version != IPV4_VERSION) {
+//        #ifdef DHCP_SERVER_DEBUG_LEVEL1
+//        printf("-> Non IPv4 package, ignoring!\n");
+//        #endif
+//        return Failure;
+//    } else if(ip_packet_length < sizeof(Ipv4Header)) {
+//        #ifdef DHCP_SERVER_DEBUG_LEVEL1
+//        printf("-> Invalid IPv4 packet length, ignoring!\n");
+//        #endif
+//        return Failure;
+//    } else if(ip_header->headerLength < 5) { // lentgh is in multyply of words (32 bit)
+//        #ifdef DHCP_SERVER_DEBUG_LEVEL1
+//        printf("-> Invalid IPv4 header length (too short), ignoring!\n");
+//        #endif
+//        return Failure;
+//    } else if(betoh16(ip_header->totalLength) < (ip_header->headerLength * 4)) {
+//        #ifdef DHCP_SERVER_DEBUG_LEVEL1
+//        printf("-> IPv4 invalid total length, ignoring!\n");
+//        #endif
+//        return Failure;
+//    } else if(isFragmentedPacket(ip_header)) {
+//        #ifdef DHCP_SERVER_DEBUG_LEVEL1
+//        printf("-> Received fragmented IPv4 packet which is not supported, ignoring!\n");
+//        #endif
+//        return Failure;
+//    } else if(ip_header->protocol != IPV4_PROTOCOL_UDP) {
+//        #ifdef DHCP_SERVER_DEBUG_LEVEL1
+//        printf("-> Received non UPD IPv4 packet, which is not supported, ignoring!\n");
+//        #endif
+//        return Failure;
+//    }
 
     // (ip_header->headerLength * 4) is the length of IPv4 packet
     // again we multiply it by 4 (32 bit), as the length is given in word length
     UdpHeader *upd_header = (UdpHeader *) ((uint8_t*)ip_header + (ip_header->headerLength * 4));
 
-    if(betoh16(upd_header->destPort) != DHCP_SERVER_PORT || betoh16(upd_header->srcPort) != DHCP_CLIENT_PORT) {
-        #ifdef DHCP_SERVER_DEBUG_LEVEL1
-        printf("-> UDP dest. port %hu (expected %hu) and source port %hu (expected %hu), ignoring!\n",
-               betoh16(upd_header->destPort), (u_short)DHCP_SERVER_PORT,
-               betoh16(upd_header->srcPort), (u_short)DHCP_CLIENT_PORT);
-        #endif
-        return Failure;
-    }
+//    if(betoh16(upd_header->destPort) != DHCP_SERVER_PORT || betoh16(upd_header->srcPort) != DHCP_CLIENT_PORT) {
+//        #ifdef DHCP_SERVER_DEBUG_LEVEL1
+//        printf("-> UDP dest. port %hu (expected %hu) and source port %hu (expected %hu), ignoring!\n",
+//               betoh16(upd_header->destPort), (u_short)DHCP_SERVER_PORT,
+//               betoh16(upd_header->srcPort), (u_short)DHCP_CLIENT_PORT);
+//        #endif
+//        return Failure;
+//    }
 
     const DhcpMessage *dhcp_packet = (DhcpMessage *) ((uint8_t*)upd_header + UDP_HEADER_LENGTH);
     size_t dhcp_pkt_len = betoh16(upd_header->length) - UDP_HEADER_LENGTH;
