@@ -95,7 +95,7 @@ void interlinkBuffer_processReservedChunk(void) {
         } else if(messageType == (uint8_t)FORWARDING_TABLE_REMOVAL) {
             process_RemoveForwardingEntry((ForwardingBinding*)(INTERLINKE_BUFFER + payload_index));
         } else if(messageType == (uint8_t)FORWARDING_REQUEST) {
-            printDebug("Forwarding received: %u\r\n", payload_len);
+//            printDebug("Forwarding received: %u\r\n", payload_len);
             enqueue_PktQueue(
                     &interlinkForwardingPktQueue,
                     payload_index,

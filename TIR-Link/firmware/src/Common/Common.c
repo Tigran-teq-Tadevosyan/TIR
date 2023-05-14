@@ -22,7 +22,7 @@ void init_SysClock() {
     system_tick_us = 0;
     delay_tick_us = 0;
             
-    TMR1_CallbackRegister(sysTimerTick, NO_CONTEXT); // called every 100 us
+    TMR1_CallbackRegister(sysTimerTick, NO_CONTEXT);
     TMR1_Start();
 }
 
@@ -37,11 +37,14 @@ void delay_ms(systime_t ms)
     while(delay_tick_us < ms);
 }
 
-static void sysTimerTick(uint32_t status, uintptr_t contextHandle) { // called every 100 us
-//    LED_RR_Toggle();
-    system_tick_us += 10;
-    delay_tick_us += 10;
-    UART2_timeout_us += 10;
+static void sysTimerTick(uint32_t status, uintptr_t contextHandle) { 
+    ++system_tick_us;
+    ++delay_tick_us;
+    ++UART2_timeout_us;
+    
+//    system_tick_us += 10;
+//    delay_tick_us += 10;
+//    UART2_timeout_us += 10;
 }
 
 uint16_t getRandNumber(uint16_t min, uint16_t max) {

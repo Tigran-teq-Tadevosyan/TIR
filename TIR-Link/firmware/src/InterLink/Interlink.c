@@ -8,6 +8,7 @@
 #include "Common/Debug.h"
 #include "Interlink_Handshake.h"
 #include "Interlink_Forwarding.h"
+#include "Interlink_DMA.h"
 #include "InterlinkBuffer.h"
 #include "Network/DHCP/DHCP_Server.h"
 
@@ -22,7 +23,7 @@ void init_Interlink(void) {
     UART2_ReadNotificationEnable(true, true);
     UART2_ReadThresholdSet(0);
     
-    init_InterlinkDMA();
+    init_intlinkDMA();
     init_InterlinkHandshake();
 }
 
@@ -63,9 +64,11 @@ static void UART2RxEventHandler(UART_EVENT event, uintptr_t contextHandle) {
         while(true);
     }
 }
-
-static uint32_t droped_pkt_num = 0;
+/*
 void send_InterLink(InterlinkMessageType messageType, uint8_t *payload, uint16_t payload_len) {
+    append_intlinkDMA_TxQueue(messageType, payload, payload_len);
+    
+    
     if(UART2_WriteFreeBufferCountGet() < (INTERLINK_HEADER_LENGTH + payload_len) ) {
         printDebug("UART2 dropped packet count %u \r\n", ++droped_pkt_num);
         return;
@@ -89,10 +92,11 @@ void send_InterLink(InterlinkMessageType messageType, uint8_t *payload, uint16_t
             }
         }
     }
+
 }
+    */
 
 void process_Interlink(void) {
-    
     process_InterlinkHandshake();
     
     UART2_ReadNotificationEnable(false, false);
@@ -106,77 +110,4 @@ void process_Interlink(void) {
     interlinkBuffer_processReservedChunk();
     LED_GG_Set();
     UART2_ReadNotificationEnable(true, true);
-    /*
-    if((!rxNewDataAvailable && rxDelimiterFound == true) || rxDataLength() < (INTERLINK_HEADER_LENGTH)) return false;
-    rxNewDataAvailable = false;
-
-    if(!rxDelimiterFound) {
-        uint16_t delimBDC = 0; // delimiterBytesFoundCount
-        while(rxDataLength() >= (INTERLINK_HEADER_LENGTH)) {
-            if(rxBuffer[rxBufferReadIndex + delimBDC] == START_DELIMITER[delimBDC]) {
-                if(++delimBDC == START_DELIMITER_LENGTH) break;
-            } else {
-                delimBDC = 0;
-                rxBufferReadIndex = (rxBufferReadIndex + 1)%INTERLINK_READ_BUFFER_LENGTH;
-            }
-        }
-
-        if(delimBDC == START_DELIMITER_LENGTH) rxDelimiterFound = true;
-        else return false;
-    }
-
-    size_t rxDataLen = rxDataLength();
-    if(rxDataLen < INTERLINK_HEADER_LENGTH) return false; // The header is yet not available
-
-    uint16_t payload_len;
-    memmove(&payload_len, rxBuffer + rxBufferReadIndex + START_DELIMITER_LENGTH, PAYLOAD_LEN_ENTRY_SIZE);
-    
-    if(payload_len > 1514)
-        rxBufferReadIndex = (rxBufferReadIndex + START_DELIMITER_LENGTH )%INTERLINK_READ_BUFFER_LENGTH;
-    
-    uint8_t messageType;
-    memmove(&messageType, rxBuffer + rxBufferReadIndex + START_DELIMITER_LENGTH + PAYLOAD_LEN_ENTRY_SIZE, MESSAGE_TYPE_LENGTH);
-    
-
-    
-    if(payload_len > (rxDataLen - INTERLINK_HEADER_LENGTH)) return false; // The payload is yet not fully available
-
-    uint8_t *payload = NULL;
-    
-//    printDebug("Message Type: %x\r\n", (uint8_t)messageType);
-    if(payload_len > 0) {
-        payload = malloc(payload_len);
-        if(payload == NULL) {
-            printDebug("Failed to allocate memory in 'process_Interlink'\r\n");
-            while(true);
-        }
-
-        rxExtractPayload(payload, payload_len);
-
-//        printDebug("Payload: ");
-//        UART4_Write(payload, payload_len);
-//        printDebug("\r\n");
-    }
-
-    rxBufferReadIndex = (rxBufferReadIndex + INTERLINK_HEADER_LENGTH + payload_len)%INTERLINK_READ_BUFFER_LENGTH;
-    rxDelimiterFound = false;
-
-    // switch/case apparently did not work, no idea  why?
-    if(messageType == (uint8_t)HANDSHAKE_REQUEST) {
-        process_handshakeRequest();
-    } else if(messageType == (uint8_t)HANDSHAKE_OFFER) {
-        process_handshakeOffer((HANDSHAKE_ROLE_PAIR*)payload);
-    } else if(messageType == (uint8_t)HANDSHAKE_ACK) {
-        process_handshakeACK((HANDSHAKE_ROLE_PAIR*)payload);
-    } else if(messageType == (uint8_t)FORWARDING_TABLE_ADDITION) {
-        process_AddForwardingEntry((ForwardingBinding*)payload);
-    } else if(messageType == (uint8_t)FORWARDING_TABLE_REMOVAL) {
-        process_RemoveForwardingEntry((ForwardingBinding*)payload);
-    } else if(messageType == (uint8_t)FORWARDING_REQUEST) {
-        process_ForwardingRequest((EthFrame*)payload, payload_len);
-    }
-
-    if(payload != NULL) free(payload);
-    return true;
-    */
 }

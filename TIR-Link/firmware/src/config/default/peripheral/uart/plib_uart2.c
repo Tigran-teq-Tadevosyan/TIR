@@ -41,8 +41,6 @@
 #include "device.h"
 #include "plib_uart2.h"
 
-#include "definitions.h"
-
 // *****************************************************************************
 // *****************************************************************************
 // Section: UART2 Implementation
@@ -58,8 +56,8 @@ UART_RING_BUFFER_OBJECT uart2Obj;
 
 static uint8_t UART2_ReadBuffer[UART2_READ_BUFFER_SIZE];
 
-#define UART2_WRITE_BUFFER_SIZE     10000
-#define UART2_WRITE_BUFFER_SIZE_9BIT       (10000 >> 1)
+#define UART2_WRITE_BUFFER_SIZE     2
+#define UART2_WRITE_BUFFER_SIZE_9BIT       (2 >> 1)
 #define UART2_TX_INT_DISABLE()      IEC4CLR = _IEC4_U2TXIE_MASK;
 #define UART2_TX_INT_ENABLE()       IEC4SET = _IEC4_U2TXIE_MASK;
 

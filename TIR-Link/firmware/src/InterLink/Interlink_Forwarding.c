@@ -1,6 +1,9 @@
 #include "Interlink_Forwarding.h"
 
+#include <xc.h>
+
 #include "Interlink.h"
+#include "Interlink_DMA.h"
 #include "Network/Network.h"
 #include "Common/Debug.h"
 #include "W5500/MACRAW_FrameFIFO.h"
@@ -21,21 +24,21 @@ static bool ipAddrPresent(Ipv4Addr ipAddr);
 static bool macAddrPresent(MacAddr *macAddr);
 
 void send_AddForwardingEntry(DhcpServerBinding *binding) {
-    ForwardingBinding fBinding = {
-                                    .macAddr = binding->macAddr,
-                                    .ipAddr = binding->ipAddr
-                                };
+    ForwardingBinding *fBinding = __pic32_alloc_coherent(sizeof(*fBinding));
+    
+    fBinding->macAddr = binding->macAddr;
+    fBinding->ipAddr = binding->ipAddr;
 
-    send_InterLink(FORWARDING_TABLE_ADDITION, (uint8_t*)&fBinding, sizeof(ForwardingBinding));
+    append_intlinkDMA_TxQueue(FORWARDING_TABLE_ADDITION, (uint8_t*)fBinding, sizeof(ForwardingBinding), true);
 }
 
 void send_RemoveForwardingEntry(DhcpServerBinding *binding) {
-    ForwardingBinding fBinding = {
-                                    .macAddr = binding->macAddr,
-                                    .ipAddr = binding->ipAddr
-                                };
+    ForwardingBinding *fBinding = __pic32_alloc_coherent(sizeof(*fBinding));
+    
+    fBinding->macAddr = binding->macAddr;
+    fBinding->ipAddr = binding->ipAddr;
 
-    send_InterLink(FORWARDING_TABLE_REMOVAL, (uint8_t*)&fBinding, sizeof(ForwardingBinding));
+    append_intlinkDMA_TxQueue(FORWARDING_TABLE_REMOVAL, (uint8_t*)fBinding, sizeof(ForwardingBinding), true);
 }
 
 void process_AddForwardingEntry(ForwardingBinding *fBinding) {
@@ -102,7 +105,7 @@ void interlink_ForwardIfAppropriate(EthFrame *frame, uint16_t frame_length) {
     if(macCompAddr(&frame->destAddr, &MAC_BROADCAST_ADDR) || macAddrPresent(&frame->destAddr)) {
 //        printDebug("Forwarding req to -> Mac %s;\r\n",
 //                macAddrToString(&frame->destAddr, NULL));
-        send_InterLink(FORWARDING_REQUEST, (uint8_t*)frame, frame_length);
+        append_intlinkDMA_TxQueue(FORWARDING_REQUEST, (uint8_t*)frame, frame_length, false);
         return;
     }
 
@@ -114,7 +117,7 @@ void interlink_ForwardIfAppropriate(EthFrame *frame, uint16_t frame_length) {
             printDebug("Forwarding req to -> Mac %s; IP: %s\r\n",
                     macAddrToString(&frame->destAddr, NULL),
                     ipv4AddrToString(ip_header->destAddr, NULL));
-            send_InterLink(FORWARDING_REQUEST, (uint8_t*)frame, frame_length);
+            append_intlinkDMA_TxQueue(FORWARDING_REQUEST, (uint8_t*)frame, frame_length, false);
             return;
         }
     }

@@ -7,7 +7,7 @@
 #include "Common/Debug.h"
 #include "Common/BufferPktQueue.h"
 
-static uint8_t RX_BUFFER[MACRAW_RX_BUFFER_LENGTH];
+static uint8_t __attribute__((coherent)) RX_BUFFER[MACRAW_RX_BUFFER_LENGTH];
 static uint16_t rxTailIndex = 0;
 static uint16_t rxReservedChunkLength = 0;
 

@@ -2465,6 +2465,28 @@
 </value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="EVIC_134_PRIORITY"/>
+         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
+  &lt;core dnOrder=&quot;0&quot; id=&quot;EVIC_134_PRIORITY&quot;&gt;
+    &lt;Values dnOrder=&quot;0&quot;&gt;
+      &lt;User dnOrder=&quot;0&quot; value=&quot;4&quot;/&gt;
+    &lt;/Values&gt;
+  &lt;/core&gt;
+&lt;/core&gt;
+</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="EVIC_134_PRIVALUE"/>
+         <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
+  &lt;core dnOrder=&quot;0&quot; id=&quot;EVIC_134_PRIVALUE&quot;&gt;
+    &lt;Values dnOrder=&quot;0&quot;&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;1048576&quot;/&gt;
+    &lt;/Values&gt;
+  &lt;/core&gt;
+&lt;/core&gt;
+</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="core" name="EVIC_145_ENABLE"/>
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;EVIC_145_ENABLE&quot;&gt;
@@ -2580,6 +2602,7 @@
   &lt;core dnOrder=&quot;0&quot; id=&quot;EVIC_147_ENABLE&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
       &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;true&quot;/&gt;
+      &lt;User dnOrder=&quot;1&quot; value=&quot;false&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -4100,7 +4123,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;core&gt;
   &lt;core dnOrder=&quot;0&quot; id=&quot;UART2_TX_INTERRUPT_ENABLE_UPDATE&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;false&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;core&quot; value=&quot;true&quot;/&gt;
     &lt;/Values&gt;
   &lt;/core&gt;
 &lt;/core&gt;
@@ -4864,7 +4887,7 @@
          <value>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;tmr1&gt;
   &lt;tmr1 dnOrder=&quot;0&quot; id=&quot;TIMER1_PERIOD&quot;&gt;
     &lt;Values dnOrder=&quot;0&quot;&gt;
-      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;tmr1&quot; value=&quot;999&quot;/&gt;
+      &lt;Dynamic dnOrder=&quot;0&quot; id=&quot;tmr1&quot; value=&quot;99&quot;/&gt;
     &lt;/Values&gt;
   &lt;/tmr1&gt;
 &lt;/tmr1&gt;
@@ -4891,7 +4914,7 @@
       &lt;/Float&gt;
     &lt;/Attributes&gt;
     &lt;Values dnOrder=&quot;1&quot;&gt;
-      &lt;User dnOrder=&quot;0&quot; value=&quot;10.0&quot;/&gt;
+      &lt;User dnOrder=&quot;0&quot; value=&quot;1.0&quot;/&gt;
     &lt;/Values&gt;
   &lt;/tmr1&gt;
 &lt;/tmr1&gt;
@@ -5053,7 +5076,7 @@
       &lt;/Boolean&gt;
     &lt;/Attributes&gt;
     &lt;Values dnOrder=&quot;1&quot;&gt;
-      &lt;User dnOrder=&quot;0&quot; value=&quot;10000&quot;/&gt;
+      &lt;User dnOrder=&quot;0&quot; value=&quot;2&quot;/&gt;
     &lt;/Values&gt;
   &lt;/uart2&gt;
 &lt;/uart2&gt;
@@ -5225,7 +5248,7 @@
       </entry>
       <entry>
          <file>../src/config/default/peripheral/tmr1/plib_tmr1.c</file>
-         <hash>4215c6df3d57f7a036bda0ae1c70b4604e6c9fe705a3031a010c66acaa14bf8c</hash>
+         <hash>fca73b40b49eb2eaf259f9f8b8158eeafe74270bfdf75a9cd4bb963dedebaaee</hash>
       </entry>
       <entry>
          <file>../src/config/default/stdio/xc32_monitor.c</file>
@@ -5241,11 +5264,11 @@
       </entry>
       <entry>
          <file>../src/config/default/peripheral/evic/plib_evic.c</file>
-         <hash>2a8f69a1d444a4d8c7bc3185f3ea73696c86e7b9620a940d9e6245c7a5a1ca94</hash>
+         <hash>fec842f5859c195a021cb72d23b61751645d54c87b67762afaff7eb76e6006cd</hash>
       </entry>
       <entry>
          <file>../src/config/default/peripheral/uart/plib_uart2.c</file>
-         <hash>0ea14481e9358f32e76e7fbaa2f34942d3508e88f5e1c1764f4b49dd397e1603</hash>
+         <hash>5ca5f30a5da11eedcb927eafa2271363ca3cd256b69fe76a76b07719349e0bea</hash>
       </entry>
       <entry>
          <file>../src/config/default/peripheral/tmr1/plib_tmr1.h</file>
@@ -5261,7 +5284,7 @@
       </entry>
       <entry>
          <file>../src/config/default/interrupts.c</file>
-         <hash>8f20613b02ae8f220c04f355426a2f270e2709bd13d86c87a06dfa0bef481bf4</hash>
+         <hash>347690e6a859319cef26cee06f3ed7b2473e68c645c8c18d2fc228edbf39c1e7</hash>
       </entry>
       <entry>
          <file>../src/config/default/toolchain_specifics.h</file>
