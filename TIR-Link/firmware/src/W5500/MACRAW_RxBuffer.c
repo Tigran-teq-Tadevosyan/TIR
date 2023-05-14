@@ -1,32 +1,45 @@
-#include "MACRAW_Buffer.h"
+#include "MACRAW_RxBuffer.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <endian.h>
 
 #include "Common/Debug.h"
-#include "MACRAW_BufferPktQueue.h"
+#include "Common/BufferPktQueue.h"
 
-static uint8_t RX_BUFFER[RX_BUFFER_LENGTH];
-//static uint8_t TX_BUFFER[TX_BUFFER_LENGTH];
-
-static uint16_t     rxHeadIndex = 0,
-                    rxTailIndex = 0;
-
+static uint8_t RX_BUFFER[MACRAW_RX_BUFFER_LENGTH];
+static uint16_t rxTailIndex = 0;
 static uint16_t rxReservedChunkLength = 0;
 
-bool macraw_isRxEmpty(void) {
-    return isEmpty_PktQueue();
+static PktQueue rxPktQueue = {
+                                .head = NULL,
+                                .tail = NULL,
+                                .length = 0
+                            };
+
+bool macrawRx_isEmpty(void) {
+    return isEmpty_PktQueue(&rxPktQueue);
 }
 
 uint8_t* macrawRx_reserve(uint16_t length) {
-    if(length > (RX_BUFFER_LENGTH - rxTailIndex)) {
+    if(length > (MACRAW_RX_BUFFER_LENGTH - rxTailIndex)) {
         if(rxReservedChunkLength > 0) {
             memmove(RX_BUFFER, (RX_BUFFER + rxTailIndex - rxReservedChunkLength), rxReservedChunkLength);
         }
         rxTailIndex = rxReservedChunkLength;
     }
 
+    static uint16_t headIndex;
+    if(!isEmpty_PktQueue(&rxPktQueue)) {
+        headIndex = peekHeadIndex_PktQueue(&rxPktQueue);
+        if( (rxTailIndex - rxReservedChunkLength) <= headIndex && 
+            (rxTailIndex + length) > headIndex) {
+            
+            printDebug("macrawRx buffer overflow!\r\n");
+            while(true);
+        }
+    }
+    
     rxReservedChunkLength += length;
     rxTailIndex += length;
     
@@ -44,6 +57,7 @@ void macrawRx_processReservedChunk() {
     
     while(current_pkt_len <= (rxReservedChunkLength - W5500_LENGTH_SECTION_LENGTH)) {
         enqueue_PktQueue(
+                    &rxPktQueue,
                     rxTailIndex - rxReservedChunkLength + W5500_LENGTH_SECTION_LENGTH,
                     current_pkt_len
                 );
@@ -56,16 +70,15 @@ void macrawRx_processReservedChunk() {
 }
 
 uint8_t* macrawRx_getHeadPkt(uint16_t *length) {
-    if(isEmpty_PktQueue()) {
+    if(isEmpty_PktQueue(&rxPktQueue)) {
         *length = 0;
         return NULL;
     }
     
-    PktEntry* pktEntry = dequeue_PktQueue();
+    PktQueueEntry* pktEntry = dequeue_PktQueue(&rxPktQueue);
     
     uint8_t *pktPtr = RX_BUFFER + pktEntry->buffer_index;
     *length = pktEntry->pkt_length;
-    
     
     free(pktEntry);
     return pktPtr;

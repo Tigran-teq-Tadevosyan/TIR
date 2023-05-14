@@ -55,17 +55,18 @@ void EVIC_Initialize( void )
     INTCONSET = _INTCON_MVEC_MASK;
 
     /* Set up priority and subpriority of enabled interrupts */
-    IPC1SET = 0x4 | 0x0;  /* TIMER_1:  Priority 1 / Subpriority 0 */
+    IPC1SET = 0x10 | 0x0;  /* TIMER_1:  Priority 4 / Subpriority 0 */
     IPC29SET = 0x4000000 | 0x0;  /* CHANGE_NOTICE_B:  Priority 1 / Subpriority 0 */
     IPC30SET = 0x4 | 0x0;  /* CHANGE_NOTICE_C:  Priority 1 / Subpriority 0 */
     IPC31SET = 0x4 | 0x0;  /* CHANGE_NOTICE_G:  Priority 1 / Subpriority 0 */
     IPC31SET = 0x400 | 0x0;  /* CHANGE_NOTICE_H:  Priority 1 / Subpriority 0 */
-    IPC36SET = 0x400 | 0x0;  /* UART2_FAULT:  Priority 1 / Subpriority 0 */
-    IPC36SET = 0x40000 | 0x0;  /* UART2_RX:  Priority 1 / Subpriority 0 */
-    IPC36SET = 0x4000000 | 0x0;  /* UART2_TX:  Priority 1 / Subpriority 0 */
-    IPC42SET = 0x40000 | 0x0;  /* UART4_FAULT:  Priority 1 / Subpriority 0 */
-    IPC42SET = 0x4000000 | 0x0;  /* UART4_RX:  Priority 1 / Subpriority 0 */
-    IPC43SET = 0x4 | 0x0;  /* UART4_TX:  Priority 1 / Subpriority 0 */
+    IPC33SET = 0x40000 | 0x0;  /* DMA0:  Priority 1 / Subpriority 0 */
+    IPC36SET = 0x1000 | 0x0;  /* UART2_FAULT:  Priority 4 / Subpriority 0 */
+    IPC36SET = 0x100000 | 0x0;  /* UART2_RX:  Priority 4 / Subpriority 0 */
+    IPC36SET = 0x10000000 | 0x0;  /* UART2_TX:  Priority 4 / Subpriority 0 */
+    IPC42SET = 0x80000 | 0x0;  /* UART4_FAULT:  Priority 2 / Subpriority 0 */
+    IPC42SET = 0x8000000 | 0x0;  /* UART4_RX:  Priority 2 / Subpriority 0 */
+    IPC43SET = 0x8 | 0x0;  /* UART4_TX:  Priority 2 / Subpriority 0 */
 
 
 

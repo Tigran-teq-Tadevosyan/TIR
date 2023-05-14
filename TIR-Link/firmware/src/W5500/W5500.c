@@ -19,7 +19,8 @@
 #include "InterLink/Interlink_Forwarding.h"
 #include "Network/DHCP/DHCP_Server.h"
 #include "MACRAW_FrameFIFO.h"
-#include "MACRAW_Buffer.h"
+#include "MACRAW_RxBuffer.h"
+#include "InterLink/InterlinkBuffer.h"
 
 #define MACRAW_SOCKET   0 // The socket number for MACRAW socket (only socket 0 can operate in MACRAW mode)
 
@@ -126,11 +127,11 @@ void process_W5500 (void) {
             
     macrawRx_processReservedChunk();
     
-    if(!macraw_isRxEmpty()) {
+    if(!macrawRx_isEmpty()) {
         uint16_t new_frame_len;
         EthFrame *new_frame = (EthFrame*)macrawRx_getHeadPkt(&new_frame_len);
         if(new_frame_len > 1514) {
-            printDebug("Something went very wrong!!!!!\r\n");
+            printDebug("Something went very wrong (in process_W5500)!!!!!\r\n");
             while(true);
         }
 
@@ -150,25 +151,15 @@ void process_W5500Int() {
     uint16_t W5500_int = 0x0000;
     uint8_t socket_int = 0x00;
     
-    LED_RR_Clear();
     ctlwizchip(CW_GET_INTERRUPT, &W5500_int);
     ctlsocket(MACRAW_SOCKET, CS_GET_INTERRUPT, &socket_int);
     ctlsocket(MACRAW_SOCKET, CS_CLR_INTERRUPT, (void *)&MACRAW_SOCKET_INT_MASK);
-    LED_RR_Set();
     
     if(socket_int & SIK_CONNECTED) { } // Currently not used
     if(socket_int & SIK_DISCONNECTED) { } // Currently not used
 
     if(socket_int & SIK_SENT) {
-//    if(getSn_TX_RD(MACRAW_SOCKET) == getSn_TX_WR(MACRAW_SOCKET)) {
         W5500_CURRENTLY_SENDING = false;
-//        if(W5500_CURRENTLY_DATAFILLED)
-//        {
-//            setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
-//            while(getSn_CR(MACRAW_SOCKET));
-//            W5500_CURRENTLY_SENDING = true;
-//            W5500_CURRENTLY_DATAFILLED = false;
-//        }
     }
 
     if((socket_int & SIK_RECEIVED) || true) {
@@ -176,29 +167,48 @@ void process_W5500Int() {
 //        printDebug("Data to Read %u \r\n", rx_buffer_length);
         if(rx_buffer_length > 0) {
             uint8_t *read_buffer = macrawRx_reserve(rx_buffer_length);
+            printDebug("W5500 received %u bytes \r\n", rx_buffer_length);
             wiz_recv_data(MACRAW_SOCKET, read_buffer, rx_buffer_length);
             setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
             while(getSn_CR(MACRAW_SOCKET));
         }
     }
 
-    if(!isEmpty_TxFIFO() && !W5500_CURRENTLY_SENDING) {
-        W5500_CURRENTLY_SENDING = true;
-        uint16_t frame_length;
-        EthFrame* frame = peekHead_TxFIFO(&frame_length);
+    if(!W5500_CURRENTLY_SENDING) {
+        if(!isEmpty_TxFIFO()) {
+            W5500_CURRENTLY_SENDING = true;
+            uint16_t frame_length;
+            EthFrame* frame = peekHead_TxFIFO(&frame_length);
+            
+            wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
+            setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
+            while(getSn_CR(MACRAW_SOCKET));
+            
+            removeHead_TxFIFO();
+        } else if(!interlinkBuffer_isForwardingQueueEmpty()) {
+            W5500_CURRENTLY_SENDING = true;
 
-        wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
+            uint16_t frame_length;
+            EthFrame *frame = (EthFrame*)interlinkBuffer_getForwardingPkt(&frame_length);
+            
+            wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
+            setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
+            while(getSn_CR(MACRAW_SOCKET));
+        }
+//        W5500_CURRENTLY_SENDING = true;
+//        uint16_t frame_length;
+//        EthFrame* frame = peekHead_TxFIFO(&frame_length);
+
+//        wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
 //        printDebug("Written Data %u \r\n", frame_length);
-        setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
-        while(getSn_CR(MACRAW_SOCKET));
+//        setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
+//        while(getSn_CR(MACRAW_SOCKET));
 //        if(!W5500_CURRENTLY_SENDING)
 //        {
 //            W5500_CURRENTLY_SENDING = true;
 //            setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
 //            while(getSn_CR(MACRAW_SOCKET));
 //        }
-        
-        removeHead_TxFIFO();
     }
 
     // Would only be called if we have chip interrupts not related to sockets, so we clear that interrupts.

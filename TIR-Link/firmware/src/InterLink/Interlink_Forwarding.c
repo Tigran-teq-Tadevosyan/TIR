@@ -95,22 +95,6 @@ void process_RemoveForwardingEntry(ForwardingBinding *fBinding) {
                                                                         ipv4AddrToString(fBinding->ipAddr, NULL));
 }
 
-void process_ForwardingRequest(EthFrame* frame, uint16_t frame_length) {
-//    printDebug("Forwarding processing to -> Mac %s;\r\n", macAddrToString(&frame->destAddr, NULL));
-
-//    if(betoh16(frame->type) != ETH_TYPE_IPV4) return;
-
-//    size_t ip_packet_length = frame_length - sizeof(EthFrame);
-//    Ipv4Header *ip_header = (Ipv4Header *) frame->data;
-
-//    ethDumpHeader(frame);
-//    ipv4DumpHeader(ip_header);
-
-    uint8_t *tx_frame = (uint8_t*)reserveItem_TxFIFO(frame_length);
-    memmove(tx_frame, frame, frame_length);
-    incremetTailIndex_TxFIFO();
-}
-
 void interlink_ForwardIfAppropriate(EthFrame *frame, uint16_t frame_length) {
     if(betoh16(frame->type) != ETH_TYPE_IPV4 && betoh16(frame->type) != ETH_TYPE_ARP) return;
 

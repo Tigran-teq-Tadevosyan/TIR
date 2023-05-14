@@ -8,53 +8,49 @@
 #include "Common/Debug.h"
 #include "Interlink_Handshake.h"
 #include "Interlink_Forwarding.h"
+#include "InterlinkBuffer.h"
 #include "Network/DHCP/DHCP_Server.h"
 
 #define UART2_TIMEOUT_US (1000) // in microseconds
 #define INTERLINK_READ_BUFFER_LENGTH (10000) // in bytes
 
-#define START_DELIMITER_LENGTH  (4)
-#define PAYLOAD_LEN_ENTRY_SIZE  (2)
-#define MESSAGE_TYPE_LENGTH     (1)
-#define INTERLINK_HEADER_LENGTH (START_DELIMITER_LENGTH + PAYLOAD_LEN_ENTRY_SIZE + MESSAGE_TYPE_LENGTH)
-
-static const uint8_t START_DELIMITER[START_DELIMITER_LENGTH] = {0x24, 0x26, 0x24, 0x26};// $, &, $, &
-
-static uint8_t  rxBuffer[INTERLINK_READ_BUFFER_LENGTH] = {0};
-static size_t   rxBufferReadIndex = 0,
-                rxBufferWriteIndex = 0;
-static bool     rxNewDataAvailable = false,
-                rxDelimiterFound = false;
-
 static void     UART2RxEventHandler(UART_EVENT event, uintptr_t contextHandle);
-//static size_t   rxDataLength(void);
-static void     rxExtractPayload(uint8_t *buffer, uint16_t length);
 
 void init_Interlink(void) {
     // Setting up UART2: Connected to pair board
     UART2_ReadCallbackRegister(UART2RxEventHandler, NO_CONTEXT);
     UART2_ReadNotificationEnable(true, true);
     UART2_ReadThresholdSet(0);
-
+    
+    init_InterlinkDMA();
     init_InterlinkHandshake();
 }
 
 static void read_UART2() {
+    LED_BB_Clear();
     size_t read_len = UART2_ReadCountGet();
     if(read_len > 0) {
-        if(read_len < (INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex)) {
-            UART2_Read( rxBuffer + rxBufferWriteIndex,
-                        read_len);
-        } else {
-            UART2_Read( rxBuffer + rxBufferWriteIndex,
-                        INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex);
-            UART2_Read( rxBuffer,
-                        read_len - (INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex));
+        uint8_t *read_buffer = interlinkBuffer_reserve(read_len);
+        size_t reallyRead = UART2_Read(read_buffer, read_len);
+//        printDebug("read_UART2 ");
+        if(read_len != reallyRead) {
+            printDebug("read_UART2 read %u of %u\r\n", reallyRead, read_len);
+            while(true);
         }
-
-        rxBufferWriteIndex = (rxBufferWriteIndex + read_len)%INTERLINK_READ_BUFFER_LENGTH;
-        rxNewDataAvailable = true;
+//        if(read_len < (INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex)) {
+//            UART2_Read( rxBuffer + rxBufferWriteIndex,
+//                        read_len);
+//        } else {
+//            UART2_Read( rxBuffer + rxBufferWriteIndex,
+//                        INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex);
+//            UART2_Read( rxBuffer,
+//                        read_len - (INTERLINK_READ_BUFFER_LENGTH - rxBufferWriteIndex));
+//        }
+//
+//        rxBufferWriteIndex = (rxBufferWriteIndex + read_len)%INTERLINK_READ_BUFFER_LENGTH;
+//        rxNewDataAvailable = true;
     }
+    LED_BB_Set();
 }
 
 static void UART2RxEventHandler(UART_EVENT event, uintptr_t contextHandle) {
@@ -62,25 +58,11 @@ static void UART2RxEventHandler(UART_EVENT event, uintptr_t contextHandle) {
     if(event == UART_EVENT_READ_THRESHOLD_REACHED) {
         read_UART2();
         UART2_timeout_us = 0;
+    } else if(event == UART_EVENT_READ_ERROR) {
+        printDebug("UART2 Rx error %u\r\n", UART2_ErrorGet());
+        while(true);
     }
 }
-
-size_t rxDataLength(void) {
-    return (INTERLINK_READ_BUFFER_LENGTH + rxBufferWriteIndex - rxBufferReadIndex)%INTERLINK_READ_BUFFER_LENGTH;
-}
-
-static void rxExtractPayload(uint8_t *buffer, uint16_t length) {
-    size_t  payload_start_index = (rxBufferReadIndex + INTERLINK_HEADER_LENGTH)%INTERLINK_READ_BUFFER_LENGTH,
-            payload_end_index = (payload_start_index + length)%INTERLINK_READ_BUFFER_LENGTH;
-
-    if(payload_end_index >= payload_start_index) {
-        memmove(buffer, rxBuffer + payload_start_index, length);
-    } else {
-        memmove(buffer, rxBuffer + payload_start_index, INTERLINK_READ_BUFFER_LENGTH - payload_start_index);
-        memmove(buffer, rxBuffer, payload_end_index);
-    }
-}
-
 
 static uint32_t droped_pkt_num = 0;
 void send_InterLink(InterlinkMessageType messageType, uint8_t *payload, uint16_t payload_len) {
@@ -100,18 +82,31 @@ void send_InterLink(InterlinkMessageType messageType, uint8_t *payload, uint16_t
             printDebug("UART2 buffer overflow, written %u of %u \r\n", written_size, payload_len);
             while(true);
         } else {
-            printDebug("UART2 buffer  written %u \r\n", payload_len);
+//            printDebug("UART2 buffer  written %u \r\n", payload_len);
+            
+            if(messageType == FORWARDING_REQUEST) {
+                printDebug("Forwarding sent: %u\r\n", payload_len);
+            }
         }
     }
 }
 
-bool process_Interlink(void) {
+void process_Interlink(void) {
+    
     process_InterlinkHandshake();
+    
+    UART2_ReadNotificationEnable(false, false);
     if(UART2_timeout_us > UART2_TIMEOUT_US) {
         read_UART2();
 //        UART2_timeout_us = 0;
     }
-
+    
+//    UART2_ReadNotificationEnable(false, false);
+    LED_GG_Clear();
+    interlinkBuffer_processReservedChunk();
+    LED_GG_Set();
+    UART2_ReadNotificationEnable(true, true);
+    /*
     if((!rxNewDataAvailable && rxDelimiterFound == true) || rxDataLength() < (INTERLINK_HEADER_LENGTH)) return false;
     rxNewDataAvailable = false;
 
@@ -183,4 +178,5 @@ bool process_Interlink(void) {
 
     if(payload != NULL) free(payload);
     return true;
+    */
 }

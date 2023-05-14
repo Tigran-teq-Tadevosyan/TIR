@@ -7,15 +7,14 @@
 
 #include "definitions.h"                // SYS function prototypes
 
-// TIRLink includes
-    #include "Common.h"
+#include "Common.h"
 
-static void sysTimerTick(uint32_t status, uintptr_t contextHandle);
+static void sysTimerTick(uint32_t status, uintptr_t contextHandle); // called every 100 us
 
-systime_t system_tick_us;
-systime_t delay_tick_us;
-
-systime_t UART2_timeout_us;
+volatile systime_t system_tick_us;
+volatile systime_t delay_tick_us;
+ 
+volatile systime_t UART2_timeout_us;
 
 void init_SysClock() {
     srand(time(NULL));
@@ -23,39 +22,26 @@ void init_SysClock() {
     system_tick_us = 0;
     delay_tick_us = 0;
             
-    TMR1_CallbackRegister(sysTimerTick, NO_CONTEXT);
+    TMR1_CallbackRegister(sysTimerTick, NO_CONTEXT); // called every 100 us
     TMR1_Start();
-}
-
-systime_t get_SysTime_us(void) { 
-    return system_tick_us;
 }
 
 systime_t get_SysTime_ms(void) {
     return system_tick_us/1000;
 }
 
-void delay_us(systime_t us_to_wait)
-{
-    delay_tick_us = 0;
-    while(delay_tick_us < us_to_wait);
-}
-
 void delay_ms(systime_t ms)
 {
-    while(ms > 0)
-    {
-        delay_us(1000);
-        ms--;
-    }
+    ms *= 1000;
+    delay_tick_us = 0;
+    while(delay_tick_us < ms);
 }
 
-static void sysTimerTick(uint32_t status, uintptr_t contextHandle)
-{
-    system_tick_us++;
-    delay_tick_us++;
-    UART2_timeout_us++;
-    
+static void sysTimerTick(uint32_t status, uintptr_t contextHandle) { // called every 100 us
+//    LED_RR_Toggle();
+    system_tick_us += 10;
+    delay_tick_us += 10;
+    UART2_timeout_us += 10;
 }
 
 uint16_t getRandNumber(uint16_t min, uint16_t max) {
