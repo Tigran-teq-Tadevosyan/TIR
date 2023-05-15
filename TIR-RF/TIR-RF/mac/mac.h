@@ -10,7 +10,19 @@
 
 #include <stdint.h>
 
-#define MAC_HEADER_SIZE 8
+/* TI Drivers */
+#include <ti/drivers/rf/RF.h>
+#include <ti/drivers/GPIO.h>
+
+#include "phy/phy.h"
+
+
+#define MAC_RX_PACKET_BUFF_CNT  10
+
+enum rfDeviceType {
+    RF_DEVICE_MASTER = 0,
+    RF_DEVICE_SLAVE = 1
+};
 
 enum rfMacFrameType {
     MAC_SERVICE_PACKET = 0,
@@ -27,13 +39,24 @@ typedef struct rfMacPacketHeader {
 
 typedef struct rfMacDataPacket {
     rfMacPacketHeader_t hdr;
-    uint8_t data[200];
+    uint8_t data[MAX_LENGTH];
 }rfMacDataPacket_t;
 
 
-extern rfMacDataPacket_t rfMacTxPacket;
-extern rfMacDataPacket_t rfMacRxPacket;
+extern uint8_t macProcessStatus;
+extern uint8_t deviceType;
 
+void macInit(void);
+void macProcess(void);
+void startMacTransmitt(void);
+
+uint8_t macTxRdyPacketCnt(void);
+rfMacDataPacket_t * macGetTxFreePacket(void);
+rfMacDataPacket_t * macGetTxRdyPacket(void);
+
+
+rfMacDataPacket_t * macGetRxFreePacket(void);
+rfMacDataPacket_t * macGetRxRdyPacket(void);
 
 
 #endif /* MAC_MAC_H_ */
