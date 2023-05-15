@@ -13,7 +13,6 @@
 #include "Common/Debug.h"
 #include "Network/DHCP/DHCP_Server.h"
 #include "InterLink/Interlink.h"
-#include "W5500/MACRAW_FrameFIFO.h"
 
 static void SwitchEventHandler(GPIO_PIN pin, uintptr_t contextHandle);
 

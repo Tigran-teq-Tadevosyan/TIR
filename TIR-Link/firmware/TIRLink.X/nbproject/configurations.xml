@@ -57,10 +57,10 @@
       <itemPath>../src/InterLink/Interlink_Handshake.h</itemPath>
       <itemPath>../src/InterLink/Interlink_Forwarding.c</itemPath>
       <itemPath>../src/InterLink/Interlink_Forwarding.h</itemPath>
-      <itemPath>../src/InterLink/InterlinkBuffer.c</itemPath>
-      <itemPath>../src/InterLink/InterlinkBuffer.h</itemPath>
-      <itemPath>../src/InterLink/Interlink_DMA.c</itemPath>
-      <itemPath>../src/InterLink/Interlink_DMA.h</itemPath>
+      <itemPath>../src/InterLink/Interlink_TxDMA.c</itemPath>
+      <itemPath>../src/InterLink/Interlink_TxDMA.h</itemPath>
+      <itemPath>../src/InterLink/Interlink_RxDMA.c</itemPath>
+      <itemPath>../src/InterLink/Interlink_RxDMA.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -79,6 +79,8 @@
         <itemPath>../src/Network/DHCP/DHCP_Debug.h</itemPath>
         <itemPath>../src/Network/DHCP/DHCP_Server.c</itemPath>
         <itemPath>../src/Network/DHCP/DHCP_Server.h</itemPath>
+        <itemPath>../src/Network/DHCP/DHCP_MessageQueue.c</itemPath>
+        <itemPath>../src/Network/DHCP/DHCP_MessageQueue.h</itemPath>
       </logicalFolder>
       <itemPath>../src/Network/Ethernet.c</itemPath>
       <itemPath>../src/Network/Ethernet.h</itemPath>
@@ -151,8 +153,6 @@
       <itemPath>../src/W5500/W5500.c</itemPath>
       <itemPath>../src/W5500/W5500.h</itemPath>
       <itemPath>../src/W5500/W5500_Debug.c</itemPath>
-      <itemPath>../src/W5500/MACRAW_FrameFIFO.c</itemPath>
-      <itemPath>../src/W5500/MACRAW_FrameFIFO.h</itemPath>
       <itemPath>../src/W5500/MACRAW_RxBuffer.c</itemPath>
       <itemPath>../src/W5500/MACRAW_RxBuffer.h</itemPath>
     </logicalFolder>
@@ -1516,7 +1516,7 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="1d000000-1d1fffff"/>
         <property key="programmerToGoFilePath"
-                  value="E:/RedFeather/Projects/TTTHDRCD/PIC/Projects/Test/firmware/TestSoftware.X/debug/default/TestSoftware_ptg"/>
+                  value="/home/tigrantadevosyan/Documents/Dev/TIR/buffer-restructuring/TIR-Link/firmware/TIRLink.X/debug/default/TIRLink_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.pgmentry.voltage" value="low"/>

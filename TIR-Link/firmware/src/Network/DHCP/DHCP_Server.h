@@ -17,9 +17,6 @@
 
 #define DHCP_SERVER_MAINTENANCE_PERIOD (5000) // 2 seconds in milliseconds
 
-//extern const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MIN;
-//extern const Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MAX;	
-
 typedef struct
 {
    MacAddr macAddr;     ///<Client's MAC address
@@ -27,8 +24,6 @@ typedef struct
    bool validLease;     ///<Valid lease
    systime_t timestamp; ///<Timestamp
 } DhcpServerBinding;
-
-//extern DhcpServerBinding clientBinding[DHCP_SERVER_MAX_CLIENTS];
 
 TIR_Status dhcpServerStart(void);
 bool dhcpServerRunning(void);

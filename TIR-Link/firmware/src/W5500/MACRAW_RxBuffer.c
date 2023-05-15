@@ -36,7 +36,7 @@ uint8_t* macrawRx_reserve(uint16_t length) {
             (rxTailIndex + length) > headIndex) {
             
             printDebug("macrawRx buffer overflow!\r\n");
-            while(true);
+            return NULL;
         }
     }
     

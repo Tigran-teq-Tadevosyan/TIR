@@ -18,9 +18,9 @@
 #include "Network/Network.h"
 #include "InterLink/Interlink_Forwarding.h"
 #include "Network/DHCP/DHCP_Server.h"
-#include "MACRAW_FrameFIFO.h"
 #include "MACRAW_RxBuffer.h"
-#include "InterLink/InterlinkBuffer.h"
+#include "InterLink/Interlink_RxDMA.h"
+#include "Network/DHCP/DHCP_MessageQueue.h"
 
 #define MACRAW_SOCKET   0 // The socket number for MACRAW socket (only socket 0 can operate in MACRAW mode)
 
@@ -137,7 +137,7 @@ void process_W5500 (void) {
 
         if(dhcpServerRunning()) {
             if(valid_dhcpPkt(new_frame, new_frame_len)) {
-                dhcpServerProcessPkt(new_frame, (uint32_t)new_frame_len);
+                dhcpServerProcessPkt(new_frame, new_frame_len);
             } else { // We only try to forward if it is not a dhcp pkt
                 interlink_ForwardIfAppropriate(new_frame, new_frame_len);
             }
@@ -158,57 +158,45 @@ void process_W5500Int() {
     if(socket_int & SIK_CONNECTED) { } // Currently not used
     if(socket_int & SIK_DISCONNECTED) { } // Currently not used
 
-    if(socket_int & SIK_SENT) {
-        W5500_CURRENTLY_SENDING = false;
-    }
-
-    if((socket_int & SIK_RECEIVED) || true) {
+    if(true) { // with condition (socket_int & SIK_RECEIVED) W5500 sometimes lies (both tells data is present when it's not and vise-versa)
         uint16_t rx_buffer_length = getSn_RX_RSR(MACRAW_SOCKET);
 //        printDebug("Data to Read %u \r\n", rx_buffer_length);
         if(rx_buffer_length > 0) {
             uint8_t *read_buffer = macrawRx_reserve(rx_buffer_length);
-            printDebug("W5500 received %u bytes \r\n", rx_buffer_length);
-            wiz_recv_data(MACRAW_SOCKET, read_buffer, rx_buffer_length);
-            setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
-            while(getSn_CR(MACRAW_SOCKET));
+            
+            if(read_buffer != NULL) { // This mean we have overflowen the rx buffer and we can't read right now  
+//                printDebug("W5500 received %u bytes \r\n", rx_buffer_length);
+                wiz_recv_data(MACRAW_SOCKET, read_buffer, rx_buffer_length);
+                setSn_CR(MACRAW_SOCKET, Sn_CR_RECV);
+                while(getSn_CR(MACRAW_SOCKET));
+            }
         }
+    }
+    
+    if(socket_int & SIK_SENT) {
+        W5500_CURRENTLY_SENDING = false;
     }
 
     if(!W5500_CURRENTLY_SENDING) {
-        if(!isEmpty_TxFIFO()) {
+        if(!isEmpty_DHCPMessageQueue()) {
             W5500_CURRENTLY_SENDING = true;
-            uint16_t frame_length;
-            EthFrame* frame = peekHead_TxFIFO(&frame_length);
+            uint8_t *frame = peekHead_DHCPMessageQueue();
             
-            wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
+            wiz_send_data(MACRAW_SOCKET, frame, DHCP_MESSAGE_LENGTH);
             setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
             while(getSn_CR(MACRAW_SOCKET));
-            
-            removeHead_TxFIFO();
-        } else if(!interlinkBuffer_isForwardingQueueEmpty()) {
+            removeHead_DHCPMessageQueue();
+
+        } else if(!isForwardingQueueEmpty_intlinkRxDMA()) {
             W5500_CURRENTLY_SENDING = true;
 
             uint16_t frame_length;
-            EthFrame *frame = (EthFrame*)interlinkBuffer_getForwardingPkt(&frame_length);
+            uint8_t *frame = getForwardingPkt_intlinkRxDMA(&frame_length);
             
-            wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
+            wiz_send_data(MACRAW_SOCKET, frame, frame_length);
             setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
             while(getSn_CR(MACRAW_SOCKET));
         }
-//        W5500_CURRENTLY_SENDING = true;
-//        uint16_t frame_length;
-//        EthFrame* frame = peekHead_TxFIFO(&frame_length);
-
-//        wiz_send_data(MACRAW_SOCKET, (uint8_t*)frame, frame_length);
-//        printDebug("Written Data %u \r\n", frame_length);
-//        setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
-//        while(getSn_CR(MACRAW_SOCKET));
-//        if(!W5500_CURRENTLY_SENDING)
-//        {
-//            W5500_CURRENTLY_SENDING = true;
-//            setSn_CR(MACRAW_SOCKET, Sn_CR_SEND);
-//            while(getSn_CR(MACRAW_SOCKET));
-//        }
     }
 
     // Would only be called if we have chip interrupts not related to sockets, so we clear that interrupts.

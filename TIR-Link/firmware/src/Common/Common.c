@@ -11,9 +11,8 @@
 
 static void sysTimerTick(uint32_t status, uintptr_t contextHandle); // called every 100 us
 
-volatile systime_t system_tick_us;
-volatile systime_t delay_tick_us;
- 
+static volatile systime_t system_tick_us;
+static volatile systime_t delay_tick_us;
 volatile systime_t UART2_timeout_us;
 
 void init_SysClock() {
@@ -42,9 +41,9 @@ static void sysTimerTick(uint32_t status, uintptr_t contextHandle) {
     ++delay_tick_us;
     ++UART2_timeout_us;
     
-//    system_tick_us += 10;
-//    delay_tick_us += 10;
-//    UART2_timeout_us += 10;
+//    system_tick_us += 100;
+//    delay_tick_us += 100;
+//    UART2_timeout_us += 100;
 }
 
 uint16_t getRandNumber(uint16_t min, uint16_t max) {

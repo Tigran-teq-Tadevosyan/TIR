@@ -5,9 +5,8 @@
 #include "Common/Common.h"
 #include "Common/Debug.h"
 #include "Network/DHCP/DHCP_Server.h"
-#include "Interlink_DMA.h"
+#include "Interlink_TxDMA.h"
 
-// Roles related definition section
 #define LINK_HANSHAKE_TIMEOUT_MIN (250) // in milliseconds
 #define LINK_HANSHAKE_TIMEOUT_MAX (1000) // in milliseconds
 
@@ -43,7 +42,7 @@ void process_InterlinkHandshake(void) {
         timeCompare(get_SysTime_ms() , LAST_REPEAT_TIMESTAMP) > LINK_HANSHAKE_TIMEOUT) {
         
         printDebug("Sending HANDSHAKE_REQUEST Repeat\r\n");
-        append_intlinkDMA_TxQueue(HANDSHAKE_REQUEST, NULL, 0, false);
+        append2Queue_intlinkTxDMA(HANDSHAKE_REQUEST, NULL, 0, false);
         LAST_REPEAT_TIMESTAMP = get_SysTime_ms();
     } else if( HANDSHAKE_STATE == WAITING_ROLE_ACK && 
         timeCompare(get_SysTime_ms() , LAST_REPEAT_TIMESTAMP) > LINK_OFFER_TIMEOUT) {
@@ -55,7 +54,7 @@ void process_InterlinkHandshake(void) {
             offer_payload.role2 = DHCP_SERVER2; // Pair role
 
             printDebug("Sending HANDSHAKE_OFFER Repeat\r\n");
-            append_intlinkDMA_TxQueue(HANDSHAKE_OFFER, (uint8_t*)&offer_payload, sizeof(HANDSHAKE_ROLE_PAIR), false);
+            append2Queue_intlinkTxDMA(HANDSHAKE_OFFER, (uint8_t*)&offer_payload, sizeof(HANDSHAKE_ROLE_PAIR), false);
             LAST_REPEAT_TIMESTAMP = get_SysTime_ms();
         }
     }
@@ -75,7 +74,7 @@ void process_handshakeRequest(void) {
     offer_payload.role1 = DHCP_SERVER1; // Self role
     offer_payload.role2 = DHCP_SERVER2; // Pair role
     
-    append_intlinkDMA_TxQueue(HANDSHAKE_OFFER, (uint8_t*)&offer_payload, sizeof(HANDSHAKE_ROLE_PAIR), false);
+    append2Queue_intlinkTxDMA(HANDSHAKE_OFFER, (uint8_t*)&offer_payload, sizeof(HANDSHAKE_ROLE_PAIR), false);
     HANDSHAKE_STATE = WAITING_ROLE_ACK;
     OFFER_REPEAT_COUNT = 0;
 }
@@ -91,11 +90,9 @@ void process_handshakeOffer(HANDSHAKE_ROLE_PAIR* roles) {
     ack_payload.role1 = SELF_LINK_ROLE;
     ack_payload.role2 = PAIR_LINK_ROLE;
     
-    append_intlinkDMA_TxQueue(HANDSHAKE_ACK, (uint8_t*)&ack_payload, sizeof(HANDSHAKE_ROLE_PAIR), false);
+    append2Queue_intlinkTxDMA(HANDSHAKE_ACK, (uint8_t*)&ack_payload, sizeof(HANDSHAKE_ROLE_PAIR), false);
     HANDSHAKE_STATE = HANDSHAKE_FINISHED;
     dhcpServerStart();
-    UART2_ReadThresholdSet(500);
-    printDebug("dhcpServerRunning(): %d\r\n", dhcpServerRunning());
 }
 
 void process_handshakeACK(HANDSHAKE_ROLE_PAIR* roles) {
@@ -108,6 +105,4 @@ void process_handshakeACK(HANDSHAKE_ROLE_PAIR* roles) {
     printDebug("Self Role: %d\r\n", SELF_LINK_ROLE);
     printDebug("Pair Role: %d\r\n", PAIR_LINK_ROLE);
     dhcpServerStart();
-    UART2_ReadThresholdSet(500);
-    printDebug("dhcpServerRunning(): %d\r\n", dhcpServerRunning());
 }

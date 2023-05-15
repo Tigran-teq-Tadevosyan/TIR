@@ -1,4 +1,4 @@
-#include "Interlink_DMA.h"
+#include "Interlink_TxDMA.h"
 
 #include <xc.h>
 #include <stdlib.h>
@@ -13,16 +13,16 @@ static Intlink_DMAEntry *TX_QUEUE_HEAD = NULL,
 static uint32_t TX_PENDING_DATA = 0;
 
 static void intlinkDMATransmitCompleteCallback(DMAC_TRANSFER_EVENT event, uintptr_t contextHandle);
-static void process_intlinkDMA(void);
+static void process_intlinkTxDMA(void);
 
-void init_intlinkDMA(void) {
-    DMAC_ChannelCallbackRegister(DMAC_CHANNEL_0, intlinkDMATransmitCompleteCallback, 0);    
+void init_intlinkTxDMA(void) {
+    DMAC_ChannelCallbackRegister(DMAC_CHANNEL_0, intlinkDMATransmitCompleteCallback, 0);
 }
 
 static uint32_t droped_pkt_num = 0;
-void append_intlinkDMA_TxQueue(InterlinkMessageType messageType, uint8_t *payload, uint16_t payload_length, bool free_payload) {
+void append2Queue_intlinkTxDMA(InterlinkMessageType messageType, uint8_t *payload, uint16_t payload_length, bool free_payload) {
     if(MAX_TX_PENDING_DATA_SIZE < (TX_PENDING_DATA + payload_length)) {
-        printDebug("Interlink DMA_TxQueue %u \r\n", ++droped_pkt_num);
+        printDebug("Interlink DMA_TxQueue dropped pkt count %u \r\n", ++droped_pkt_num);
         return;
     }
     
@@ -48,25 +48,26 @@ void append_intlinkDMA_TxQueue(InterlinkMessageType messageType, uint8_t *payloa
     TX_PENDING_DATA += payload_length;
             
     if(!DMAC_ChannelIsBusy(DMAC_CHANNEL_0)) {
-        process_intlinkDMA();
+        process_intlinkTxDMA();
     }
 }
 
-bool isEmpty_intlinkDMA_TXQeueu(void) {
+bool isQueueEmpty_intlinkTxDMA(void) {
     return (TX_QUEUE_HEAD == NULL);
 }
 
 static void intlinkDMATransmitCompleteCallback(DMAC_TRANSFER_EVENT event, uintptr_t contextHandle) {
     (void)contextHandle;
     if(event == DMAC_TRANSFER_EVENT_COMPLETE) {
-        process_intlinkDMA();
+        process_intlinkTxDMA();
     } else if(event == DMAC_TRANSFER_EVENT_ERROR) {
-        printDebug("DMAC_TRANSFER_EVENT_ERROR\r\n");
+        printDebug("DMAC_TRANSFER_EVENT_ERRORin interlink Tx\r\n");
         while(true);
     }
 }
+
     
-static void process_intlinkDMA(void) {
+static void process_intlinkTxDMA(void) {
     if(TX_QUEUE_HEAD == NULL) return;
     
     if(!TX_QUEUE_HEAD->head_sent) {
@@ -86,6 +87,6 @@ static void process_intlinkDMA(void) {
         
         __pic32_free_coherent(prev_head);
         
-        process_intlinkDMA();
+        process_intlinkTxDMA();
     }
 }

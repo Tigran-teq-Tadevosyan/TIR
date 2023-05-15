@@ -26,8 +26,8 @@ struct Intlink_DMAEntry {
     Intlink_DMAEntry *next;
 };
 
-void init_intlinkDMA(void);
-void append_intlinkDMA_TxQueue(InterlinkMessageType messageType, uint8_t *payload, uint16_t payload_length, bool free_payload);
-bool isEmpty_intlinkDMA_TXQeueu(void);
+void init_intlinkTxDMA(void);
+void append2Queue_intlinkTxDMA(InterlinkMessageType messageType, uint8_t *payload, uint16_t payload_length, bool free_payload);
+bool isQueueEmpty_intlinkTxDMA(void);
 
 #endif // _INTERLINK_DMA_H

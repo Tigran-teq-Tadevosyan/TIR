@@ -5,9 +5,10 @@
 
 #include "DHCP_Debug.h"
 #include "Common/Debug.h"
-#include "W5500/MACRAW_FrameFIFO.h"
 #include "InterLink/Interlink.h" 
 #include "InterLink/Interlink_Forwarding.h"
+
+#include "DHCP_MessageQueue.h"
 
 Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MIN;
 Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MAX;
@@ -40,6 +41,10 @@ TIR_Status dhcpServerStart(void) {
         DHCP_SERVER_IPv4_ADDRESS_MIN = DHCP_SERVER2_IPv4_ADDRESS_MAX;
         DHCP_SERVER_NEXT_IPv4_ADDRESS = DHCP_SERVER2_IPv4_ADDRESS_MIN;
     } else { return Failure; }
+    
+    #ifdef DHCP_SERVER_DEBUG_LEVEL0
+    printDebug("DHCP server started\r\n");
+    #endif
     
     __dhcpServerRunning = true;
     return Success;
@@ -693,15 +698,15 @@ TIR_Status dhcpServerSendReply(uint8_t type, Ipv4Addr yourIpAddr, const DhcpMess
     Ipv4Addr destIpAddr;
     uint16_t destPort;
 
-    uint32_t    frame_length    = ETH_HEADER_SIZE + IPV4_MIN_HEADER_LENGTH + UDP_HEADER_LENGTH + DHCP_MAX_MSG_SIZE;
-    uint8_t     *frame          = (uint8_t*)reserveItem_TxFIFO(frame_length);
-    EthFrame    *eth_header     = (EthFrame *) frame;
+//    uint32_t    frame_length    = ETH_HEADER_SIZE + IPV4_MIN_HEADER_LENGTH + UDP_HEADER_LENGTH + DHCP_MAX_MSG_SIZE;
+//    uint8_t     *frame          = (uint8_t*)reserveNew_DHCPMessageQueue();
+    EthFrame    *eth_header     = (EthFrame *) reserveNew_DHCPMessageQueue();
     Ipv4Header  *ip_header      = (Ipv4Header *) ((uint8_t*)eth_header + ETH_HEADER_SIZE);
     UdpHeader   *upd_header     = (UdpHeader *) ((uint8_t*)ip_header + IPV4_MIN_HEADER_LENGTH);
     DhcpMessage *dhcp_packet    = (DhcpMessage *) ((uint8_t*)upd_header + UDP_HEADER_LENGTH);
 
     // Cleaning the frame buffer
-    memset(frame, 0, frame_length);
+    memset(eth_header, 0, DHCP_MESSAGE_LENGTH);
 
     //Format DHCP reply message
     dhcp_packet->op = DHCP_OPCODE_BOOTREPLY;
@@ -868,7 +873,8 @@ TIR_Status dhcpServerSendReply(uint8_t type, Ipv4Addr yourIpAddr, const DhcpMess
     printf("------PACKET END------\n");
     #endif
     
-    incremetTailIndex_TxFIFO();
+//    incremetTailIndex_TxFIFO();
+    appendReserved_DHCPMessageQueue();
     
     return status;
 }

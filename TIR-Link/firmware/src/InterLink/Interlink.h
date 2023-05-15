@@ -2,15 +2,13 @@
 #define _INTERLINK_H
 
 #include <inttypes.h>
-#include <stddef.h>
-#include <stdbool.h>
 
 #define START_DELIMITER_LENGTH  (4)
 #define PAYLOAD_LEN_ENTRY_SIZE  (2)
 #define MESSAGE_TYPE_LENGTH     (1)
 #define INTERLINK_HEADER_LENGTH (START_DELIMITER_LENGTH + PAYLOAD_LEN_ENTRY_SIZE + MESSAGE_TYPE_LENGTH)
 
-static const uint8_t START_DELIMITER[START_DELIMITER_LENGTH] = {0x26, 0x24, 0x26, 0x24}; //{0x24, 0x26, 0x24, 0x26}; // $, &, $, &
+static const uint8_t START_DELIMITER[START_DELIMITER_LENGTH] = {0x26, 0x24, 0x26, 0x24}; // {0x24, 0x26, 0x24, 0x26}; // $, &, $, &
 
 typedef enum {
     UNDEFINED_ROLE   = 0x00,
@@ -29,9 +27,6 @@ typedef enum {
 
 void init_Interlink(void);
 void process_Interlink(void);
-//void send_InterLink(InterlinkMessageType messageType, uint8_t *payload, uint16_t payload_len);
-
-//size_t   rxDataLength(void);
 
 // Definitions in Interlink_Handshake.c
 InterlinkHostRole get_SelfLinkRole(void);

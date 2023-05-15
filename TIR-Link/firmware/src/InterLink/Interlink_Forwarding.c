@@ -3,10 +3,9 @@
 #include <xc.h>
 
 #include "Interlink.h"
-#include "Interlink_DMA.h"
+#include "Interlink_TxDMA.h"
 #include "Network/Network.h"
 #include "Common/Debug.h"
-#include "W5500/MACRAW_FrameFIFO.h"
 
 struct ForwardingListEntry_t; // Forward declaration for next entry
 typedef struct ForwardingListEntry_t ForwardingListEntry;
@@ -29,7 +28,7 @@ void send_AddForwardingEntry(DhcpServerBinding *binding) {
     fBinding->macAddr = binding->macAddr;
     fBinding->ipAddr = binding->ipAddr;
 
-    append_intlinkDMA_TxQueue(FORWARDING_TABLE_ADDITION, (uint8_t*)fBinding, sizeof(ForwardingBinding), true);
+    append2Queue_intlinkTxDMA(FORWARDING_TABLE_ADDITION, (uint8_t*)fBinding, sizeof(ForwardingBinding), true);
 }
 
 void send_RemoveForwardingEntry(DhcpServerBinding *binding) {
@@ -38,7 +37,7 @@ void send_RemoveForwardingEntry(DhcpServerBinding *binding) {
     fBinding->macAddr = binding->macAddr;
     fBinding->ipAddr = binding->ipAddr;
 
-    append_intlinkDMA_TxQueue(FORWARDING_TABLE_REMOVAL, (uint8_t*)fBinding, sizeof(ForwardingBinding), true);
+    append2Queue_intlinkTxDMA(FORWARDING_TABLE_REMOVAL, (uint8_t*)fBinding, sizeof(ForwardingBinding), true);
 }
 
 void process_AddForwardingEntry(ForwardingBinding *fBinding) {
@@ -103,9 +102,7 @@ void interlink_ForwardIfAppropriate(EthFrame *frame, uint16_t frame_length) {
 
     // First we check based on destination MAC address, if it is broadcast or in forwarding table we forward it
     if(macCompAddr(&frame->destAddr, &MAC_BROADCAST_ADDR) || macAddrPresent(&frame->destAddr)) {
-//        printDebug("Forwarding req to -> Mac %s;\r\n",
-//                macAddrToString(&frame->destAddr, NULL));
-        append_intlinkDMA_TxQueue(FORWARDING_REQUEST, (uint8_t*)frame, frame_length, false);
+        append2Queue_intlinkTxDMA(FORWARDING_REQUEST, (uint8_t*)frame, frame_length, false);
         return;
     }
 
@@ -114,10 +111,7 @@ void interlink_ForwardIfAppropriate(EthFrame *frame, uint16_t frame_length) {
         Ipv4Header *ip_header = (Ipv4Header *) frame->data;
 
         if(ip_header->destAddr == IPV4_BROADCAST_ADDR || ipAddrPresent(ip_header->destAddr)) {  
-            printDebug("Forwarding req to -> Mac %s; IP: %s\r\n",
-                    macAddrToString(&frame->destAddr, NULL),
-                    ipv4AddrToString(ip_header->destAddr, NULL));
-            append_intlinkDMA_TxQueue(FORWARDING_REQUEST, (uint8_t*)frame, frame_length, false);
+            append2Queue_intlinkTxDMA(FORWARDING_REQUEST, (uint8_t*)frame, frame_length, false);
             return;
         }
     }

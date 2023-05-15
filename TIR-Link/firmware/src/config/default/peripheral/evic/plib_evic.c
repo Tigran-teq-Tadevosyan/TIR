@@ -61,8 +61,8 @@ void EVIC_Initialize( void )
     IPC31SET = 0x4 | 0x0;  /* CHANGE_NOTICE_G:  Priority 1 / Subpriority 0 */
     IPC31SET = 0x400 | 0x0;  /* CHANGE_NOTICE_H:  Priority 1 / Subpriority 0 */
     IPC33SET = 0x100000 | 0x0;  /* DMA0:  Priority 4 / Subpriority 0 */
+    IPC33SET = 0x10000000 | 0x0;  /* DMA1:  Priority 4 / Subpriority 0 */
     IPC36SET = 0x1000 | 0x0;  /* UART2_FAULT:  Priority 4 / Subpriority 0 */
-    IPC36SET = 0x100000 | 0x0;  /* UART2_RX:  Priority 4 / Subpriority 0 */
     IPC42SET = 0x80000 | 0x0;  /* UART4_FAULT:  Priority 2 / Subpriority 0 */
     IPC42SET = 0x8000000 | 0x0;  /* UART4_RX:  Priority 2 / Subpriority 0 */
     IPC43SET = 0x8 | 0x0;  /* UART4_TX:  Priority 2 / Subpriority 0 */
