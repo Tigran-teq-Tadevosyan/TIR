@@ -1,3 +1,62 @@
+# Qt specific
+# C++ objects and libs
+/TIR-Application/*.slo
+/TIR-Application/*.lo
+/TIR-Application/*.o
+/TIR-Application/*.a
+/TIR-Application/*.la
+/TIR-Application/*.lai
+/TIR-Application/*.so
+/TIR-Application/*.so.*
+/TIR-Application/*.dll
+/TIR-Application/*.dylib
+
+# Qt-es
+/TIR-Application/object_script.*.Release
+/TIR-Application/object_script.*.Debug
+/TIR-Application/*_plugin_import.cpp
+/TIR-Application/.qmake.cache
+/TIR-Application/.qmake.stash
+/TIR-Application/*.pro.user
+/TIR-Application/*.pro.user.*
+/TIR-Application/*.qbs.user
+/TIR-Application/*.qbs.user.*
+/TIR-Application/*.moc
+/TIR-Application/moc_*.cpp
+/TIR-Application/moc_*.h
+/TIR-Application/qrc_*.cpp
+/TIR-Application/ui_*.h
+/TIR-Application/*.qmlc
+/TIR-Application/*.jsc
+/TIR-Application/Makefile*
+/TIR-Application/*build-*
+/TIR-Application/*.qm
+/TIR-Application/*.prl
+
+/TIR-Application/build-debug
+/TIR-Application/build-release
+
+# Qt unit tests
+/TIR-Application/target_wrapper.*
+
+# QtCreator
+/TIR-Application/*.autosave
+
+# QtCreator Qml
+/TIR-Application/*.qmlproject.user
+/TIR-Application/*.qmlproject.user.*
+
+# QtCreator CMake
+/TIR-Application/CMakeLists.txt.user*
+
+# QtCreator 4.8< compilation database
+/TIR-Application/compile_commands.json
+
+# QtCreator local machine specific files for imported projects
+/TIR-Application/*creator.user*
+
+/TIR-Application/*_qmlcache.qrc
+
 # MPLAB X IDE specific
 /TIR-Link/firmware/TIRLink.X/~*.*
 /TIR-Link/firmware/TIRLink.X/build/
