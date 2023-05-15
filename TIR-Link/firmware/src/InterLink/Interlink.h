@@ -2,6 +2,7 @@
 #define _INTERLINK_H
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 #define START_DELIMITER_LENGTH  (4)
 #define PAYLOAD_LEN_ENTRY_SIZE  (2)
@@ -24,6 +25,10 @@ typedef enum {
     FORWARDING_TABLE_REMOVAL	= 0x05,
     FORWARDING_REQUEST		= 0x06
 } InterlinkMessageType;
+
+
+extern bool _RX_DMAC_TRANSFER_EVENT_ERROR_FLAG;
+extern bool _TX_DMAC_TRANSFER_EVENT_ERROR_FLAG; 
 
 void init_Interlink(void);
 void process_Interlink(void);

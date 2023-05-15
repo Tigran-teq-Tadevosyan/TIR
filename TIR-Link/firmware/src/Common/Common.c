@@ -15,8 +15,12 @@ static volatile systime_t system_tick_us;
 static volatile systime_t delay_tick_us;
 volatile systime_t UART2_timeout_us;
 
+static volatile systime_t system_tick_ms;
+static volatile systime_t delay_tick_ms;
+volatile systime_t UART2_timeout_ms;
+
 void init_SysClock() {
-    srand(time(NULL));
+    srand(DEVSN0);
     
     system_tick_us = 0;
     delay_tick_us = 0;
@@ -37,13 +41,19 @@ void delay_ms(systime_t ms)
 }
 
 static void sysTimerTick(uint32_t status, uintptr_t contextHandle) { 
+//    ++system_tick_ms;
+//    ++delay_tick_ms;
+//    ++UART2_timeout_ms;
     ++system_tick_us;
     ++delay_tick_us;
     ++UART2_timeout_us;
     
-//    system_tick_us += 100;
-//    delay_tick_us += 100;
-//    UART2_timeout_us += 100;
+    
+//        system_tick_us += 10;
+//    delay_tick_us += 10;
+//    UART2_timeout_us += 10;
+//    LED_GG_Toggle();
+
 }
 
 uint16_t getRandNumber(uint16_t min, uint16_t max) {

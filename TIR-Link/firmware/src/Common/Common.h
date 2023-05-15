@@ -58,6 +58,8 @@ typedef enum {
 typedef uint64_t systime_t;
 
 extern volatile systime_t UART2_timeout_us;
+extern volatile systime_t UART2_timeout_ms;
+
 
 // Initializes the system timer
 void init_SysClock(void);

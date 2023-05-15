@@ -61,11 +61,9 @@ static void intlinkDMATransmitCompleteCallback(DMAC_TRANSFER_EVENT event, uintpt
     if(event == DMAC_TRANSFER_EVENT_COMPLETE) {
         process_intlinkTxDMA();
     } else if(event == DMAC_TRANSFER_EVENT_ERROR) {
-        printDebug("DMAC_TRANSFER_EVENT_ERRORin interlink Tx\r\n");
-        while(true);
+        _TX_DMAC_TRANSFER_EVENT_ERROR_FLAG = true;
     }
 }
-
     
 static void process_intlinkTxDMA(void) {
     if(TX_QUEUE_HEAD == NULL) return;

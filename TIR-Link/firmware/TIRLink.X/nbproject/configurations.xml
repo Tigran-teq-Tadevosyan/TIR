@@ -1516,7 +1516,7 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="1d000000-1d1fffff"/>
         <property key="programmerToGoFilePath"
-                  value="/home/tigrantadevosyan/Documents/Dev/TIR/buffer-restructuring/TIR-Link/firmware/TIRLink.X/debug/default/TIRLink_ptg"/>
+                  value="/home/tigrantadevosyan/Documents/Dev/TIR/TIR-Source/TIR-Link/firmware/TIRLink.X/debug/default/TIRLink_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.pgmentry.voltage" value="low"/>

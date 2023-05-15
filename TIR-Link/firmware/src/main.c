@@ -51,6 +51,14 @@ int main(void) {
         if(dhcpServerRunning()) {
             dhcpServerMaintanance();
         }
+        
+        if(_TX_DMAC_TRANSFER_EVENT_ERROR_FLAG) {
+            printDebug("_TX_DMAC_TRANSFER_EVENT_ERROR_FLAG in interlink Tx\r\n");
+            while(true);
+        } else if(_RX_DMAC_TRANSFER_EVENT_ERROR_FLAG) {
+            printDebug("_RX_DMAC_TRANSFER_EVENT_ERROR_FLAG in interlink Rx\r\n");
+            while(true);
+        }
     }
     
     /* Execution should not come here during normal operation */

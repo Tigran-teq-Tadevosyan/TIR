@@ -16,7 +16,6 @@ Ipv4Addr DHCP_SERVER_IPv4_ADDRESS_MAX;
 Ipv4Addr DHCP_SERVER_NEXT_IPv4_ADDRESS;
 
 DhcpServerBinding clientBinding[DHCP_SERVER_MAX_CLIENTS];
-DhcpServerBinding pairServerClientBinding[DHCP_SERVER_MAX_CLIENTS];
 
 systime_t last_maintenance_timestamp = 0;
 
@@ -43,7 +42,7 @@ TIR_Status dhcpServerStart(void) {
     } else { return Failure; }
     
     #ifdef DHCP_SERVER_DEBUG_LEVEL0
-    printDebug("DHCP server started\r\n");
+    printDebug("DHCP server started: self role: %u; pair role: %u;\r\n", selfLinkRole, get_PairLinkRole());
     #endif
     
     __dhcpServerRunning = true;

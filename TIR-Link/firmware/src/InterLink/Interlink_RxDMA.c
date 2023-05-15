@@ -120,8 +120,7 @@ static void intlinkDMAReceiveCompleteCallback(DMAC_TRANSFER_EVENT event, uintptr
         rxUnprocSecLen += rxRecSecLen;
         rxRecSecLen = INTERLINK_BUFFER_BLOCK_SIZE;
     } else if(event == DMAC_TRANSFER_EVENT_ERROR) {
-        printDebug("DMAC_TRANSFER_EVENT_ERROR in interlink Rx\r\n");
-        while(true);
+        _RX_DMAC_TRANSFER_EVENT_ERROR_FLAG = true;
     }
 }
 
