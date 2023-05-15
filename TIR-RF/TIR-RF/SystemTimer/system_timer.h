@@ -10,7 +10,14 @@
 
 #include <stddef.h>
 
-#define SYTEM_TICK_US   10
+#define SYTEM_TIMESLOT_DURATION_US  (2500)
+#define SYTEM_TICK_US   (10)
+#define SYTEM_TIMESLOT_DURATION  (SYTEM_TIMESLOT_DURATION_US / SYTEM_TICK_US)
+
+
+#define TX_START_DURATION_US  (50)
+#define TX_START_DURATION  (TX_START_DURATION_US / SYTEM_TICK_US)
+
 
 void systemTimerInit(void);
 
