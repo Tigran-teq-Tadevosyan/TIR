@@ -65,9 +65,9 @@ void CHANGE_NOTICE_B_InterruptHandler( void );
 void CHANGE_NOTICE_C_InterruptHandler( void );
 void CHANGE_NOTICE_G_InterruptHandler( void );
 void CHANGE_NOTICE_H_InterruptHandler( void );
+void DMA0_InterruptHandler( void );
+void DMA1_InterruptHandler( void );
 void UART2_FAULT_InterruptHandler( void );
-void UART2_RX_InterruptHandler( void );
-void UART2_TX_InterruptHandler( void );
 void UART4_FAULT_InterruptHandler( void );
 void UART4_RX_InterruptHandler( void );
 void UART4_TX_InterruptHandler( void );
@@ -75,7 +75,7 @@ void UART4_TX_InterruptHandler( void );
 
 
 /* All the handlers are defined here.  Each will call its PLIB-specific function. */
-void __ISR(_TIMER_1_VECTOR, ipl1SRS) TIMER_1_Handler (void)
+void __ISR(_TIMER_1_VECTOR, ipl4SRS) TIMER_1_Handler (void)
 {
     TIMER_1_InterruptHandler();
 }
@@ -100,32 +100,32 @@ void __ISR(_CHANGE_NOTICE_H_VECTOR, ipl1SRS) CHANGE_NOTICE_H_Handler (void)
     CHANGE_NOTICE_H_InterruptHandler();
 }
 
-void __ISR(_UART2_FAULT_VECTOR, ipl1SRS) UART2_FAULT_Handler (void)
+void __ISR(_DMA0_VECTOR, ipl4SRS) DMA0_Handler (void)
+{
+    DMA0_InterruptHandler();
+}
+
+void __ISR(_DMA1_VECTOR, ipl4SRS) DMA1_Handler (void)
+{
+    DMA1_InterruptHandler();
+}
+
+void __ISR(_UART2_FAULT_VECTOR, ipl4SRS) UART2_FAULT_Handler (void)
 {
     UART2_FAULT_InterruptHandler();
 }
 
-void __ISR(_UART2_RX_VECTOR, ipl1SRS) UART2_RX_Handler (void)
-{
-    UART2_RX_InterruptHandler();
-}
-
-void __ISR(_UART2_TX_VECTOR, ipl1SRS) UART2_TX_Handler (void)
-{
-    UART2_TX_InterruptHandler();
-}
-
-void __ISR(_UART4_FAULT_VECTOR, ipl1SRS) UART4_FAULT_Handler (void)
+void __ISR(_UART4_FAULT_VECTOR, ipl2SRS) UART4_FAULT_Handler (void)
 {
     UART4_FAULT_InterruptHandler();
 }
 
-void __ISR(_UART4_RX_VECTOR, ipl1SRS) UART4_RX_Handler (void)
+void __ISR(_UART4_RX_VECTOR, ipl2SRS) UART4_RX_Handler (void)
 {
     UART4_RX_InterruptHandler();
 }
 
-void __ISR(_UART4_TX_VECTOR, ipl1SRS) UART4_TX_Handler (void)
+void __ISR(_UART4_TX_VECTOR, ipl2SRS) UART4_TX_Handler (void)
 {
     UART4_TX_InterruptHandler();
 }

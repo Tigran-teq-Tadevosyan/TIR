@@ -1,9 +1,11 @@
 #include "Interlink_Forwarding.h"
 
+#include <xc.h>
+
 #include "Interlink.h"
+#include "Interlink_TxDMA.h"
 #include "Network/Network.h"
 #include "Common/Debug.h"
-#include "W5500/MACRAW_FrameFIFO.h"
 
 struct ForwardingListEntry_t; // Forward declaration for next entry
 typedef struct ForwardingListEntry_t ForwardingListEntry;
@@ -21,21 +23,21 @@ static bool ipAddrPresent(Ipv4Addr ipAddr);
 static bool macAddrPresent(MacAddr *macAddr);
 
 void send_AddForwardingEntry(DhcpServerBinding *binding) {
-    ForwardingBinding fBinding = {
-                                    .macAddr = binding->macAddr,
-                                    .ipAddr = binding->ipAddr
-                                };
+    ForwardingBinding *fBinding = __pic32_alloc_coherent(sizeof(*fBinding));
+    
+    fBinding->macAddr = binding->macAddr;
+    fBinding->ipAddr = binding->ipAddr;
 
-    send_InterLink(FORWARDING_TABLE_ADDITION, (uint8_t*)&fBinding, sizeof(ForwardingBinding));
+    append2Queue_intlinkTxDMA(FORWARDING_TABLE_ADDITION, (uint8_t*)fBinding, sizeof(ForwardingBinding), true);
 }
 
 void send_RemoveForwardingEntry(DhcpServerBinding *binding) {
-    ForwardingBinding fBinding = {
-                                    .macAddr = binding->macAddr,
-                                    .ipAddr = binding->ipAddr
-                                };
+    ForwardingBinding *fBinding = __pic32_alloc_coherent(sizeof(*fBinding));
+    
+    fBinding->macAddr = binding->macAddr;
+    fBinding->ipAddr = binding->ipAddr;
 
-    send_InterLink(FORWARDING_TABLE_REMOVAL, (uint8_t*)&fBinding, sizeof(ForwardingBinding));
+    append2Queue_intlinkTxDMA(FORWARDING_TABLE_REMOVAL, (uint8_t*)fBinding, sizeof(ForwardingBinding), true);
 }
 
 void process_AddForwardingEntry(ForwardingBinding *fBinding) {
@@ -95,30 +97,12 @@ void process_RemoveForwardingEntry(ForwardingBinding *fBinding) {
                                                                         ipv4AddrToString(fBinding->ipAddr, NULL));
 }
 
-void process_ForwardingRequest(EthFrame* frame, uint16_t frame_length) {
-//    printDebug("Forwarding processing to -> Mac %s;\r\n", macAddrToString(&frame->destAddr, NULL));
-
-//    if(betoh16(frame->type) != ETH_TYPE_IPV4) return;
-
-//    size_t ip_packet_length = frame_length - sizeof(EthFrame);
-//    Ipv4Header *ip_header = (Ipv4Header *) frame->data;
-
-//    ethDumpHeader(frame);
-//    ipv4DumpHeader(ip_header);
-
-    uint8_t *tx_frame = (uint8_t*)reserveItem_TxFIFO(frame_length);
-    memmove(tx_frame, frame, frame_length);
-    incremetTailIndex_TxFIFO();
-}
-
 void interlink_ForwardIfAppropriate(EthFrame *frame, uint16_t frame_length) {
     if(betoh16(frame->type) != ETH_TYPE_IPV4 && betoh16(frame->type) != ETH_TYPE_ARP) return;
 
     // First we check based on destination MAC address, if it is broadcast or in forwarding table we forward it
     if(macCompAddr(&frame->destAddr, &MAC_BROADCAST_ADDR) || macAddrPresent(&frame->destAddr)) {
-//        printDebug("Forwarding req to -> Mac %s;\r\n",
-//                macAddrToString(&frame->destAddr, NULL));
-        send_InterLink(FORWARDING_REQUEST, (uint8_t*)frame, frame_length);
+        append2Queue_intlinkTxDMA(FORWARDING_REQUEST, (uint8_t*)frame, frame_length, false);
         return;
     }
 
@@ -127,10 +111,7 @@ void interlink_ForwardIfAppropriate(EthFrame *frame, uint16_t frame_length) {
         Ipv4Header *ip_header = (Ipv4Header *) frame->data;
 
         if(ip_header->destAddr == IPV4_BROADCAST_ADDR || ipAddrPresent(ip_header->destAddr)) {  
-            printDebug("Forwarding req to -> Mac %s; IP: %s\r\n",
-                    macAddrToString(&frame->destAddr, NULL),
-                    ipv4AddrToString(ip_header->destAddr, NULL));
-            send_InterLink(FORWARDING_REQUEST, (uint8_t*)frame, frame_length);
+            append2Queue_intlinkTxDMA(FORWARDING_REQUEST, (uint8_t*)frame, frame_length, false);
             return;
         }
     }

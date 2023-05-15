@@ -13,11 +13,8 @@
 #include "Common/Debug.h"
 #include "Network/DHCP/DHCP_Server.h"
 #include "InterLink/Interlink.h"
-#include "W5500/MACRAW_FrameFIFO.h"
 
 static void SwitchEventHandler(GPIO_PIN pin, uintptr_t contextHandle);
-
-bool printFlag = false;
 
 int main(void) {   
     /* Initialize all modules */
@@ -38,28 +35,21 @@ int main(void) {
     GPIO_PinIntEnable(SW_3_PIN, GPIO_INTERRUPT_ON_BOTH_EDGES);
     GPIO_PinIntEnable(SW_4_PIN, GPIO_INTERRUPT_ON_BOTH_EDGES);
   
-//    RNG_TrngEnable(); 
-    
     init_SysClock();
     init_Debug();
     init_Interlink();
     init_W5500();
-
+    
     while(true) {
         /* Maintain state machines of all polled MPLAB Harmony modules. */
         SYS_Tasks();
+        
         process_W5500();
-             
+        
         process_Interlink();
-                
+        
         if(dhcpServerRunning()) {
             dhcpServerMaintanance();
-        }
-        
-        if(printFlag) {
-            printBothQueueSpaces();
-            printDebug("Interlink rx buffer length: %u\r\n", rxDataLength());
-            printFlag = false;
         }
     }
     
@@ -77,7 +67,6 @@ static void SwitchEventHandler(GPIO_PIN pin, uintptr_t contextHandle) {
         } else { }
     } else if(pin == SW_2_PIN) {
         if(SW_2_Get() == 0) {
-            printFlag = true;
         } else { }
     } else if(pin == SW_3_PIN) {
         if(SW_3_Get() == 0) {

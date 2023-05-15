@@ -6,6 +6,8 @@
       <itemPath>../src/Common/Common.h</itemPath>
       <itemPath>../src/Common/Debug.h</itemPath>
       <itemPath>../src/Common/Debug.c</itemPath>
+      <itemPath>../src/Common/BufferPktQueue.c</itemPath>
+      <itemPath>../src/Common/BufferPktQueue.h</itemPath>
     </logicalFolder>
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -16,17 +18,14 @@
             <logicalFolder name="clk" displayName="clk" projectFiles="true">
               <itemPath>../src/config/default/peripheral/clk/plib_clk.h</itemPath>
             </logicalFolder>
-            <logicalFolder name="coretimer" displayName="coretimer" projectFiles="true">
-              <itemPath>../src/config/default/peripheral/coretimer/plib_coretimer.h</itemPath>
+            <logicalFolder name="dmac" displayName="dmac" projectFiles="true">
+              <itemPath>../src/config/default/peripheral/dmac/plib_dmac.h</itemPath>
             </logicalFolder>
             <logicalFolder name="evic" displayName="evic" projectFiles="true">
               <itemPath>../src/config/default/peripheral/evic/plib_evic.h</itemPath>
             </logicalFolder>
             <logicalFolder name="gpio" displayName="gpio" projectFiles="true">
               <itemPath>../src/config/default/peripheral/gpio/plib_gpio.h</itemPath>
-            </logicalFolder>
-            <logicalFolder name="rng" displayName="rng" projectFiles="true">
-              <itemPath>../src/config/default/peripheral/rng/plib_rng.h</itemPath>
             </logicalFolder>
             <logicalFolder name="spi" displayName="spi" projectFiles="true">
               <logicalFolder name="spi_master" displayName="spi_master" projectFiles="true">
@@ -58,6 +57,10 @@
       <itemPath>../src/InterLink/Interlink_Handshake.h</itemPath>
       <itemPath>../src/InterLink/Interlink_Forwarding.c</itemPath>
       <itemPath>../src/InterLink/Interlink_Forwarding.h</itemPath>
+      <itemPath>../src/InterLink/Interlink_TxDMA.c</itemPath>
+      <itemPath>../src/InterLink/Interlink_TxDMA.h</itemPath>
+      <itemPath>../src/InterLink/Interlink_RxDMA.c</itemPath>
+      <itemPath>../src/InterLink/Interlink_RxDMA.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -76,6 +79,8 @@
         <itemPath>../src/Network/DHCP/DHCP_Debug.h</itemPath>
         <itemPath>../src/Network/DHCP/DHCP_Server.c</itemPath>
         <itemPath>../src/Network/DHCP/DHCP_Server.h</itemPath>
+        <itemPath>../src/Network/DHCP/DHCP_MessageQueue.c</itemPath>
+        <itemPath>../src/Network/DHCP/DHCP_MessageQueue.h</itemPath>
       </logicalFolder>
       <itemPath>../src/Network/Ethernet.c</itemPath>
       <itemPath>../src/Network/Ethernet.h</itemPath>
@@ -95,17 +100,14 @@
             <logicalFolder name="clk" displayName="clk" projectFiles="true">
               <itemPath>../src/config/default/peripheral/clk/plib_clk.c</itemPath>
             </logicalFolder>
-            <logicalFolder name="coretimer" displayName="coretimer" projectFiles="true">
-              <itemPath>../src/config/default/peripheral/coretimer/plib_coretimer.c</itemPath>
+            <logicalFolder name="dmac" displayName="dmac" projectFiles="true">
+              <itemPath>../src/config/default/peripheral/dmac/plib_dmac.c</itemPath>
             </logicalFolder>
             <logicalFolder name="evic" displayName="evic" projectFiles="true">
               <itemPath>../src/config/default/peripheral/evic/plib_evic.c</itemPath>
             </logicalFolder>
             <logicalFolder name="gpio" displayName="gpio" projectFiles="true">
               <itemPath>../src/config/default/peripheral/gpio/plib_gpio.c</itemPath>
-            </logicalFolder>
-            <logicalFolder name="rng" displayName="rng" projectFiles="true">
-              <itemPath>../src/config/default/peripheral/rng/plib_rng.c</itemPath>
             </logicalFolder>
             <logicalFolder name="spi" displayName="spi" projectFiles="true">
               <logicalFolder name="spi_master" displayName="spi_master" projectFiles="true">
@@ -151,8 +153,8 @@
       <itemPath>../src/W5500/W5500.c</itemPath>
       <itemPath>../src/W5500/W5500.h</itemPath>
       <itemPath>../src/W5500/W5500_Debug.c</itemPath>
-      <itemPath>../src/W5500/MACRAW_FrameFIFO.c</itemPath>
-      <itemPath>../src/W5500/MACRAW_FrameFIFO.h</itemPath>
+      <itemPath>../src/W5500/MACRAW_RxBuffer.c</itemPath>
+      <itemPath>../src/W5500/MACRAW_RxBuffer.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -182,7 +184,7 @@
         <platformTool>pkob4hybrid</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion>4.21</languageToolchainVersion>
-        <platform>3</platform>
+        <platform>2</platform>
       </toolsSet>
       <packs>
         <pack name="PIC32MZ-DA_DFP" vendor="Microchip" version="1.4.118"/>
@@ -291,7 +293,7 @@
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-cross-reference-file" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
-        <property key="heap-size" value="20000"/>
+        <property key="heap-size" value="50000"/>
         <property key="input-libraries" value=""/>
         <property key="kseg-length" value=""/>
         <property key="kseg-origin" value=""/>
@@ -1514,7 +1516,7 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="1d000000-1d1fffff"/>
         <property key="programmerToGoFilePath"
-                  value="E:/RedFeather/Projects/TIR/software/TIR/TIR-Link/firmware/TIRLink.X/debug/default/TIRLink_ptg"/>
+                  value="/home/tigrantadevosyan/Documents/Dev/TIR/buffer-restructuring/TIR-Link/firmware/TIRLink.X/debug/default/TIRLink_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.pgmentry.voltage" value="low"/>

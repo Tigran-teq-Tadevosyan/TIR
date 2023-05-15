@@ -56,16 +56,13 @@ typedef enum {
 } TIR_Status;
 
 typedef uint64_t systime_t;
-//typedef uint32_t size_t;
 
-extern systime_t UART2_timeout_us;
+extern volatile systime_t UART2_timeout_us;
 
 // Initializes the system timer
 void init_SysClock(void);
-systime_t get_SysTime_us(void); // Returns system time in microseconds
 systime_t get_SysTime_ms(void); // Returns system time in milliseconds
 
-void delay_us(systime_t us_to_wait);
 void delay_ms(systime_t ms);
 
 uint16_t getRandNumber(uint16_t min, uint16_t max);
