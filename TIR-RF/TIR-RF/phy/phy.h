@@ -16,25 +16,26 @@
 
 
 
-#define RX_START_TO_SETTLE_TICKS   256 /* Time between RX start trigger and the radio
+#define RX_START_TO_SETTLE_TICKS   (256) /* Time between RX start trigger and the radio
                                         * being ready to receive the first preamble bit.
                                         * This is a fixed value for CMD_PROP_RX. */
-#define TX_START_TO_PREAMBLE_TICKS 384 /* Time between TX start trigger and first bit on air.
+#define TX_START_TO_PREAMBLE_TICKS (384) /* Time between TX start trigger and first bit on air.
                                         * This is a fixed value for CMD_PROP_TX. */
 
-#define TX_CMD_TO_START 500 /* Time between TX start trigger and first bit on air.
+#define TX_CMD_TO_START             (1200) /* Time between TX start trigger and first bit on air.
                                         * This is a fixed value for CMD_PROP_TX. */
 
-#define PREAMLBE_CNT 4
-#define SYNCWORD_CNT 4
-#define CRC_CNT 2
+#define PREAMLBE_CNT    4
+#define SYNCWORD_CNT    4
+#define LENGHT_DATA_CNT 1
+#define CRC_CNT         2
 
 #define DATA_SPEED 1000000
 
 /* Packet RX Configuration */
 #define MAC_HEADER_SIZE             8
-#define MAX_DATA_SIZE               240  /* Data Maximum Size of a Generic Data Entry */
-#define MAX_LENGTH             MAC_HEADER_SIZE + MAX_DATA_SIZE /* Max length byte the radio will accept */
+#define MAX_DATA_SIZE               180  /* Data Maximum Size of a Generic Data Entry */
+#define MAX_LENGTH             (MAC_HEADER_SIZE + MAX_DATA_SIZE) /* Max length byte the radio will accept */
 #define NUM_DATA_ENTRIES       2  /* NOTE: Only two data entries supported at the moment */
 #define NUM_APPENDED_BYTES     2  /* The Data Entries data field will contain:
                                    * 1 Header byte (RF_cmdPropRx.rxConf.bIncludeHdr = 0x1)
@@ -51,14 +52,11 @@ void ReceivedOnRFcallback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e);
 void TransmitPackageRFcallback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e);
 
 void phyCancel(void);
+void phyTxStartTimeSet(void);
 void phySendPackage(uint8_t* data, uint16_t len);
 void phyStartReceive(void);
 
-uint8_t phyRxPacketRdy(void);
 uint32_t phyGetLastRxTickPassed(void);
-void phyRxPacketRdyClean(void);
-
-void phyProcess(void);
 
 
 

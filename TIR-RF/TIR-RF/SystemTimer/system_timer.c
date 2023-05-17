@@ -18,12 +18,31 @@
 #include "ti_drivers_config.h"
 #include "system_timer.h"
 #include "mac/mac.h"
+#include "phy/phy.h"
 
 uint32_t system_timer_tick = 0;
-uint32_t tx_start_tick = 0;
+uint32_t self_timer_tick = 0;
+uint32_t tx_start_flag = 0;
+
+uint8_t countersIsFixed = 0;
 
 /* Callback used for toggling the LED. */
 void timerCallback(Timer_Handle myHandle, int_fast16_t status);
+
+
+void fixCounters(void)
+{
+    countersIsFixed = 1;
+}
+
+void releaseCounters(uint16_t passedTime)
+{
+    system_timer_tick += passedTime;
+    self_timer_tick += passedTime;
+
+    countersIsFixed = 0;
+}
+
 
 
 void systemTimerInit(void)
@@ -56,6 +75,7 @@ void systemTimerInit(void)
         /* Failed to start timer */
         while (1) {}
     }
+
 }
 
 /*
@@ -65,8 +85,10 @@ void systemTimerInit(void)
  */
 void timerCallback(Timer_Handle myHandle, int_fast16_t status)
 {
+    if(countersIsFixed) return;
     system_timer_tick++;
-    tx_start_tick++;
+    self_timer_tick++;
+
     if(system_timer_tick % SYTEM_TIMESLOT_DURATION == 0)
     {
       if(system_timer_tick % (2*SYTEM_TIMESLOT_DURATION) == 0)
@@ -74,7 +96,7 @@ void timerCallback(Timer_Handle myHandle, int_fast16_t status)
           GPIO_write(CONFIG_GPIO_GLED, 0);
           if(deviceType == RF_DEVICE_MASTER)
           {
-              tx_start_tick = 0;
+              tx_start_flag = 1;
           }
       }
       else
@@ -82,15 +104,16 @@ void timerCallback(Timer_Handle myHandle, int_fast16_t status)
           GPIO_write(CONFIG_GPIO_GLED, 1);
           if(deviceType == RF_DEVICE_SLAVE)
           {
-              tx_start_tick = 0;
+              tx_start_flag = 1;
           }
       }
     }
 
-    if(tx_start_tick == 0)
+    if(tx_start_flag == 1)
+    {
+        tx_start_flag = 0;
         prepMacTrasnmitt();
+    }
 
-    if(tx_start_tick == TX_START_DURATION)
-        startMacTransmitt();
 }
 

@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
 
 
 /* TI Drivers */
@@ -44,6 +45,8 @@
 
 /* Driverlib Header files */
 #include DeviceFamily_constructPath(driverlib/rf_prop_mailbox.h)
+#include DeviceFamily_constructPath(driverlib/cpu.h)
+#include DeviceFamily_constructPath(driverlib/ioc.h)
 
 /* Board Header files */
 #include "ti_drivers_config.h"
@@ -60,6 +63,9 @@
 
 /***** Defines *****/
 
+uint8_t printStats = 0;
+void buttonCallbackFunction(uint_least8_t index);
+
 void initGpio(void)
 {
     GPIO_setConfig(CONFIG_GPIO_RLED, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
@@ -68,8 +74,25 @@ void initGpio(void)
     GPIO_setConfig(CONFIG_GPIO_GLED, GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW);
     GPIO_write(CONFIG_GPIO_GLED, CONFIG_GPIO_LED_OFF);
 
+    GPIO_setConfig(CONFIG_GPIO_BTN1, GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_FALLING);
+
+    /* Install Button callback */
+    GPIO_setCallback(CONFIG_GPIO_BTN1, buttonCallbackFunction);
+    /* Enable interrupts */
+    GPIO_enableInt(CONFIG_GPIO_BTN1);
+
 }
 
+/* Pin interrupt Callback function board buttons configured in the pinTable. */
+void buttonCallbackFunction(uint_least8_t index) {
+
+    if (GPIO_read(index) == 1)
+    {
+        return;
+    }
+
+    printStats = 1;
+}
 
 void *mainThread(void *arg0)
 {
@@ -87,8 +110,17 @@ void *mainThread(void *arg0)
 
     while(1)
     {
-        phyProcess();
         macProcess();
+
+        if(printStats)
+        {
+            printStats = 0;
+            uint8_t statTxt[100];
+            sprintf((char *)statTxt, "\r\nTx Bytes - %lu\r\nRx Bytes - %lu\r\nLost Packets - %lu\r\n", macDataBytesSent, macDataBytesRecieved, macLostPacket);
+            macDataBytesSent = 0;
+            macDataBytesRecieved = 0;
+            uartSend(statTxt, strlen((char *)statTxt));
+        }
     }
 }
 

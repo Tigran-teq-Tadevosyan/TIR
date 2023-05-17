@@ -25,31 +25,15 @@
 
 /* Buffer which contains all Data Entries for receiving data.
  * Pragmas are needed to make sure this buffer is 4 byte aligned (requirement from the RF Core) */
-#if defined(__TI_COMPILER_VERSION__)
-#pragma DATA_ALIGN (rxDataEntryBuffer, 4);
-static uint8_t
-rxDataEntryBuffer[RF_QUEUE_DATA_ENTRY_BUFFER_SIZE(NUM_DATA_ENTRIES,
-                                                  MAX_LENGTH,
-                                                  NUM_APPENDED_BYTES)];
-#elif defined(__IAR_SYSTEMS_ICC__)
-#pragma data_alignment = 4
-static uint8_t
-rxDataEntryBuffer[RF_QUEUE_DATA_ENTRY_BUFFER_SIZE(NUM_DATA_ENTRIES,
-                                                  MAX_LENGTH,
-                                                  NUM_APPENDED_BYTES)];
-#elif defined(__GNUC__)
+
 static uint8_t
 rxDataEntryBuffer[RF_QUEUE_DATA_ENTRY_BUFFER_SIZE(NUM_DATA_ENTRIES,
                                                   MAX_LENGTH,
                                                   NUM_APPENDED_BYTES)]
                                                   __attribute__((aligned(4)));
-#else
-#error This compiler is not supported.
-#endif
+
 
 /*******Global variable declarations*********/
-
-volatile uint8_t packetRxCb;
 
 
 
@@ -60,20 +44,22 @@ RF_CmdHandle rfPostHandle;
 /* Receive dataQueue for RF Core to fill in data */
 static dataQueue_t dataQueue;
 static rfc_dataEntryGeneral_t* currentDataEntry;
+
+uint32_t rxPhyRdyFlag;
 static uint8_t packetLength;
 static uint8_t* packetDataPointer;
 
+
+uint32_t txStartTime;
 uint32_t rxRdyTick;
 uint32_t txStartedTick;
+
 uint32_t txEndTick;
 uint8_t resumeRx = 0;
 
 
 void phyInit(void)
 {
-    packetRxCb = NO_PACKET;
-
-
 
     RF_Params rfParams;
     RF_Params_init(&rfParams);
@@ -95,7 +81,7 @@ void phyInit(void)
     /* Discard ignored packets from Rx queue */
     RF_cmdPropRx.rxConf.bAutoFlushIgnored = 1;
     /* Discard packets with CRC error from Rx queue */
-    RF_cmdPropRx.rxConf.bAutoFlushCrcErr = 1;
+    RF_cmdPropRx.rxConf.bAutoFlushCrcErr = 0;
     /* Implement packet length filtering to avoid PROP_ERROR_RXBUF */
     RF_cmdPropRx.maxPktLen = MAX_LENGTH;
     RF_cmdPropRx.pktConf.bRepeatOk = 1;
@@ -118,19 +104,23 @@ void phyInit(void)
 void phyCancel(void)
 {
     /*Cancel the ongoing command*/
-    RF_cancelCmd(rfHandle, rfPostHandle, 1);
+    RF_cancelCmd(rfHandle, rfPostHandle, 0);
+}
+
+void phyTxStartTimeSet(void)
+{
+    txStartTime = RF_getCurrentTime() + TX_CMD_TO_START;
 }
 
 void phySendPackage(uint8_t* data, uint16_t len)
 {
     RF_cmdPropTx.pktLen = len;
     RF_cmdPropTx.pPkt = data;
-    RF_cmdPropTx.startTime = RF_getCurrentTime() + TX_CMD_TO_START;
+    RF_cmdPropTx.startTime = txStartTime;
 
     //RF_runCmd(rfHandle, (RF_Op*)&RF_cmdPropTx, RF_PriorityNormal, &TransmitPackageRFcallback, RF_EventLastCmdDone);
     RF_postCmd(rfHandle, (RF_Op*)&RF_cmdPropTx, RF_PriorityNormal, &TransmitPackageRFcallback, RF_EventLastCmdDone);
-    txStartedTick = system_timer_tick;
-    phyStartReceive();
+    txStartedTick = self_timer_tick;
 }
 
 void phyStartReceive(void)
@@ -139,28 +129,6 @@ void phyStartReceive(void)
     rfPostHandle = RF_postCmd(rfHandle, (RF_Op*)&RF_cmdPropRx,
                                                            RF_PriorityNormal, &ReceivedOnRFcallback,
                                                            RF_EventRxEntryDone | RF_EventRxOk);
-}
-
-uint8_t phyRxPacketRdy(void)
-{
-    return packetRxCb;
-}
-
-void phyRxPacketRdyClean(void)
-
-{
-    packetRxCb = NO_PACKET;
-}
-
-void phyProcess(void)
-{
-//    if(resumeRx == 1)
-//    {
-//        resumeRx = 0;
-//        /* Resume RF RX */
-//        phyStartReceive();
-//    }
-
 }
 
 uint32_t phyGetLastRxTickPassed(void)
@@ -174,7 +142,7 @@ void ReceivedOnRFcallback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
 {
     if(e & RF_EventRxOk)
     {
-        rxRdyTick = system_timer_tick;
+        rxRdyTick = self_timer_tick;
     }
 
     if (e & RF_EventRxEntryDone)
@@ -189,13 +157,10 @@ void ReceivedOnRFcallback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
          * - Data starts from the second byte */
         packetLength      = *(uint8_t*)(&currentDataEntry->data); //gets the packet length (send over with packet)
         packetDataPointer = (uint8_t*)(&currentDataEntry->data + 1); //data starts from 2nd byte
-
         /* Copy the payload + the status byte to the packet variable */
-        memcpy((uint8_t*)macGetRxFreePacket(), packetDataPointer, (packetLength));
-
+        memcpy((uint8_t*)macFillRxFreePacketInfo(rxRdyTick, packetDataPointer[packetLength + 1]), packetDataPointer, (packetLength)); // packetDataPointer[packetLength + 1] -> rx appended status byte
         /* Move read entry pointer to next entry */
         RFQueue_nextEntry();
-
     }
 }
 
@@ -206,7 +171,7 @@ void TransmitPackageRFcallback(RF_Handle h, RF_CmdHandle ch, RF_EventMask e)
     if (e & RF_EventLastCmdDone)
     {
         //resumeRx = 1;
-        txEndTick = system_timer_tick;
+        txEndTick = self_timer_tick;
     }
 }
 
