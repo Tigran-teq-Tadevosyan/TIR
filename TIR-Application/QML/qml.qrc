@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Window.qml</file>
+        <file>TIRComboBox.qml</file>
+    </qresource>
+</RCC>

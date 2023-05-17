@@ -98,6 +98,7 @@ void process_RemoveForwardingEntry(ForwardingBinding *fBinding) {
 }
 
 void interlink_ForwardIfAppropriate(EthFrame *frame, uint16_t frame_length) {
+    if(FORWARDING_LIST_LENGTH == 0) return;
     if(betoh16(frame->type) != ETH_TYPE_IPV4 && betoh16(frame->type) != ETH_TYPE_ARP) return;
 
     // First we check based on destination MAC address, if it is broadcast or in forwarding table we forward it
