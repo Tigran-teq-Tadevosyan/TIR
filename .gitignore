@@ -148,4 +148,4 @@ dkms.conf
 
 
 *.zip
-*.pdf
+# *.pdf
