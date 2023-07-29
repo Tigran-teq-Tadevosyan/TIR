@@ -1,0 +1,114 @@
+%
+\documentclass[11pt]{report}
+\usepackage{mathptmx}
+\renewcommand{\familydefault}{\rmdefault}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm,headheight=1cm,headsep=1cm,footskip=1cm}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+\setlength{\parskip}{\medskipamount}
+\setlength{\parindent}{0pt}
+\usepackage[numbers]{natbib}
+\usepackage{verbatim}
+\usepackage{pdfpages}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage[numbers]{natbib}
+\usepackage{nomencl}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage[breakable,skins]{tcolorbox}
+\usepackage{float}
+\usepackage[titles]{tocloft}
+\usepackage{enumitem}
+\usepackage{makecell}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+    }
+
+%%  Changing indentation  of chapter title in toc
+\makeatletter
+\renewcommand{\numberline}[1]{%
+  \setbox0\hbox{#1\quad}%
+  \hb@xt@\wd0{\@cftbsnum #1\@cftasnum\hfil}\@cftasnumb}
+\makeatother
+
+% the following is useful when we have the old nomencl.sty package
+\providecommand{\printnomenclature}{\printglossary}
+\providecommand{\makenomenclature}{\makeglossary}
+\makenomenclature
+\doublespacing
+
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
+\providecommand{\LyX}{L\kern-.1667em\lower.25em\hbox{Y}\kern-.125emX\@}
+%% Because html converters don't know tabularnewline
+\providecommand{\tabularnewline}{\\}
+%% A simple dot to overcome graphicx limitations
+\newcommand{\lyxdot}{.}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\usepackage{tauthesis}
+\usepackage[font={small,bf}, labelfont={small,bf}, margin=1cm]{caption}
+\usepackage{titlesec}
+\newcommand{\hsp}{\hspace{20pt}}
+
+\titleformat{\chapter}[hang]{\Huge\bfseries}{\thechapter\hsp}{0pt}{\Huge\bfseries}
+
+\Title{\textbf{Portable RF System for Network Bridging}}
+\Author{\textbf{Tigran Tadevosyan}
+\\ \vspace{0.5cm}
+Supervised by: Vahagn Mkhitaryan }
+\Year{May 2023}
+\Supervisor{Vahagn Mkhitaryan}
+\Department{Department of Computer Science}
+\Degree{Bachelor in Computer Science}
+% \Degree{Doctor of Philosophy}
+
+\makeatother
+
+\usepackage[english]{babel}
+\begin{document}
+
+\prelimpages
+
+
+\titlepage
+
+\include{Abstract}
+
+%\tableofcontents{}
+\tableofcontents
+
+\textpages
+
+\listoffigures
+
+\listoftables
+
+\printnomenclature{}
+
+%\footnote{Split the thesis into separate chapters. Use \textbackslash{}include mode to include the separate files.}
+\include{1.Introduction}
+\include{2.Link-Device}
+\include{3.RF-Link}
+\include{4.Conclusion}
+%\bibliographystyle{plainnat}
+%\bibliographystyle{IEEEtran}
+\bibliographystyle{IEEEtranN}
+\bibliography{references}
+
+
+\appendix
+% \include{appendix}
+
+\newpage{}
+
+\end{document}

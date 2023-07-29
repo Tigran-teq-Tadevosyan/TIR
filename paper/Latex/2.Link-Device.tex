@@ -1,0 +1,258 @@
+\chapter{Link Device}
+For the Link Device we have decided to use the PIC32MZ DA Curiosity development kit from Microchip with PIC32MZ2064DAR176 MCU on it. It is powerful enough for our usage and has all the necessary connectivity for the project, except for an Ethernet interface, for which we have used the W5500 chip from WIZnet.
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{PIC32MZ-DA-curiosity}
+\end{center}
+\caption{Top View of PIC32MZ DA Curiosity Development Kit}
+\label{pic32da-curiosity-top-view}
+\end{figure}
+
+\begin{table}
+\centering
+\caption{Technical Specifications of PIC32MZ DA Curiosity \cite{pic-datasheet}}
+\label{table1}
+\begin{tabular}{|l|l|}
+\hline 
+MCU Model & PIC32MZ2064DAR176 \\ \hline
+MCU Architecture & 32-bit MIPS \\ \hline
+MCU Max Frequency & 200 MHz \\ \hline
+Program Memory Size & 2048 KB \\ \hline
+SRAM & 640 KB \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Interlink Protocol}
+
+In order to facilitate efficient internal communication among Link devices while simultaneously tunneling external traffic, it is imperative to establish a clear distinction between service packets and forwarding requests. For this purpose, linked devices are using a so-called “Interlink” protocol. 
+
+\begin{table}
+\centering
+\caption{Interlink packet structure}
+\label{interlink-pkt-struct}
+\begin{tabular}{|p{1in}|p{1.5in}|p{2in}|} \hline 
+\multirow{3}{*}{Header} & Start Delimiter & {4 bytes} \\ \cline{2-3}
+ & Payload Length & 2 byte unsigned integer \\ \cline{2-3}
+ & Message Type & 1 byte \\ \cline{2-3} \hline
+ \multicolumn{2}{|c|}{Payload} & Up to 1514 bytes \\ \hline
+ \multicolumn{2}{|c|}{End Sequence} & 2 bytes \\ \hline
+\end{tabular}
+\end{table}
+
+As the Interlink packets are being transmitted over RF, data losses are eminent. Moreover, the packets can be split between two time slots, or the same time slot can carry information of two packets (the idea of the times slots is covered in the RF Link section). To avoid this problem, we must be able to identify the start and the end of the Interlink packets. We do so by starting every packet with a 4 byte start delimiter that is represented by an improbable combination of symbols {0x26, 0x24, 0x26, 0x24} (“\$ \& \$ \&” in ASCII) and ends with a 2 byte sequence of {0x04, 0x04} (two end of transmission symbols in ASCII). 
+
+During data reception when encountering a start delimiter, we make sure that at the end of the payload (calculated by the payload length) an end sequence is present. If not, we drop two bytes and search for the next start delimiter in the sequence. Through this procedure we ensure that a data loss in one packet would not result in inclusion of the next packet’s beginning in this one, corrupting both packets. Although this procedure is designed to address the unreliability of RF, we include this in Interlink, as this also would help with the unreliability of the UART, which is less of an issue, however errors are still possible on relatively high baud rates (230400), especially at the beginning of the serial transmission.
+
+The start delimiter is followed by a 2 byte representation of the packet payload length as a little-endian unsigned integer. The biggest payload we intend to encapsulate in an interlink packet is the Ethernet frame, which consists of the destination address (6 byte), the source address (6 byte), the Ethertype (2 byte) and the payload (at most 1500 byte as we do not support jumbo frames used in high performance networks), so 2 bytes will suffice.
+
+The last byte in the header indicates the message type, possible values of which are listed below:
+\begin{itemize}[nolistsep]
+    \item HANDSHAKE\_REQUEST,
+    \item HANDSHAKE\_OFFER,
+    \item HANDSHAKE\_ACK,
+    \item FORWARDING\_TABLE\_ADDITION,
+    \item FORWARDING\_TABLE\_REMOVAL,
+    \item FORWARDING\_REQUEST.
+\end{itemize}
+
+The first five message types are for the service packets, intended for the internal communication between the Link devices, and the last one is for the frame forwarding request, that will be discussed later. The service packets are used to accommodate the handshake procedure and carry out the forwarding table synchronization.
+
+\section{Handshake Procedure}
+
+Every device in our network has a dedicated role. Upon power on, the device is assigned UNDEFINED\_ROLE, and to acquire a role, it must go through the handshake procedure. Currently, we only have 2 designated roles (DHCP\_SERVER1 and DHCP\_SERVER2), however, the procedure is designed to be relatively easily extendable to more roles and a higher number of agents in the network. Throughout the handshake procedure, there are three possible states that the agent can be in: HANDSHAKE\_UNINTIALIZED, WAITING\_ROLE\_ACK, HANDSHAKE\_FINISHED.  Upon power on, the Link device sends a “HANDSHAKE\_REQUEST” message with an empty payload signaling its readiness for a handshake. Moreover, a request timeout is generated in the range of 250 to 1000 ms using a pseudo-random number generator, which was seeded with the value in 32 bit “DEVSN0” register (DEVSN0 to DEVSN3 registers contain a unique serial number of the device \cite{pic-datasheet}). The device continues to repeatedly send out requests with the aforementioned timeout delay for 10 times, after which, if no valid response is received, it assigns itself a role. The timeout duration is calculated randomly to avoid collisions of requests sent by the other agents. Even in the scenario when the agent A gets a randomly generated number \(\Delta t_A\) as the timeout delay, and the agent B, being booted up at time \(t_B\)  starting from boot time of the first device, gets a timeout delay of \(\Delta t_B = \Delta t_A - t_B\), resulting in the two requests being transmitted at the same time causing a collision, this would still not be an issue as on the next repeat of either agent’s “HANDSHAKE\_REQUEST” it would reach the peer. Upon receiving a “HANDSHAKE\_REQUEST” packet, two scenarios can occur. First, if the agent-receiver has no role assigned to it yet, it will assign a role to itself and will send an “HANDSHAKE\_OFFER” message to the peer. In our case it would assign the role of “DHCP\_SERVER1” to itself and offer the “DHCP\_SERVER2” role to peers. In the second scenario, if the agent-receiver already has an assigned role, it would just offer the other role to the peer by again sending a “HANDSHAKE\_OFFER” message, which contains the offered roles in message payload.
+After sending the “HANDSHAKE\_OFFER” message, the agent proceeds to the “WAITING\_ROLE\_ACK” handshake state. As in the case of the “HANDSHAKE\_REQUEST” messages, there is another timeout generated with a random number generator, and we again repeat the “HANDSHAKE\_OFFER” a maximum of 10 times. If no acknowledgement message is received during these repetitions, the agent rolls back into “HANDSHAKE\_UNINTIALIZED” state.
+Upon receiving a “HANDSHAKE\_OFFER” message, if the agent is in the state of “WAITING\_ROLE\_ACK” or “HANDSHAKE\_FINISHED”, if the roles in payload coincide with the roles it has it has registered, it respond with a “HANDSHAKE\_ACK” message. In the case of agent-receiver being in “WAITING\_ROLE\_ACK” state, it performs same procedure, after which it also start the DHCP server (covered later) with agreed roles. If the roles do not match or the agent-receiver is in “HANDSHAKE\_UNINTIALIZED” state, it just ignores the message.
+Upon receiving a “HANDSHAKE\_ACK” message if the agent is in the state of “WAITING\_ROLE\_ACK” and the roles in the message match, the current registered roles of agent-receivers starts the DHCP server with the agreed roles, otherwise it just ignores the message. 
+It is important to mention that in cases when receiver-agent is in the state of “HANDSHAKE\_FINISHED” and it receives a “HANDSHAKE\_OFFER” or “HANDSHAKE\_ACK” message with roles matching to his role assignments he also sends ”FORWARDING\_TABLE\_ADDITION” messages for all his valid DHCP bindings (covered later).
+
+\section{DHCP Server}
+
+The Open Systems Interconnection model (OSI model) is a widely accepted conceptual model that “provides a common basis for the coordination of standards development for the purpose of system interconnection.” \cite{OSI} It consists of the following 7 layers: Physical, Data Link, Network, Transport, Session, Presentation, and Application. The first layer, the physical layer, is the layer that describes the physical connection between devices, meaning that it describes the standard procedure of the transmission through the given medium. In this project we are focusing on IEEE 802.3 (Ethernet). 
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{ethernet-port}
+\end{center}
+\caption{Ethernet Port}
+\label{ethernet-port}
+\end{figure}
+
+The second, data link layer, describes the protocols by which data is transferred between nodes on a network across the physical layer \cite{data-link-layer}. IEEE 802.3 standard also describes the layer 2 communication protocol, commonly referred to as just Ethernet. Data is transmitted by so called Ethernet frames, which have the following structure:
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=1\textwidth]{Ethernet-frame}
+\end{center}
+\caption{Ethernet Port}
+\label{ethernet-port}
+\end{figure}
+
+\begin{enumerate}[nolistsep]
+    \item Preamble - The preamble consists of a 56-bit (seven-byte) pattern of alternating 1 and 0 bits, allowing devices on the network to easily synchronize their receiver clocks, providing bit-level synchronization, 
+    \item SFD - The eight-bit (one-byte) value that marks the end of the preamble,
+    \item Destination MAC address,  
+    \item Source MAC address,
+    \item EtherType - The type message in the payload of the frame,
+    \item Payload - The data that is carried inside the frame,
+    \item FCS - A four-octet cyclic redundancy check (CRC) that allows detection of corrupted data within the entire frame as received on the receiver side.
+\end{enumerate}
+
+Every network interface controller (NIC) has a unique MAC (Media Access Control) address assigned to it by the manufacturer. It consists of 6 octets, out of which the first three are given to the NIC manufacturer. Devices use these addresses to communicate in local area networks (LAN). 
+
+The next is the network layer, which is responsible for packet forwarding including routing through intermediate routers \cite{data-link-layer}. Internet protocol (IP) is one of the protocols of the network layer that most of the internet runs on. There are two major versions of IP, Internet Protocol Version 4 (IPv4), and its successor Internet Protocol Version 6 (IPv6). In the IPv4 protocol the IP address is a 4 byte number that is usually represented by four consecutive numbers in the range of 0-255 separated by dot (for example 192.1.0.7). An IPv6 address is represented as eight groups of four hexadecimal digits, each group representing 16 bits The groups are separated by colons (for example 2001:0cc8:87a3:0000:0000:8a4e:f270:7a3c) \cite{ipv6-arch}. These addresses are used for the routing purposes, meaning that routing nodes forward the IP packets via their IP addresses. Even though most of the internet infrastructure already supports IPv6, most of the internet still runs predominantly on IPv4. IP packets are nested inside layer 2 packets, mostly Ethernet or Point-to-Point Protocol (PPP). Below is the structure of IPv4 package: 
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=1\textwidth]{IPv4-Packet.png}
+\end{center}
+\caption{IPv4 Packet structure}
+\label{ethernet-port}
+\end{figure}
+
+As this is not a crucial element of our project, there is no need to elaborate on this structure in further detail.
+Packets of the higher layers of the OSI model are encapsulated within the IP packets, and if the MAC addresses are assigned during the manufacturing of the NIC, the IP addresses are dynamically assigned within the network when they are connected to it. The role of the IP assignment is performed using the Dynamic Host Configuration Protocol (DHCP) by DHCP server. In the case of the home networks this role is usually performed by the router. However, as there might not be a DHCP server in our network,  to be able to make use of the IP and all the higher level protocols we have two solutions. First is statically configuring every single device in the network or our Link devices should perform the role of the DHCP server. As we want to make the process of connecting devices to our network plug and play, we had to go with the second option. DHCP is an application layer (layer 7) protocol, meaning it must be encapsulated as a payload of a lower layer protocol’s packet to be transmitted over the network. In the case of the DHCP, it is encapsulated inside User Datagram Protocol (UDP), which itself is a transport layer (layer 4) protocol, which in its turn is encapsulated inside IP packet (IPv6 in case of the DHCPv6 and IPv4 in case of the DHCPv4), which is finally encapsulated in the ethernet frame. 
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{UDP-encapsulation}
+\end{center}
+\caption{Network Message Encapsulation}
+\label{ethernet-port}
+\end{figure}
+
+This way, if we want to be able to serve DHCP messages, we must be able to work with all these protocols mentioned above. We have taken two main limitations not to overly sophisticate the program at this stage. As virtually any device supports IPv4 and DHCPv4, we only support those versions, and as the Maximum Transmission Unit (MTU) in our network is plenty enough to facilitate the biggest possible DHCP message (548 bytes in case of DHCPv4), we do not support IP packet fragmentation.
+
+As our DHCP message is going to be encapsulated inside a UDP packet, let us briefly go over the structure of its header. It consists of four fields: source port, destination port, length, and checksum. Each of the fields are 2 bytes long. In our case, the DHCP server listens to its UDP port number 67 and the client listens to the UDP port number 68, meaning that messages sent from the client to the server must have destination port set to 67 and source port to 68, or vice versa for the server to client communication. Moreover, we skip the checksum calculation also as it is not mandatory in the case if the UDP message is encapsulated inside an IPv4 packet, so this field is always set to 0s.
+DHCP operations fall into four phases: server discovery, IP lease offer, IP lease request, and IP lease acknowledgement \cite{book-computer-networks}. Below is an illustration of a typical DHCP transaction for IP address acquisition.
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.3\textwidth]{DHCP_session}
+\end{center}
+\caption{Illustration of Typical DHCP Session}
+\label{ethernet-port}
+\end{figure}
+
+The DHCP session usually starts with the client sending a DHCPDISCOVER message using the destination address 255.255.255.255 (broadcast address). The DHCP client may also include the IP that it is requesting and other options like request for a subnet mask, router address, Domain Name Server (DNS) address, etc. When a DHCP server receives a DHCPDISCOVER message from a client, it responds with a DHCPOFFER message, usually using a broadcast address too. After receiving a DHCPOFFER message client would respond with a DHCPREQUEST message with requested IP address in it and if DHCP servers confirms the assignment by sending DHCPACK message. We wouldn't explor the exact details of the protocols, which can be found here (SOURCE HERE), as it is out of this reports scope, but here are a series of screenshots of Wireshake (network packet sniffing software) of steps in the DHCP session performed via our DHCP server.
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=1.1\textwidth]{DHCP-Discovery.png}
+\end{center}
+\caption{Screenshots of DHCP Discovery Packet.}
+\label{dhcp-discovery}
+\end{figure}
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{DHCP-Offer.png}
+\end{center}
+\caption{Screenshots of DHCP Offer Packet.}
+\label{dhcp-offer}
+\end{figure}
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{DHCP-Request.png}
+\end{center}
+\caption{Screenshots of DHCP Request Packet.}
+\label{dhcp-request}
+\end{figure}
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{DHCP-Ack.png}
+\end{center}
+\caption{Screenshots of DHCP Acknowledgment Packet.}
+\label{dhcp-ack}
+\end{figure}
+
+\newpage
+
+After the client is assigned the IP address, it sends additional DHCPREQUEST messages (without prior DHCPDISCOVER message) with a certain timeout before its lease time has expired, so it would not be removed from DHCP bindings of the server. Moreover, our Link devices are communicating between each other with Interlink message types of “FORWARDING\_TABLE\_ADDITION” and “FORWARDING\_TABLE\_REMOVAL” to notify in the addition and removal of the DHCP bindings in their list, so the other servers know to what IPs and MAC addresses the incoming messages should be forwarded and which should be dropped. 
+Link devices are set up to have an IP address of 100.100.0.1 with a subnet mask of 255.255.255.0.  So we can assign IP addresses in the range of 100.100.0.2 to 100.100.0.254, as 100.100.0.1 is assigned to us and 100.100.0.255 is reserved for broadcast. The ranges of IP addresses in which individual Link devices are allowed to assign is based on their role. In our case as we have just two roles, the “DHCP\_SERVER1” would give out IP addresses in the range of 100.100.0.2 to 100.100.0.100, and “DHCP\_SERVER1” would give out IP addresses in the range of 100.100.0.101 to 100.100.0.254. The lease time is set to be 3 minutes and we perform maintenance (for removal of expired DHCP binding) every 5 seconds. 
+
+\section{Efficient Packet Queue Structure}
+
+During normal operation most of the data traffic that Link device receives from Ethernet bridge is going to be pass to RF link, while most of the traffic received from RF link is going to be passed to Ethernet bridge. This means that designing an efficient algorithm that abstains from unnecessarily coping memory segments in memory would provide a reduced latency and better performance for our system. On both RF link and Ethernet bridge side we are using static buffers which we are going to discuss in subsequent sections, but for use to be able to operate in such fashion have to have some method of keeping track of packets in the buffers.  
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{queue-pkt-struct}
+\end{center}
+\caption{Illustration of Packet Queue.}
+\label{pkt-queue-stuct}
+\end{figure}
+
+Figure \ref{pkt-queue-stuct} illustrates the inner workings of our packet queue. We have decide to implement it based on a linked list, which means that we would have to allocate memory for each node dynamically, but also gives us the ability to omit a limitation on the number of packets we can track. Taking into consideration the fact that each node take up just 8 bytes in memory and the packet data is located in static buffers the trade off beneficial. This way we are able to read received data into a buffer, analyze it, and then forward it from the same memory location if there would be a need for it.  
+
+\section{Connection to W5500}
+
+As our PIC32MZ DA Curiosity development kit does not have the hardware interface necessary for Ethernet connection, we have to rely on additional hardware to achieve that. For that purpose, we have decided on an integrated board from JESSINIE with the WIZnet W5500 embedded Ethernet controller on it.
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.5\textwidth]{w5500}
+\end{center}
+\caption{WIZnet W5500 embedded Ethernet controller.}
+\label{ethernet-port}
+\end{figure}
+
+The connection between our Link device and the W5500 is maintained using Serial Peripheral Interface (SPI). Naturally Link device is operating in “master” mode and the W5500 is operating in “slave mode”. The SPI clock frequency is set at 20 MHz. This is way lower than 80 MHz, which is the maximum frequency the chip is rated to work in. We assume the problem lies in the bad quality of the cables that we used and the fact that in our prototype we use cables to connect the W5500 to PIC32 controller, which introduce parasitic resistance and capacitance on SPI lines. However, we did not continue to investigate this issue further as higher SPI frequencies would not result in better performance, because even at 20 MHz it is not the bottleneck of our system.
+We are using the official driver library from WIZnet to communicate with the chip. We initialize the W5500 with network configuration described in table \ref{w5500-net-conf}.
+
+\begin{table}
+\centering
+\caption{W5500 Network Configuration}
+\label{w5500-net-conf}
+\begin{tabular}{|l|l|}
+\hline 
+MAC address & A5:E6:38:61:B8:71 \\ \hline
+IP address & 100.100.0.1 \\ \hline
+Subnet mask & 255.255.255.0 \\ \hline
+\end{tabular}
+\end{table}
+
+W5500 supports a total of 8 “sockets” which support various modes, but we are using the so-called “MACRAW” mode, because it provides with maximum control over the socket. Only the socket 0 supports “MACRAW” mode, so that is the socket we are going to use. Although we are losing on performance by not utilizing the majority of functionalities of the chip, in our case we have no other choice as we need to process the raw ethernet frames, and the “MACRAW” mode is the only one that provides us with that ability. The only hardware feature we are using is hardware level IPv6 blocking, as we are not intending to support them in the scope of this project \cite{w5500}.
+
+The W5500 has a combined memory of 32 KBs, half of which is for the RX buffer and the other half for the TX buffer. As we are only utilizing one socket, we fully assigned the whole memory of both the buffers to that socket. During the initialization of the socket we set two interrupts in its interrupt mask, which are reception interrupt and transmission interrupt. Our initial plan of enabling a callback on the interrupt pin of this chip quickly fell apart, as we understood that the library provided by WIZnet is written in a way that makes working with the chip in such a manner really inconvenient. So we decided to operate the SPI in blocking mode and handle interrupts in the program execution loop. In fact, later we have discovered that the chip is behaving strangely, as it gives out a reception interrupt, when there is no data available to read and sometimes the opposite occurs, so we don't even pay attention to that status and just read the number of available data on every iteration. The same cannot be said about the sent status, as it seems to work fine.
+
+In case of data reception we are going to use the data structure described in section 2.4 and a 30 KB static buffer. 
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{macraw-rx-buffer}
+\end{center}
+\caption{RX Buffer of MACRAW Socket.}
+\label{macraw-rx-buffer}
+\end{figure}
+
+As it is ilustrated in the figure \ref{macraw-rx-buffer}, we only need to keep track of two values: 
+\begin{enumerate}[nolistsep]
+    \item rxReservedChunk - the length of reserved chunk, which is located directly before the rxTail,
+    \item rxTail - the position of reserved chunk's end.
+\end{enumerate}
+
+If there is any data that must be read from W5500, we just reserve that amount of space at the rxTail position of our static buffer and return the pointer to the reserved section for data to be written there. During the execution loop of our program we analyze the contents of the reserved chunk and perform one of the following procedures: 
+\begin{itemize}[nolistsep]
+    \item If the received frame is a DHCP message, we respones to it accrodingly.
+    \item If the received frame eather contains an IPv4 or ARP packet, and the MAC of IP address in the packet headers match any one of forwarding table entries we received from pair agent, we enqueue that packet in the aforementioned queue structure, for the data to later be passed to RF link.
+\end{itemize}
+It is important to mention on every data reception from Ether bridge, before reserving memory check if the reservation of this data would cause an override of data packet that was still not forwarded to RF Link, if so we abstain from reading that data until enough memory is freed in our buffer\footnote{This could potentially cause an overflow of W5500's inner rx buffer, resulting in a data loss, which is inevitable in case our modest throughput}. Last important remark is that as want to our data to be directly transmitted from the memory location we have read it to, we are forced to work with continues blocks of memory, meaning the circular buffer can't wrap at the end of the buffer and spit the frame into to separate memory chunks. This means that if the remaining amount memory left at the end of the buffer is not enough for reception, we have to return to the start of the buffer and left the end unutilized. Moreover, a scenario might occur where we have some yet not analyzed data in reserved chunk right before the rxTail, which might contain the beginning of a frame we are about to read from Ethernet bridge. This will again cause a frame fragmentation which forces us into moving that reserved chunk to the beginning of the buffer and reserving new chunk at the end of that one to ensure continuity of frames.
+
+\section{Link Device UART Connection}
+
+For the connection to RF link we have used UART. It may seem that using SPI to achieve higher speeds would be a better approach. Reason for not doing so is that setting up MCU's as "slave" devices in configurations similar to ours is tedious and in our case unnecessary as we are not "bottle-necked" by the Link device to RF link's  communication speed, but, as it would become apparent later, by the processing power of the RF link MCU's. The UART is running at 230400 bauds per second.
+
+To reduce the amount of processing resources we dedicate to UART servicing we have have made use of a feature that our MCU supports called \textbf{Direct Memory Access (DMA)}. Its a hardware subsystems that can access main system memory and copy memory around independently of the processing unit. Our MCU's architect is realize is such a way that system memory is divided into two sections: \textbf{KSEG0} and \textbf{KSEG1}. The memory in \textbf{KSEG0} cacheable and \textbf{KSEG1} \cite{pic-datasheet}. This in turn means that operations in \textbf{KSEG0} can be optimized by the MCU. Obviously, the use of L1 cached make it impossible for DMA to work with \textbf{KSEG0} memory as it work separately from processing unit. This forces us to use memory located in \textbf{KSEG1} for the static buffers use for UART communication. Moreover, as we want to transmit the data received from Ethernet bridge to RF link without copying it we have to allocate it's buffer in \textbf{KSEG1} section too. As the data is sent to RF core directly from the static buffer used for Ethernet bridge reception, we do not need to keep a separate buffer for transmission, but just keep track of packets we must pass to RF link with the use of Packet Queue data structure, and free them after they are sent. The reception is not that straightforward, as we do not know the exact amount of data we are going to receive, so we are unable to configure DMA channel to copy that amount of data to reception buffer from UART register. The simplest solution would be to perform just 1 byte coping operations, but this will kill the purpose of DMA as we would get reception completion callbacks on every byte making this process very inefficient. The reason why we can't just increase number of bytes to be received, before reception interrupt is raised, is that if for example we have a reception block size of 100 bytes and we have received 99 byes of data, the interrupt would not be raised until 1 more byte is received. This may cause a lot of issued as for example that 99 bytes may contain acknowledgement message that receiving side is wait to send more data. Or even in our case "HANDSHAKE\_REQUEST" is just 7 bytes long, so there must be 15 of them received for the threshold to be received. One possible solution could be adding padding to messages so they are multiple of block size, but because of the unreliable nature of RF we could loose some data causing the aforementioned issues. To solve this we have check the \textbf{DCH1DPTR} (contains the pointer to memory location that DMA would copy next byte) register every 10 milliseconds and if it have been change. If so we add it to unprocessed section of our reception buffer, so it can later be processed during execution loop. 
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=1\textwidth]{dma-rx-buffer}
+\end{center}
+\caption{RX Buffer for Link Device's UART.}
+\label{dma-rx-buffer}
+\end{figure}
+
+As illustrates in figure \ref{dma-rx-buffer} we only need to keep track of the start of the unprocessed section, the length of unprocessed section, and the number of bytes left to read for the DMA writing block to be finished. When the a reception finished callback called we just pass the next block to DMA channel to copy UART data into and increase the length of recording section to the block size. Of course as in the case of MACRAW socket's rx buffer, we have to perform additional procedures in the case of our next recording section reaching the end of the buffer to ensure that every frame is written in a continues block of memory.  
